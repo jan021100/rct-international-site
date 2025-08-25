@@ -2,65 +2,70 @@
 <header id="main-header"
   class="fixed inset-x-0 top-0 z-50 border-b border-neutral-300/60
          bg-base-50/90 dark:bg-base-900/90 backdrop-blur">
+
   <!-- Beta Banner -->
-<div id="beta-banner"
-  class="w-full bg-accent text-white text-sm py-2 px-4 font-medium flex items-center justify-center gap-4">
-  🚧 This website is in <span class="font-bold">Beta</span>
-  <a href="mailto:janhanke@rct-prague.de?subject=RCT%20Website%20Bug%20Report"
-     class="px-3 py-1 text-xs rounded bg-white text-accent font-semibold hover:opacity-90 anim">
-    Report Bug
-  </a>
-  <button id="close-banner"
-    class="ml-2 text-lg leading-none font-bold text-white opacity-70 hover:opacity-100">×</button>
-</div>
+  <div id="beta-banner"
+       class="w-full bg-accent text-white text-sm py-2 px-4 font-medium flex items-center justify-center gap-4">
+    🚧 This website is in <span class="font-bold m-0">Beta</span>
+    <a href="mailto:janhanke@rct-prague.de?subject=RCT%20Website%20Bug%20Report"
+       class="px-3 py-1 text-xs rounded bg-white text-accent font-semibold hover:opacity-90 anim">
+      Report Bug
+    </a>
+    <button id="close-banner"
+            class="ml-2 text-lg leading-none font-bold text-white opacity-70 hover:opacity-100"
+            aria-label="Close beta banner">×</button>
+  </div>
+
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 md:h-20 flex items-center justify-between">
 
-    <!-- Left Nav (desktop only) -->
-    <nav class="hidden md:flex items-center gap-6 text-sm text-neutral-700 dark:text-neutral-300">
-      <a href="index.html" class="hover:opacity-80">Home</a>
-      <a href="cycling.html" class="hover:opacity-80">Cycling</a>
-      <a href="running.html" class="hover:opacity-80">Running</a>
-      <a href="triathlon.html" class="hover:opacity-80">Triathlon</a>
-      <a href="team.html" class="hover:opacity-80">Team</a>
-      <a href="events.html" class="hover:opacity-80">Events</a>
-      <a href="shop.html" class="hover:opacity-80">Shop</a>
-    </nav>
+    <!-- Left: mobile menu button (shown on small screens) + desktop nav -->
+    <div class="flex items-center gap-3">
+      <!-- Mobile Menu Button -->
+      <button id="mobile-menu-btn"
+              class="md:hidden p-2 rounded hover:bg-neutral-200 dark:hover:bg-neutral-800"
+              aria-controls="mobile-menu" aria-expanded="false" aria-label="Open menu">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
 
-    <!-- Mobile Menu Button -->
-    <button id="mobile-menu-btn" class="md:hidden p-2 rounded hover:bg-neutral-200 dark:hover:bg-neutral-800">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-           viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"/>
-      </svg>
-    </button>
+      <!-- Desktop nav -->
+      <nav class="hidden md:flex items-center gap-6 text-sm text-neutral-700 dark:text-neutral-300">
+        <a href="index.html" class="hover:opacity-80">Home</a>
+        <a href="cycling.html" class="hover:opacity-80">Cycling</a>
+        <a href="running.html" class="hover:opacity-80">Running</a>
+        <a href="triathlon.html" class="hover:opacity-80">Triathlon</a>
+        <a href="team.html" class="hover:opacity-80">Team</a>
+        <a href="events.html" class="hover:opacity-80">Events</a>
+        <a href="shop.html" class="hover:opacity-80">Shop</a>
+      </nav>
+    </div>
 
-    <!-- Center Logo -->
+    <!-- Center Logo (absolute so it stays centered even with other elements) -->
     <a href="index.html" class="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
       <img src="/assets/img/rct-logo.png" alt="RCT International Logo"
-           class="h-8 sm:h-10 lg:h-12 w-auto">
+           class="h-8 sm:h-10 lg:h-12 w-auto pointer-events-auto">
     </a>
 
-    <!-- Right Utilities -->
-    <div class="flex items-center gap-2 ml-auto">
-      <!-- EN active -->
-      <button class="px-2 py-1 text-xs rounded border border-neutral-300 dark:border-neutral-700">EN</button>
-
-      <!-- DE -->
-      <button class="relative group px-2 py-1 text-xs rounded border border-neutral-300 dark:border-neutral-700">
-        DE
-        <span class="pointer-events-none absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[10px] px-2 py-1 rounded bg-neutral-800 text-white opacity-0 group-hover:opacity-100 transition">
-          Coming soon
-        </span>
-      </button>
-
-      <!-- CZ -->
-      <button class="relative group px-2 py-1 text-xs rounded border border-neutral-300 dark:border-neutral-700">
-        CZ
-        <span class="pointer-events-none absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[10px] px-2 py-1 rounded bg-neutral-800 text-white opacity-0 group-hover:opacity-100 transition">
-          Coming soon
-        </span>
-      </button>
+    <!-- Right utilities -->
+    <div class="flex items-center gap-3 ml-auto">
+      <!-- Language dropdown -->
+      <div class="relative">
+        <button id="lang-toggle"
+                class="px-2 py-1 text-xs rounded border border-neutral-300 dark:border-neutral-700"
+                aria-haspopup="menu" aria-expanded="false">
+          EN
+        </button>
+        <div id="lang-menu"
+             class="hidden absolute right-0 mt-1 w-28 rounded-lg border border-neutral-300 dark:border-neutral-700
+                    bg-white dark:bg-neutral-900 shadow-soft py-1 text-sm">
+          <button class="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800">EN</button>
+          <button class="w-full text-left px-3 py-1.5 opacity-60 cursor-not-allowed">DE (soon)</button>
+          <button class="w-full text-left px-3 py-1.5 opacity-60 cursor-not-allowed">CZ (soon)</button>
+        </div>
+      </div>
 
       <!-- Account -->
       <a href="account.html" class="hover:opacity-70" aria-label="Account">
@@ -73,7 +78,8 @@
   </div>
 
   <!-- Mobile Menu -->
-  <div id="mobile-menu" class="hidden md:hidden flex flex-col px-4 py-3 space-y-2 bg-base-50 dark:bg-base-900 border-t border-neutral-300 dark:border-neutral-700">
+  <div id="mobile-menu"
+       class="hidden md:hidden flex flex-col px-4 py-3 space-y-2 bg-base-50 dark:bg-base-900 border-t border-neutral-300 dark:border-neutral-700">
     <a href="index.html" class="hover:opacity-80">Home</a>
     <a href="cycling.html" class="hover:opacity-80">Cycling</a>
     <a href="running.html" class="hover:opacity-80">Running</a>
