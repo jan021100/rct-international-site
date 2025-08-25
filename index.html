@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en" class="">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RCT International — United in Motion</title>
+  <meta name="description" content="RCT International is a global sports collective for cycling, running & triathlon. Ride. Train. Race. Belong.">
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            base: { 50:'#F6F5F2', 900:'#0D0D0F' },
+            neutral: { 800:'#1f2328', 700:'#2B2B2E', 600:'#4b5563', 500:'#64748b', 300:'#cbd5e1' },
+            gold: '#D6B25E',
+            accent: '#D36B1F'
+          },
+          fontFamily: { sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif'] },
+          boxShadow: { soft:'0 10px 30px rgba(0,0,0,.08)' }
+        }
+      }
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .hero-tile{background-image:url('/assets/svg/topo-tile.svg'); background-size:700px}
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header (injected) -->
+  <div id="site-header"></div>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden hero-tile">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid lg:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="uppercase tracking-widest text-xs opacity-70">Cycling • Running • Triathlon</p>
+        <h1 class="font-serif text-4xl sm:text-5xl text-neutral-900 dark:text-base-50">RCT International</h1>
+        <p class="mt-4 max-w-xl opacity-80">
+          We’re an international collective of cyclists, runners, and triathletes, building a modern sports brand around community, performance, and style. Founded in Prague, connected across Europe: United in Motion.
+        </p>
+        <div class="mt-6 flex gap-3">
+          <a href="join.html" class="px-5 py-3 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 anim">Join us</a>
+        </div>
+      </div>
+      <div class="rounded-2xl overflow-hidden shadow-soft border border-neutral-300/60 dark:border-neutral-700">
+        <img src="/assets/img/IMG_4516.png" alt="Group ride in Prague" class="w-full h-full object-cover">
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="py-16 border-t border-neutral-300/60 dark:border-neutral-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-8">
+      <h2 class="font-serif text-3xl text-neutral-900 dark:text-base-50">What we’re about</h2>
+      <div class="md:col-span-2 space-y-4 opacity-90">
+        <p>RCT International brings together people who share a passion for endurance sports. Our community blends the energy of group rides and runs with the professionalism of a well-organized sports team and the creativity of a modern lifestyle brand.</p>
+        <p>From local meet-ups to international events, we create opportunities to ride, run, race, and connect. Whether you’re chasing personal bests or just enjoying the journey, RCT is about pushing limits, discovering new places, and making it unforgettable.</p>
+        <div class="flex flex-wrap gap-2 text-xs">
+          <span class="px-3 py-1 rounded-full bg-neutral-200/60 dark:bg-neutral-800/60">Registered spolek (CZ)</span>
+          <span class="px-3 py-1 rounded-full bg-neutral-200/60 dark:bg-neutral-800/60">Member of Czech Cycling Federation</span>
+          <span class="px-3 py-1 rounded-full bg-neutral-200/60 dark:bg-neutral-800/60">Prague • Friedrichsdorf • Hochtaunus</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Divisions -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="font-serif text-3xl mb-8">Divisions</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <a href="cycling.html" class="block rounded-2xl overflow-hidden border border-neutral-300/60 dark:border-neutral-700 hover:shadow-soft anim">
+          <img src="/assets/img/hero-cycling@2000.jpg" alt="Cycling" class="h-44 w-full object-cover">
+          <div class="p-5">
+            <h3 class="font-semibold">Cycling</h3>
+            <p class="text-sm opacity-80">Road, gravel, or MTB - group rides, racing, and adventures for all levels.</p>
+          </div>
+        </a>
+        <a href="running.html" class="block rounded-2xl overflow-hidden border border-neutral-300/60 dark:border-neutral-700 hover:shadow-soft anim">
+          <img src="/assets/img/hero-running@2000.jpg" alt="Running" class="h-44 w-full object-cover">
+          <div class="p-5">
+            <h3 class="font-semibold">Running</h3>
+            <p class="text-sm opacity-80">Social runs, training sessions, and race meet-ups for every pace.</p>
+          </div>
+        </a>
+        <a href="triathlon.html" class="block rounded-2xl overflow-hidden border border-neutral-300/60 dark:border-neutral-700 hover:shadow-soft anim">
+          <img src="/assets/img/hero-tri@2000.jpg" alt="Triathlon" class="h-44 w-full object-cover">
+          <div class="p-5">
+            <h3 class="font-semibold">Triathlon</h3>
+            <p class="text-sm opacity-80">Swim, bike, run - connect with fellow triathletes and cross-train in all three.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapters -->
+  <section class="py-16 bg-white dark:bg-neutral-950 border-y border-neutral-300/60 dark:border-neutral-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="font-serif text-3xl mb-8 dark:text-base-50">Chapters</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+
+        <!-- Prague -->
+        <div class="rounded-2xl border border-neutral-300/60 dark:border-neutral-700 p-6">
+          <img src="/assets/img/city-prague@1600.jpg" alt="Prague chapter" class="rounded-lg mb-4">
+          <p>
+            Our most active and largest chapter, based in the heart of Europe.
+            All sports are represented here by a young and dynamic community of students, young professionals, and passionate athletes.
+            Multiple weekly events, regular race participation, and a thriving social scene make it the beating heart of RCT,
+            especially as this is where most of our activities and projects are currently led.
+          </p>
+        </div>
+
+        <!-- Friedrichsdorf - Hochtaunus Region -->
+        <div class="rounded-2xl border border-neutral-300/60 dark:border-neutral-700 p-6">
+          <img src="/assets/img/city-hochtaunus@1600.jpg" alt="Friedrichsdorf - Hochtaunus chapter" class="rounded-lg mb-4">
+          <p>
+            The birthplace of RCT, located in the scenic Hochtaunus region.
+            While there are currently no regular events, a small but close-knit community stays active
+            through regional and cross-chapter rides, races, and social activities.
+            We’re working to grow the local scene, with plans to establish regular rides, runs, and youth-focused programs in the future.
+            All set against some of Germany’s most beautiful cycling and running routes.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Partner pitch -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="font-serif text-3xl">Partner with us</h2>
+      <p class="opacity-80 mt-2">
+        Partner with a team that lives and breathes endurance sports - on the road, online, and in the community.
+        We deliver authentic brand exposure through events, team kit, video content, and a loyal, growing network of athletes.
+      </p>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700">Logo placement on team kit, content, and event banners</div>
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700">Product placement in authentic cycling, running, and triathlon content</div>
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700">Presence at races, training sessions, and community events</div>
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700">Access to a growing, international sports audience</div>
+      </div>
+      <!-- Replaced partners page link with mailto -->
+      <a href="mailto:janhanke@rct-prague.de?subject=Request%20Sponsor%20Deck%20-%20RCT%20International&body=Hi%20RCT%20team%2C%0D%0A%0D%0APlease%20send%20your%20latest%20sponsor%20%2F%20partner%20deck.%0D%0A%0D%0AThanks%2C%0D%0A"
+         class="mt-6 inline-block px-5 py-3 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 anim">Request sponsor deck</a>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 bg-neutral-900 text-white dark:bg-neutral-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-8 items-center">
+      <div class="md:col-span-2">
+        <h3 class="font-serif text-3xl">Join. Train. Race. Belong.</h3>
+        <p class="mt-2 opacity-80">Wherever the road, trail, or track leads, you’ll find RCT members pushing forward together. Join us and be part of a team that’s redefining community in sport.</p>
+      </div>
+      <div><a href="join.html" class="px-6 py-3 rounded-lg bg-gold text-neutral-900 font-semibold anim">Get in touch</a></div>
+    </div>
+  </section>
+
+  <!-- Footer (injected) -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader + layout fix (keep inside body) -->
+  <script defer>
+  async function loadComponent(id, file) {
+    const host = document.getElementById(id);
+    if (!host) return;
+    const res = await fetch(file, { cache: 'no-cache' });
+    host.innerHTML = await res.text();
+  }
+
+  function applyHeaderOffset() {
+    const header = document.getElementById('main-header');
+    document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+  }
+
+  (async () => {
+    await Promise.all([
+      loadComponent('site-header', '/components/header.html'),
+      loadComponent('site-footer', '/components/footer.html'),
+    ]);
+
+    // Now footer exists -> set year if the element is present there
+    const yr = document.getElementById('yr');
+    if (yr) yr.textContent = new Date().getFullYear();
+
+    // keep body padding in sync with sticky header
+    const header = document.getElementById('main-header');
+    if (header) {
+      applyHeaderOffset();
+      const ro = new ResizeObserver(applyHeaderOffset);
+      ro.observe(header);
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(applyHeaderOffset);
+      }
+      window.addEventListener('resize', applyHeaderOffset);
+      window.addEventListener('orientationchange', applyHeaderOffset);
+    }
+  })();
+  </script>
+
+  <!-- Global site script (ES module; imports firebase.js internally) -->
+  <script type="module" src="assets/js/site.js"></script>
+</body>
+</html>

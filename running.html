@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RCT International — Running</title>
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            base: { 50:'#F6F5F2', 900:'#0D0D0F' },
+            neutral: { 800:'#1f2328', 700:'#2B2B2E', 600:'#4b5563', 500:'#64748b', 300:'#cbd5e1' },
+            gold: '#D6B25E',
+            accent: '#D36B1F'
+          },
+          fontFamily: { sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif'] },
+          boxShadow: { soft:'0 10px 30px rgba(0,0,0,.08)' }
+        }
+      }
+    }
+  </script>
+  <style>.anim{transition:all .2s ease}</style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header (injected) -->
+  <div id="site-header"></div>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 grid lg:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="uppercase tracking-widest text-xs opacity-70">Running</p>
+        <h1 class="font-serif text-4xl sm:text-5xl text-neutral-900 dark:text-base-50">Run together. Go further.</h1>
+        <p class="mt-4 opacity-90">
+          RCT Running is a welcoming crew for every pace — from first 5K to marathon goals. We mix community vibes with purposeful training,
+          weekly meet‑ups, and race weekends across Europe. If you want people to run with and grow with, you’ll fit right in.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="join.html" class="px-5 py-3 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 anim">Join</a>
+          <a href="#weekly" class="px-5 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">Weekly schedule</a>
+        </div>
+      </div>
+      <div class="rounded-2xl overflow-hidden shadow-soft border border-neutral-300/60 dark:border-neutral-700">
+        <img src="/assets/img/hero-running@2000.jpg" alt="RCT group run" class="w-full h-full object-cover">
+      </div>
+    </div>
+  </section>
+
+  <!-- Weekly Schedule -->
+  <section id="weekly" class="py-12 border-t border-neutral-300/60 dark:border-neutral-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="font-serif text-3xl text-neutral-900 dark:text-base-50">Weekly runs · Prague</h2>
+
+      <div class="mt-5 grid lg:grid-cols-3 gap-6 items-stretch">
+        <!-- Sunday Social Run -->
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700 h-full flex flex-col">
+          <div class="text-xs uppercase tracking-wide opacity-70">Sunday</div>
+          <h3 class="mt-1 font-semibold">Sunday Social Run</h3>
+          <p class="mt-2 text-sm opacity-90">
+            Easy‑pace city run focused on community and conversation. Perfect for beginners or recovery days.
+            Final time and route are posted in WhatsApp.
+          </p>
+        </div>
+
+        <!-- Thursday City Run -->
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700 h-full flex flex-col">
+          <div class="text-xs uppercase tracking-wide opacity-70">Thursday</div>
+          <h3 class="mt-1 font-semibold">Thursday City Run</h3>
+          <p class="mt-2 text-sm opacity-90">
+            Faster, longer city run for building fitness and consistency. Details each week in WhatsApp.
+          </p>
+        </div>
+
+        <!-- Long / Trail / Race prep -->
+        <aside class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700 h-full flex flex-col">
+          <h3 class="font-semibold">Distance & Trails</h3>
+          <p class="mt-2 text-sm opacity-90">
+            Long‑run meetups for race prep, occasional trail sessions around Prague, and pop‑up race weekends.
+            Plans are coordinated in the running chat.
+          </p>
+        </aside>
+      </div>
+
+      <p class="mt-4 text-sm opacity-80">
+        Extra sessions pop up during the week. Members propose runs directly in the WhatsApp group.
+      </p>
+
+      <div class="mt-4 flex flex-wrap gap-3">
+        <a href="https://chat.whatsapp.com/FG9kvIo883i4nhVPONEJYi" target="_blank" rel="noopener"
+           class="inline-block px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">WhatsApp Prague</a>
+        <a href="https://www.strava.com/clubs/1032760" target="_blank" rel="noopener"
+           class="inline-block px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900">Upcoming runs on Strava</a>
+        <a href="https://www.instagram.com/rct.prague.running" target="_blank" rel="noopener"
+           class="inline-block px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">@rct.prague.running</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Programs & Community -->
+  <section class="py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-10 items-start">
+      <div>
+        <h2 class="font-serif text-3xl text-neutral-900 dark:text-base-50">For every runner</h2>
+        <p class="mt-3 opacity-90">
+          Training for your first 10K, chasing a marathon PB, or coming back from injury — you’ll find the right pace group and support.
+          We share plans, route ideas, race logistics, and celebrate everyone’s progress.
+        </p>
+        <ul class="mt-4 list-disc list-inside space-y-1 opacity-90 text-sm">
+          <li>Group structure for easy, steady, and workout runs</li>
+          <li>Community race weekends and training camps</li>
+          <li>Knowledge sharing on shoes, strength, nutrition, and recovery</li>
+        </ul>
+        <a href="mailto:info@rct-prague.de" class="mt-5 inline-block px-5 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">Ask a question</a>
+      </div>
+      <div class="flex justify-center">
+        <div class="rounded-2xl overflow-hidden border border-neutral-300/60 dark:border-neutral-700 shadow-soft max-w-md">
+          <img src="/assets/img/hero-run@1600.jpg" alt="RCT running crew" class="w-full h-auto object-cover">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Instagram -->
+  <section class="py-14 border-t border-neutral-300/60 dark:border-neutral-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-baseline justify-between">
+        <h2 class="font-serif text-3xl text-neutral-900 dark:text-base-50">From the run</h2>
+        <a href="https://www.instagram.com/rct.prague.running" target="_blank" class="text-sm underline">Follow @rct.prague.running</a>
+      </div>
+
+      <!-- If you have a Behold feed for running, replace the feed-id below. Otherwise, remove the widget block. -->
+      <behold-widget feed-id="ziUYuD3M7IkdoMjU5ngR"></behold-widget>
+<script>
+  (() => {
+    const d=document,s=d.createElement("script");s.type="module";
+    s.src="https://w.behold.so/widget.js";d.head.append(s);
+  })();
+</script>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 bg-neutral-900 text-white dark:bg-neutral-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-8 items-center">
+      <div class="md:col-span-2">
+        <h3 class="font-serif text-3xl">Join. Train. Race. Belong.</h3>
+        <p class="mt-2 opacity-80">Hop in the running chat, meet the crew, and head out with us — all levels welcome.</p>
+      </div>
+      <div><a href="join.html" class="px-6 py-3 rounded-lg bg-gold text-neutral-900 font-semibold anim">Run with us!</a></div>
+    </div>
+  </section>
+
+  <!-- Footer (injected) -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader + sticky header offset -->
+  <script defer>
+  async function loadComponent(id, file) {
+    const host = document.getElementById(id);
+    if (!host) return;
+    const res = await fetch(file, { cache: 'no-cache' });
+    host.innerHTML = await res.text();
+  }
+
+  function applyHeaderOffset() {
+    const header = document.getElementById('main-header');
+    document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+  }
+
+  (async () => {
+    await Promise.all([
+      loadComponent('site-header', '/components/header.html'),
+      loadComponent('site-footer', '/components/footer.html'),
+    ]);
+
+    // Set year after footer exists
+    const yr = document.getElementById('yr');
+    if (yr) yr.textContent = new Date().getFullYear();
+
+    const header = document.getElementById('main-header');
+    if (header) {
+      applyHeaderOffset();
+      const ro = new ResizeObserver(applyHeaderOffset);
+      ro.observe(header);
+      if (document.fonts && document.fonts.ready) { document.fonts.ready.then(applyHeaderOffset); }
+      window.addEventListener('resize', applyHeaderOffset);
+      window.addEventListener('orientationchange', applyHeaderOffset);
+    }
+  })();
+  </script>
+
+  <!-- Global site script (ES module; imports firebase.js internally) -->
+  <script type="module" src="assets/js/site.js"></script>
+</body>
+</html>

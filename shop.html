@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RCT International — Shop</title>
+  <meta name="description" content="RCT International catalog of team apparel and accessories.">
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            base: { 50:'#F6F5F2', 900:'#0D0D0F' },
+            neutral: { 800:'#1f2328', 700:'#2B2B2E', 600:'#4b5563', 500:'#64748b', 300:'#cbd5e1' },
+            gold: '#D6B25E',
+            accent: '#D36B1F'
+          },
+          fontFamily: { sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif'] },
+          boxShadow: { soft:'0 10px 30px rgba(0,0,0,.08)' }
+        }
+      }
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .modal-backdrop{background:rgba(0,0,0,.55)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:.5rem;padding:.5rem .75rem}
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+
+  <!-- Header (loaded via components) -->
+  <div id="site-header"></div>
+  <div id="header-spacer"></div>
+
+  <!-- Hero -->
+  <section class="relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 flex items-end justify-between gap-6">
+      <div>
+        <p class="uppercase tracking-widest text-xs opacity-70">RCT International</p>
+        <h1 class="font-serif text-4xl md:text-5xl text-neutral-900 dark:text-base-50">Shop</h1>
+        <p class="mt-3 opacity-80 max-w-2xl">
+          Catalog of current RCT apparel and accessories. Items are manufactured and sold by Pactimo. Orders are coordinated
+          via our team for custom production. Prices are indicative and may vary with exchange rates.
+        </p>
+      </div>
+      <div class="hidden md:block">
+        <img src="/assets/img/shop/hero@1200.jpg" alt="RCT apparel" class="rounded-2xl border border-neutral-300/60 dark:border-neutral-700 shadow-soft max-h-40 object-cover">
+      </div>
+    </div>
+  </section>
+
+  <!-- Controls -->
+  <section class="py-4 border-y border-neutral-300/60 dark:border-neutral-700 bg-white/60 dark:bg-neutral-950/60 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center gap-4">
+      <!-- Search -->
+      <div class="flex-1">
+        <label for="search" class="sr-only">Search products</label>
+        <input id="search" type="search" placeholder="Search products..." class="w-full md:max-w-md px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+      </div>
+      <!-- Filters -->
+      <div class="flex flex-wrap items-center gap-2">
+        <select id="filter-gender" class="px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+          <option value="">All genders</option>
+          <option value="Men">Men</option>
+          <option value="Women">Women</option>
+          <option value="Unisex">Unisex</option>
+        </select>
+        <select id="filter-sport" class="px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+          <option value="">All sports</option>
+          <option value="Cycling">Cycling</option>
+          <option value="Running">Running</option>
+          <option value="Triathlon">Triathlon</option>
+        </select>
+        <select id="filter-category" class="px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+          <option value="">All categories</option>
+          <option>Jersey</option>
+          <option>Long Sleeve Jersey</option>
+          <option>Bib Short</option>
+          <option>Run Top</option>
+          <option>Tri Suit</option>
+          <option>Jacket</option>
+          <option>Vest</option>
+          <option>Track Jacket</option>
+          <option>Sports Bra</option>
+          <option>Suit</option>
+        </select>
+        <select id="sort" class="px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+          <option value="pop">Sort by: Featured</option>
+          <option value="az">Name A–Z</option>
+          <option value="za">Name Z–A</option>
+          <option value="priceAsc">Price low to high</option>
+          <option value="priceDesc">Price high to low</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pactimo Size Chart -->
+  <section class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl border border-neutral-300/60 dark:border-neutral-700 bg-white dark:bg-neutral-950 p-5">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <h2 class="font-serif text-2xl text-neutral-900 dark:text-base-50">Pactimo Size Chart</h2>
+          <a class="btn border border-neutral-300 dark:border-neutral-700 anim"
+             href="https://www.pactimo-custom.com/pages/custom-cycling-clothing-size-chart" target="_blank" rel="noopener">
+            Open on pactimo-custom.com
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product Grid -->
+  <section class="py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div id="product-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+
+      <!-- Disclaimer -->
+      <div class="mt-10 p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700 bg-white dark:bg-neutral-950">
+        <h4 class="font-semibold">Important notice</h4>
+        <p class="text-sm opacity-80 mt-2">
+          RCT International <strong>does not sell</strong> these products and is <strong>not a party</strong> to any sales contract.
+          We only coordinate custom team orders. All manufacturing, fulfillment, shipping, returns, exchanges, repairs, and
+          <strong>warranty or quality claims</strong> are solely between the customer and Pactimo (the manufacturer/seller).
+          Prices shown are indicative and may change. Any contractual terms, product specifications, delivery times, and consumer
+          rights are provided by Pactimo and prevail over any information on this page.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer (loaded via components) -->
+  <div id="site-footer" class="mt-16"></div>
+
+  <!-- Size Picker Modal -->
+  <div id="size-modal" class="fixed inset-0 hidden z-50">
+    <div class="absolute inset-0 modal-backdrop"></div>
+    <div class="relative mx-auto max-w-md w-[92%] mt-24 rounded-2xl border border-neutral-300/60 dark:border-neutral-700 bg-white dark:bg-neutral-950 shadow-soft p-5">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold">Select size</h3>
+        <button type="button" class="px-2 py-1 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800" data-close-size>&#10005;</button>
+      </div>
+      <p class="text-sm opacity-80 mt-1" id="size-modal-sub">Choose your size for:</p>
+      <div class="grid grid-cols-4 gap-2 mt-4" id="size-grid"></div>
+      <div class="mt-4 text-right">
+        <button type="button" class="btn border border-neutral-300 dark:border-neutral-700 anim" data-close-size>Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Info Modal -->
+  <div id="info-modal" class="fixed inset-0 hidden z-50">
+    <div class="absolute inset-0 modal-backdrop"></div>
+    <div class="relative mx-auto max-w-3xl w-[94%] md:w-[80%] lg:w-[70%] mt-10 rounded-2xl border border-neutral-300/60 dark:border-neutral-700 bg-white dark:bg-neutral-950 shadow-soft p-0 overflow-hidden">
+      <div class="flex items-center justify-between p-4 border-b border-neutral-200/60 dark:border-neutral-800">
+        <div class="font-semibold" id="info-title">Product info</div>
+        <button type="button" class="px-2 py-1 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800" data-close-info>&#10005;</button>
+      </div>
+      <div class="p-5 space-y-3">
+        <p class="opacity-80 text-sm">Details coming soon. We’ll add fabric, fit, and feature info straight from Pactimo.</p>
+        <ul class="list-disc list-inside text-sm opacity-80">
+          <li>Fit &amp; intended use (race, endurance, run).</li>
+          <li>Fabrics &amp; panels, UV protection, pockets.</li>
+          <li>Care instructions &amp; longevity tips.</li>
+        </ul>
+      </div>
+      <div class="p-4 border-t border-neutral-200/60 dark:border-neutral-800 text-right">
+        <button type="button" class="btn border border-neutral-300 dark:border-neutral-700 anim" data-close-info>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data + Renderer -->
+  <script>
+    // Minimal component loader
+    async function loadComponent(id, file) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const res = await fetch(file, {cache:'no-store'});
+      el.innerHTML = await res.text();
+      if (id === 'site-header') adjustHeaderSpacer();
+    }
+    function adjustHeaderSpacer() {
+      const header = document.querySelector('header');
+      const spacer = document.getElementById('header-spacer');
+      if (!spacer) return;
+      spacer.style.height = (header ? header.offsetHeight : 0) + 'px';
+    }
+    window.addEventListener('resize', adjustHeaderSpacer);
+    window.addEventListener('load', () => {
+      loadComponent('site-header','/components/header.html');
+      loadComponent('site-footer','/components/footer.html');
+      setTimeout(adjustHeaderSpacer, 50);
+      setTimeout(adjustHeaderSpacer, 250);
+    });
+
+    // -------- Product data --------
+const PRODUCTS = [
+  /* ---------- WHITE ---------- */
+  { name:"Women's SS Run Tee (White)", price:41.40, gender:"Women", sport:"Running", category:"Run Top", color:"White", img:"/assets/img/shop/white/w-ss-run-tee-1.png" },
+  { name:"Men's SS Run Tee (White)",   price:41.40, gender:"Men",    sport:"Running", category:"Run Top", color:"White", img:"/assets/img/shop/white/m-ss-run-tee-1.png" },
+  { name:"Women's LS Run Tee (White)", price:45.90, gender:"Women", sport:"Running", category:"Run Top", color:"White", img:"/assets/img/shop/white/w-ls-run-tee-1.png" },
+  { name:"Men's LS Run Tee (White)",   price:45.90, gender:"Men",    sport:"Running", category:"Run Top", color:"White", img:"/assets/img/shop/white/m-ls-run-tee-1.png" },
+  { name:"Women's Run Tank Top (White)", price:39.60, gender:"Women", sport:"Running", category:"Run Top", color:"White", img:"/assets/img/shop/white/w-run-tank-top-1.png" },
+  { name:"Men's Run Singlet (White)",    price:39.60, gender:"Men",    sport:"Running", category:"Run Top", color:"White", img:"/assets/img/shop/white/m-run-singlet-1.png" },
+
+  { name:"Men's Ascent Aero Jersey (White)",     price:92.70, gender:"Men", sport:"Cycling", category:"Jersey", color:"White", img:"/assets/img/shop/white/m-ascent-aero-jersey-1.png" },
+  { name:"Men's Flyte Jersey (White)",           price:132.30,gender:"Men", sport:"Cycling", category:"Jersey", color:"White", img:"/assets/img/shop/white/m-flyte-jersey-1-2.png" },
+  { name:"Men's Summit Aero Mesh Jersey (White)",price:119.70,gender:"Men", sport:"Cycling", category:"Jersey", color:"White", img:"/assets/img/shop/white/m-summit-aero-mesh-jersey-1.png" },
+  { name:"Women's Ascent Aero Jersey (White)",   price:92.70, gender:"Women", sport:"Cycling", category:"Jersey", color:"White", img:"/assets/img/shop/white/w-ascent-aero-jersey-1.png" },
+  { name:"Women's Flyte Jersey (White)",         price:132.30,gender:"Women", sport:"Cycling", category:"Jersey", color:"White", img:"/assets/img/shop/white/w-flyte-jersey-1.png" },
+  { name:"Women's Summit Aero Mesh Jersey (White)",price:119.70,gender:"Women", sport:"Cycling", category:"Jersey", color:"White", img:"/assets/img/shop/white/w-summit-aero-mesh-jersey-1.png" },
+  { name:"Men's Continental Jersey (White)",     price:73.80, gender:"Men", sport:"Cycling", category:"Jersey", color:"White", img:"/assets/img/shop/white/m-continental-jersey-1.png" },
+  { name:"Women's Continental Jersey (White)",   price:73.80, gender:"Women", sport:"Cycling", category:"Jersey", color:"White", img:"/assets/img/shop/white/w-continental-jersey-1.png" },
+
+  { name:"Men's Ascent Aero LS Jersey (White)",  price:98.10, gender:"Men", sport:"Cycling", category:"Long Sleeve Jersey", color:"White", img:"/assets/img/shop/white/m-ascent-aero-ls-jersey-1.png" },
+  { name:"Women's Ascent Aero LS Jersey (White)",price:98.10, gender:"Women", sport:"Cycling", category:"Long Sleeve Jersey", color:"White", img:"/assets/img/shop/white/w-ascent-aero-ls-jersey-1.png" },
+  { name:"Men's Alpine Thermal LS Jersey (White)",price:126.90,gender:"Men", sport:"Cycling", category:"Long Sleeve Jersey", color:"White", img:"/assets/img/shop/white/m-alpine-thermal-ls-jersey-1.png" },
+  { name:"Women's Alpine Thermal LS Jersey (White)",price:126.90,gender:"Women", sport:"Cycling", category:"Long Sleeve Jersey", color:"White", img:"/assets/img/shop/white/w-alpine-thermal-ls-jersey-1.png" },
+
+  /* ---------- PINK ---------- */
+  { name:"Women's SS Run Tee", price:41.40, gender:"Women", sport:"Running", category:"Run Top", color:"Pink", img:"/assets/img/shop/w-ss-run-tee.jpg" },
+  { name:"Men's SS Run Tee",   price:41.40, gender:"Men",    sport:"Running", category:"Run Top", color:"Pink", img:"/assets/img/shop/m-ss-run-tee.jpg" },
+  { name:"Women's LS Run Tee", price:45.90, gender:"Women", sport:"Running", category:"Run Top", color:"Pink", img:"/assets/img/shop/w-ls-run-tee-2.png" },
+  { name:"Men's LS Run Tee",   price:45.90, gender:"Men",    sport:"Running", category:"Run Top", color:"Pink", img:"/assets/img/shop/m-ls-run-tee-1.png" },
+  { name:"Women's Run Tank Top", price:39.60, gender:"Women", sport:"Running", category:"Run Top", color:"Pink", img:"/assets/img/shop/w-run-tank-top-1.png" },
+  { name:"Men's Run Singlet",    price:39.60, gender:"Men",    sport:"Running", category:"Run Top", color:"Pink", img:"/assets/img/shop/m-run-singlet-1.png" },
+
+  { name:"Men's Continental Jersey",     price:73.80, gender:"Men", sport:"Cycling", category:"Jersey", color:"Pink", img:"/assets/img/shop/m-continental-jersey-1.png" },
+  { name:"Men's Ascent Aero Jersey",     price:92.70, gender:"Men", sport:"Cycling", category:"Jersey", color:"Pink", img:"/assets/img/shop/m-ascent-aero-jersey-1.png" },
+  { name:"Men's Flyte Jersey",           price:132.30,gender:"Men", sport:"Cycling", category:"Jersey", color:"Pink", img:"/assets/img/shop/m-flyte-jersey-1-2.png" },
+  { name:"Men's Summit Aero Mesh Jersey",price:119.70,gender:"Men", sport:"Cycling", category:"Jersey", color:"Pink", img:"/assets/img/shop/m-summit-aero-mesh-jersey-1.png" },
+  { name:"Women's Continental Jersey",   price:73.80, gender:"Women", sport:"Cycling", category:"Jersey", color:"Pink", img:"/assets/img/shop/w-continental-jersey-1.png" },
+  { name:"Women's Ascent Aero Jersey",   price:92.70, gender:"Women", sport:"Cycling", category:"Jersey", color:"Pink", img:"/assets/img/shop/w-ascent-aero-jersey-1.png" },
+  { name:"Women's Flyte Jersey",         price:132.30,gender:"Women", sport:"Cycling", category:"Jersey", color:"Pink", img:"/assets/img/shop/w-flyte-jersey-1.png" },
+  { name:"Women's Summit Aero Mesh Jersey",price:119.70,gender:"Women", sport:"Cycling", category:"Jersey", color:"Pink", img:"/assets/img/shop/w-summit-aero-mesh-jersey-1.png" },
+
+  { name:"Men's Ascent Aero LS Jersey",    price:98.10, gender:"Men", sport:"Cycling", category:"Long Sleeve Jersey", color:"Pink", img:"/assets/img/shop/m-ascent-aero-ls-jersey-1.png" },
+  { name:"Women's Ascent Aero LS Jersey",  price:98.10, gender:"Women", sport:"Cycling", category:"Long Sleeve Jersey", color:"Pink", img:"/assets/img/shop/w-ascent-aero-ls-jersey-1.png" },
+  { name:"Men's Alpine Thermal LS Jersey", price:126.90,gender:"Men", sport:"Cycling", category:"Long Sleeve Jersey", color:"Pink", img:"/assets/img/shop/m-alpine-thermal-ls-jersey-1.png" },
+  { name:"Women's Alpine Thermal LS Jersey",price:126.90,gender:"Women", sport:"Cycling", category:"Long Sleeve Jersey", color:"Pink", img:"/assets/img/shop/w-alpine-thermal-ls-jersey-1.png" },
+
+  /* ---------- TRI / OUTERWEAR / REST ---------- */
+  { name:"Men's SS Flytesuit (with pockets)",        price:151.20, gender:"Men", sport:"Triathlon", category:"Suit", color:"Black", img:"/assets/img/shop/m-ss-flytesuit-w-pockets-radio-pocket-1.png" },
+  { name:"Women's SS Flytesuit (with pockets)",      price:151.20, gender:"Women", sport:"Triathlon", category:"Suit", color:"Black", img:"/assets/img/shop/w-ss-flytesuit-w-pockets-radio-pocket-1.png" },
+  { name:"Men's Aero Mesh SS Flyte Suit — Custom",   price:260.10, gender:"Men", sport:"Triathlon", category:"Suit", color:"Black", img:"/assets/img/shop/m-aero-mesh-ss-flyte-suit-custom-1.png" },
+  { name:"Women's Aero Mesh SS Flyte Suit — Custom", price:260.10, gender:"Women", sport:"Triathlon", category:"Suit", color:"Black", img:"/assets/img/shop/w-aero-mesh-ss-flyte-suit-custom-1.png" },
+
+  { name:"Men's Divide Wind Jacket",   price:75.60, gender:"Men", sport:"Cycling", category:"Jacket", color:"Black", img:"/assets/img/shop/m-divide-wind-jacket-1.png" },
+  { name:"Women's Divide Wind Jacket", price:75.60, gender:"Women", sport:"Cycling", category:"Jacket", color:"Black", img:"/assets/img/shop/w-divide-wind-jacket-1.png" },
+  { name:"Men's Divide Wind Vest",     price:71.10, gender:"Men", sport:"Cycling", category:"Vest", color:"Black", img:"/assets/img/shop/m-divide-wind-vest-1.png" },
+  { name:"Women's Divide Wind Vest",   price:71.10, gender:"Women", sport:"Cycling", category:"Vest", color:"Black", img:"/assets/img/shop/w-divide-wind-vest-1.png" },
+
+  { name:"Men's Highlands Track Jacket",   price:87.30, gender:"Men", sport:"Cycling", category:"Track Jacket", color:"Black", img:"/assets/img/shop/m-highlands-track-jacket-1.png" },
+  { name:"Women's Highlands Track Jacket", price:87.30, gender:"Women", sport:"Cycling", category:"Track Jacket", color:"Black", img:"/assets/img/shop/w-highlands-track-jacket-1.png" },
+  { name:"Sports Bra", price:36.00, gender:"Women", sport:"Running", category:"Sports Bra", color:"Pink", img:"/assets/img/shop/w-sports-bra-1.png" },
+
+  { name:"Men's Threshold SS Tri Suit",              price:161.10, gender:"Men", sport:"Triathlon", category:"Tri Suit", color:"Black", img:"/assets/img/shop/m-threshold-ss-tri-suit-1.png" },
+  { name:"Women's Threshold SS Tri Suit",            price:161.10, gender:"Women", sport:"Triathlon", category:"Tri Suit", color:"Black", img:"/assets/img/shop/w-threshold-ss-tri-suit-1.png" },
+];
+
+    // -------- Filtering & rendering --------
+    const grid = () => document.getElementById('product-grid');
+    const $ = sel => document.querySelector(sel);
+    const filters = {
+      search: $('#search'),
+      gender: $('#filter-gender'),
+      sport: $('#filter-sport'),
+      category: $('#filter-category'),
+      sort: $('#sort')
+    };
+
+    function matches(p) {
+      const q = (filters.search.value || '').toLowerCase().trim();
+      const g = filters.gender.value;
+      const s = filters.sport.value;
+      const c = filters.category.value;
+      if (g && p.gender !== g) return false;
+      if (s && p.sport !== s) return false;
+      if (c && p.category !== c) return false;
+      if (!q) return true;
+      const hay = `${p.name} ${p.gender} ${p.sport} ${p.category} ${p.color} ${p.tag||''}`.toLowerCase();
+      return hay.includes(q);
+    }
+    function sortList(list){
+      switch(filters.sort.value){
+        case 'az': return list.sort((a,b)=>a.name.localeCompare(b.name));
+        case 'za': return list.sort((a,b)=>b.name.localeCompare(a.name));
+        case 'priceAsc': return list.sort((a,b)=>a.price-b.price);
+        case 'priceDesc': return list.sort((a,b)=>b.price-a.price);
+        default: return list;
+      }
+    }
+
+    // ----- Modals -----
+    const sizeModal = document.getElementById('size-modal');
+    const sizeGrid  = document.getElementById('size-grid');
+    const sizeSub   = document.getElementById('size-modal-sub');
+    const infoModal = document.getElementById('info-modal');
+    const infoTitle = document.getElementById('info-title');
+
+    let _pendingProduct = null;
+    const SIZES = ["2XS","XS","S","M","L","XL","2XL","3XL"];
+
+    function openSizeModal(product){
+      _pendingProduct = product;
+      sizeSub.textContent = `Choose your size for: ${product.name}${product.color?` — ${product.color}`:''}`;
+      sizeGrid.innerHTML = SIZES.map(sz =>
+        `<button type="button" data-size="${sz}" class="btn border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 anim">${sz}</button>`
+      ).join('');
+      sizeModal.classList.remove('hidden');
+    }
+    function closeSizeModal(){ sizeModal.classList.add('hidden'); _pendingProduct=null; }
+
+    function openInfoModal(product){
+      infoTitle.textContent = product.name;
+      infoModal.classList.remove('hidden');
+    }
+    function closeInfoModal(){ infoModal.classList.add('hidden'); }
+
+    sizeModal.addEventListener('click', (e)=>{
+      if (e.target.hasAttribute('data-close-size') || e.target === sizeModal.querySelector('.modal-backdrop')) {
+        closeSizeModal();
+        return;
+      }
+      const btn = e.target.closest('[data-size]');
+      if (!btn || !_pendingProduct) return;
+      const sz = btn.getAttribute('data-size');
+      const subj = encodeURIComponent(`Order Request — ${_pendingProduct.name} (${_pendingProduct.color||'—'}) — Size ${sz}`);
+      const body =
+`Hi Jan,
+
+I'd like to order:
+• Product: ${_pendingProduct.name}
+• Color: ${_pendingProduct.color || '—'}
+• Size: ${sz}
+
+My details:
+• Name:
+• Phone (optional):
+• Shipping city/country:
+
+Anything else to note:
+- `;
+
+      const mailto = `mailto:janhanke@rct-prague.de?subject=${subj}&body=${encodeURIComponent(body)}`;
+      window.location.href = mailto;
+      closeSizeModal();
+    });
+
+    infoModal.addEventListener('click', (e)=>{
+      if (e.target.hasAttribute('data-close-info') || e.target === infoModal.querySelector('.modal-backdrop')) {
+        closeInfoModal();
+      }
+    });
+
+    // ----- Cards -----
+    function card(p){
+      const tag = p.tag
+        ? `<span class="absolute left-2 top-2 text-[10px] px-2 py-1 rounded-full bg-neutral-900/80 text-white dark:bg-base-50 dark:text-neutral-900">${p.tag}</span>`
+        : '';
+      const img = p.img || '/assets/img/shop/placeholder.jpg';
+
+      return `
+      <div class="group rounded-2xl overflow-hidden border border-neutral-300/60 dark:border-neutral-700 bg-white dark:bg-neutral-950 hover:shadow-soft anim">
+        <!-- MEDIA -->
+        <div class="relative bg-white dark:bg-neutral-950 flex items-center justify-center h-64 md:h-72 xl:h-80 p-4 overflow-hidden border-b border-neutral-200/60 dark:border-neutral-800">
+          ${tag}
+          <img src="${img}" alt="${p.name}" class="block max-h-full max-w-full w-auto h-auto object-contain" />
+        </div>
+
+        <!-- CONTENT -->
+        <div class="p-4 space-y-1">
+          <div class="text-xs opacity-60">${p.gender} · ${p.sport} · ${p.category}</div>
+          <h3 class="font-semibold leading-snug">${p.name}</h3>
+          <div class="mt-1 flex items-center justify-between">
+            <span class="font-semibold">€${p.price.toFixed(2)}</span>
+            ${p.color ? `<span class="text-xs opacity-70">${p.color}</span>` : ''}
+          </div>
+          <div class="mt-3 flex gap-2">
+            <button class="btn border border-neutral-300 dark:border-neutral-700 anim" data-action="request" data-name="${encodeURIComponent(p.name)}">Request</button>
+            <button class="btn bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 anim" data-action="info" data-name="${encodeURIComponent(p.name)}">Product info</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function render(){
+      const list = sortList(PRODUCTS.filter(matches));
+      const html = list.map(card).join('') || `
+        <div class="col-span-full p-8 text-center rounded-2xl border border-neutral-300/60 dark:border-neutral-700">
+          <p>No products match your filters. Reset filters or try a different search.</p>
+        </div>`;
+      grid().innerHTML = html;
+
+      // bind actions
+      grid().querySelectorAll('[data-action="request"]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const name = decodeURIComponent(btn.getAttribute('data-name'));
+          const product = PRODUCTS.find(p => p.name === name);
+          if (product) openSizeModal(product);
+        });
+      });
+      grid().querySelectorAll('[data-action="info"]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const name = decodeURIComponent(btn.getAttribute('data-name'));
+          const product = PRODUCTS.find(p => p.name === name);
+          if (product) openInfoModal(product);
+        });
+      });
+    }
+
+    // events
+    filters.search.addEventListener('input', render);
+    filters.gender.addEventListener('change', render);
+    filters.sport.addEventListener('change', render);
+    filters.category.addEventListener('change', render);
+    filters.sort.addEventListener('change', render);
+
+    window.addEventListener('load', render);
+  </script>
+</body>
+</html>

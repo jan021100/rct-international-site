@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Merge Profiles — RCT International</title>
+
+  <!-- Fonts & Tailwind (same setup as other pages) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors:{ base:{50:'#F6F5F2',900:'#0D0D0F'},
+                   neutral:{800:'#1f2328',700:'#2B2B2E',600:'#4b5563',500:'#64748b',300:'#cbd5e1'},
+                   gold:'#D6B25E', accent:'#D36B1F' },
+          fontFamily:{ sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif'] },
+          boxShadow:{ soft:'0 10px 30px rgba(0,0,0,.08)' }
+        }
+      }
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .card{border:1px solid rgb(203 213 225 / .6)}
+    .dark .card{border-color:#374151}
+    .pill{border:1px solid rgb(203 213 225 / .6); border-radius:9999px; padding:.125rem .5rem}
+    .dark .pill{border-color:#374151}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;}
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header (injected) -->
+  <div id="site-header"></div>
+
+  <!-- Title -->
+  <section class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="font-serif text-4xl text-neutral-900 dark:text-base-50">Merge profiles (Admin)</h1>
+      <p class="opacity-80 mt-1">
+        Select a <strong>target member</strong> (left) and a <strong>source</strong> (guest or legacy, right) and merge.
+        Target name &amp; email are preserved. Other empty fields are filled from the source. Roles are OR-merged.
+        All attendance is retro-written to the target. Legacy matching supports <em>email</em> and <em>name</em> (with diacritic-insensitive fallback scan).
+      </p>
+    </div>
+  </section>
+
+  <section class="pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Not authorized -->
+      <div id="not-admin" class="hidden p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+        <p class="text-red-600 font-medium">You are not authorized to access this page.</p>
+        <p class="text-sm opacity-80 mt-1">Please sign in with an admin account.</p>
+      </div>
+
+      <!-- Admin UI -->
+      <div id="admin-ui" class="hidden grid lg:grid-cols-2 gap-8">
+        <!-- Target user (member) -->
+        <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="font-serif text-2xl dark:text-base-50">Target member</h2>
+            <input id="filter-users" type="text" placeholder="Search name/email" class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm">
+          </div>
+          <div id="users-list" class="mt-3 h-96 overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800"></div>
+          <div class="mt-3 text-sm opacity-80">
+            Selected: <span id="sel-user" class="font-medium">—</span>
+          </div>
+        </div>
+
+        <!-- Source (guest or legacy) -->
+        <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="font-serif text-2xl dark:text-base-50">Source: Guest or Legacy</h2>
+            <input id="filter-sources" type="text" placeholder="Search name/email" class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm">
+          </div>
+          <div id="sources-list" class="mt-3 h-96 overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800"></div>
+          <div class="mt-3 text-sm opacity-80">
+            Selected: <span id="sel-source" class="font-medium">—</span>
+          </div>
+        </div>
+
+        <!-- Merge action + console -->
+        <div class="lg:col-span-2">
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center gap-3">
+              <button id="btn-merge" class="px-5 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 anim">Merge now</button>
+              <span id="merge-msg" class="text-sm"></span>
+            </div>
+            <div class="mt-4">
+              <div class="text-sm font-medium mb-1">Process log</div>
+              <div id="log" class="mono text-xs bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-3 h-64 overflow-auto"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer (injected) -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader + sticky header offset -->
+  <script defer>
+    async function loadComponent(id, file) {
+      const host = document.getElementById(id);
+      if (!host) return;
+      const res = await fetch(file, { cache: 'no-cache' });
+      host.innerHTML = await res.text();
+    }
+    function applyHeaderOffset() {
+      const header = document.getElementById('main-header');
+      document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+    }
+    (async () => {
+      await Promise.all([
+        loadComponent('site-header', '/components/header.html'),
+        loadComponent('site-footer', '/components/footer.html'),
+      ]);
+      const header = document.getElementById('main-header');
+      if (header) {
+        applyHeaderOffset();
+        const ro = new ResizeObserver(applyHeaderOffset);
+        ro.observe(header);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(applyHeaderOffset);
+        window.addEventListener('resize', applyHeaderOffset);
+        window.addEventListener('orientationchange', applyHeaderOffset);
+      }
+    })();
+  </script>
+
+  <!-- Firebase logic -->
+  <script type="module">
+    import { auth, db, onUserChanged, getUserProfile } from '/assets/js/firebase.js';
+    import {
+      collection, collectionGroup, query, where, orderBy, limit, getDocs, doc, getDoc,
+      updateDoc, setDoc, writeBatch
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // --- Admin gate ---
+    const adminUI = document.getElementById('admin-ui');
+    const notAdmin = document.getElementById('not-admin');
+
+    const usersList = document.getElementById('users-list');
+    const sourcesList = document.getElementById('sources-list');
+    const filterUsers = document.getElementById('filter-users');
+    const filterSources = document.getElementById('filter-sources');
+
+    const selUserText = document.getElementById('sel-user');
+    const selSourceText = document.getElementById('sel-source');
+
+    const btnMerge = document.getElementById('btn-merge');
+    const mergeMsg = document.getElementById('merge-msg');
+    const logEl = document.getElementById('log');
+
+    let allUsers = [];     // {uid,name,email}
+    let allGuests = [];    // {id,displayName,email, type:'guest'}
+    let allLegacy = [];    // {id,name,email, type:'legacy'}
+    let selectedUser = null;     // {uid,name,email}
+    let selectedSource = null;   // {type:'guest'|'legacy', id, name/email, fullData}
+
+    function show(el){ el.classList.remove('hidden'); }
+    function hide(el){ el.classList.add('hidden'); }
+
+    function log(line){
+      const t = new Date().toLocaleTimeString();
+      logEl.textContent += `[${t}] ${line}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+      console.log(line);
+    }
+
+    // --- Load data ---
+    async function loadUsers() {
+      const qy = query(collection(db,'users'), orderBy('name'), limit(2000));
+      const snap = await getDocs(qy);
+      allUsers = snap.docs.map(d => ({ uid:d.id, ...(d.data()||{}) }));
+    }
+    async function loadGuests() {
+      const qy = query(collection(db,'guests'), orderBy('displayName'), limit(3000));
+      const snap = await getDocs(qy);
+      allGuests = snap.docs.map(d => ({ id:d.id, type:'guest', ...(d.data()||{}) }));
+    }
+    async function loadLegacy() {
+      const qy = query(collection(db,'legacyMembers'), orderBy('name'), limit(3000));
+      const snap = await getDocs(qy);
+      allLegacy = snap.docs.map(d => ({ id:d.id, type:'legacy', ...(d.data()||{}) }));
+    }
+
+    function renderUsers(filter=''){
+      const f = filter.trim().toLowerCase();
+      usersList.innerHTML = '';
+      const filtered = allUsers.filter(u=>{
+        return !f || (u.name||'').toLowerCase().includes(f) || (u.email||'').toLowerCase().includes(f);
+      });
+      if (filtered.length === 0) {
+        usersList.innerHTML = '<div class="p-3 text-sm opacity-70">No matches.</div>';
+        return;
+      }
+      filtered.forEach(u=>{
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'w-full text-left p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 anim flex items-center gap-2';
+        row.innerHTML = `
+          <span class="font-medium">${u.name || '(member)'}</span>
+          <span class="opacity-60 text-sm">${u.email || ''}</span>
+          <span class="pill text-xs ml-auto">user</span>
+        `;
+        row.addEventListener('click', ()=>{
+          selectedUser = { uid:u.uid, name:u.name, email:u.email };
+          selUserText.textContent = `${u.name || '(member)'} — ${u.email || ''}`;
+        });
+        usersList.appendChild(row);
+      });
+    }
+
+    function renderSources(filter=''){
+      const f = filter.trim().toLowerCase();
+      sourcesList.innerHTML = '';
+      const combined = [
+        ...allGuests.map(g => ({ id:g.id, type:'guest', label:g.displayName||'(guest)', email:g.email||'', _raw:g })),
+        ...allLegacy.map(l => ({ id:l.id, type:'legacy', label:l.name||'(legacy)', email:l.email||'', _raw:l })),
+      ].filter(x => !f || x.label.toLowerCase().includes(f) || x.email.toLowerCase().includes(f));
+
+      if (combined.length === 0) {
+        sourcesList.innerHTML = '<div class="p-3 text-sm opacity-70">No matches.</div>';
+        return;
+      }
+      combined.forEach(s=>{
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'w-full text-left p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 anim flex items-center gap-2';
+        row.innerHTML = `
+          <span class="font-medium">${s.label}</span>
+          <span class="opacity-60 text-sm">${s.email}</span>
+          <span class="pill text-xs ml-auto">${s.type}</span>
+        `;
+        row.addEventListener('click', ()=>{
+          selectedSource = { type:s.type, id:s.id, name:s.label, email:s.email, raw:s._raw };
+          selSourceText.textContent = `${s.label} — ${s.email} (${s.type})`;
+        });
+        sourcesList.appendChild(row);
+      });
+    }
+
+    // --- Merge helpers ---
+    function boolOr(a,b){ return !!(a || b); }
+    function normalizeStr(v){ return (v || '').toString().trim(); }
+    function normalizeName(n){
+      return (n || '')
+        .toString()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // strip diacritics
+        .toLowerCase().trim();
+    }
+
+    async function copyProfileData(sourceData, targetUid) {
+      const src = sourceData || {};
+      const srcRoles = (src.roles || {});
+      const tRef = doc(db,'users',targetUid);
+      const tSnap = await getDoc(tRef);
+      const tData = tSnap.exists() ? tSnap.data() : {};
+
+      const payload = {};
+      const maybe = (field) => {
+        const cur = normalizeStr(tData[field]);
+        const val = normalizeStr(src[field]);
+        if (!cur && val) payload[field] = val;
+      };
+      // do not overwrite name/email
+      maybe('address');
+      maybe('birthdate');
+      maybe('phone');
+      maybe('nationality');
+      maybe('sports');
+
+      const tRoles = tData.roles || {};
+      const mergedRoles = {
+        admin:        boolOr(tRoles.admin,        srcRoles.admin),
+        evMember:     boolOr(tRoles.evMember,     srcRoles.evMember),
+        legacyMember: boolOr(tRoles.legacyMember, srcRoles.legacyMember),
+        rctMember:    boolOr(tRoles.rctMember,    srcRoles.rctMember),
+        spolekMember: boolOr(tRoles.spolekMember, srcRoles.spolekMember),
+        germanMember: boolOr(tRoles.germanMember, srcRoles.germanMember),
+      };
+      payload.roles = mergedRoles;
+
+      if (Object.keys(payload).length) {
+        await setDoc(tRef, payload, { merge:true });
+      }
+      return payload;
+    }
+
+    async function rewriteAttendanceFromGuest(guestId, user) {
+      log(`Find attendance for guestId=${guestId} …`);
+      const qy = query(collectionGroup(db,'attendance'), where('guestId','==',guestId));
+      const snap = await getDocs(qy);
+      log(`Found ${snap.size} attendance docs (guest). Rewriting …`);
+      const docs = snap.docs;
+      let changed = 0;
+      for (let i=0;i<docs.length;i+=450) {
+        const slice = docs.slice(i,i+450);
+        const batch = writeBatch(db);
+        slice.forEach(d=>{
+          batch.update(d.ref, {
+            userId: user.uid,
+            guestId: null,
+            displayName: user.name || user.email || 'member',
+            email: user.email || null
+          });
+        });
+        await batch.commit();
+        changed += slice.length;
+      }
+      await updateDoc(doc(db,'guests',guestId), { mergedToUserId: user.uid, isProspect:false });
+      log(`Marked guest ${guestId} mergedToUserId=${user.uid}.`);
+      return changed;
+    }
+
+    // NEW: Legacy rewrite supports email, then name, then fallback diacritic-insensitive scan
+    async function rewriteAttendanceFromLegacy(legacy, user) {
+      const email = normalizeStr(legacy.email);
+      const legacyName = normalizeStr(legacy.name);
+      const legacyNameNorm = normalizeName(legacy.name);
+      let matches = [];
+
+      // 1) by email (if present)
+      if (email) {
+        log(`Find attendance by legacy email=${email} …`);
+        const q1 = query(collectionGroup(db,'attendance'), where('email','==',email));
+        const s1 = await getDocs(q1);
+        if (!s1.empty) {
+          matches.push(...s1.docs);
+          log(`Matched ${s1.size} by email.`);
+        } else {
+          log(`No matches by email.`);
+        }
+      }
+
+      // 2) exact by displayName
+      log(`Find attendance by exact name="${legacyName}" …`);
+      const q2 = query(collectionGroup(db,'attendance'), where('displayName','==',legacyName));
+      const s2 = await getDocs(q2);
+      if (!s2.empty) {
+        matches.push(...s2.docs);
+        log(`Matched ${s2.size} by exact name.`);
+      } else {
+        log(`No exact name matches.`);
+      }
+
+      // 3) fallback scan: fetch recent attendance & filter by diacritic-insensitive name
+      // (guard: only if we still have 0)
+      if (matches.length === 0) {
+        log(`Fallback scan (up to 2000 recent attendance docs) for diacritic-insensitive match …`);
+        // We assume attendance docs have createdAt; if not, this still returns some window.
+        const q3 = query(collectionGroup(db,'attendance'), orderBy('createdAt','desc'), limit(2000));
+        const s3 = await getDocs(q3);
+        const filtered = s3.docs.filter(d => normalizeName(d.data().displayName) === legacyNameNorm);
+        log(`Fallback scan matched ${filtered.length}.`);
+        matches.push(...filtered);
+      }
+
+      // Deduplicate by path
+      const uniq = new Map();
+      matches.forEach(d => uniq.set(d.ref.path, d));
+      const docs = Array.from(uniq.values());
+
+      if (docs.length === 0) {
+        log('No attendance to rewrite for legacy.');
+        // still mark merged for bookkeeping
+        try { await updateDoc(doc(db,'legacyMembers',legacy.id), { mergedToUserId: user.uid }); } catch {}
+        return 0;
+      }
+
+      log(`Rewriting ${docs.length} attendance docs to userId=${user.uid} …`);
+      let changed = 0;
+      for (let i=0;i<docs.length;i+=450) {
+        const slice = docs.slice(i,i+450);
+        const batch = writeBatch(db);
+        slice.forEach(d=>{
+          batch.update(d.ref, {
+            userId: user.uid,
+            guestId: null,
+            displayName: user.name || user.email || 'member',
+            email: user.email || null
+          });
+        });
+        await batch.commit();
+        changed += slice.length;
+      }
+
+      try {
+        await updateDoc(doc(db,'legacyMembers',legacy.id), { mergedToUserId: user.uid });
+        log(`Marked legacy ${legacy.id} mergedToUserId=${user.uid}.`);
+      } catch(e) {
+        log(`Could not mark legacy merged: ${e.message||e}`);
+      }
+
+      return changed;
+    }
+
+    // --- Do merge ---
+    async function doMerge() {
+      mergeMsg.textContent = ''; mergeMsg.className='text-sm';
+      if (!selectedUser || !selectedSource) {
+        mergeMsg.textContent = 'Select a target member and a source first.'; mergeMsg.classList.add('text-red-600'); return;
+      }
+      btnMerge.disabled = true;
+      log('--- Merge start ---');
+      try {
+        // Load full target user
+        const userRef = doc(db,'users',selectedUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) throw new Error('Target user not found.');
+        const user = { uid:selectedUser.uid, ...(userSnap.data()||{}) };
+
+        // Load full source
+        let sourceData = null;
+        if (selectedSource.type === 'guest') {
+          const sSnap = await getDoc(doc(db,'guests',selectedSource.id));
+          if (!sSnap.exists()) throw new Error('Guest not found.');
+          sourceData = sSnap.data();
+        } else {
+          const sSnap = await getDoc(doc(db,'legacyMembers',selectedSource.id));
+          if (!sSnap.exists()) throw new Error('Legacy entry not found.');
+          sourceData = { id:selectedSource.id, ...(sSnap.data()||{}) };
+        }
+
+        log('Copy profile fields (excluding name/email) …');
+        const payload = await copyProfileData(sourceData, user.uid);
+        log(`Updated target with: ${JSON.stringify(payload)}`);
+
+        // Attendance rewrite
+        let changed = 0;
+        if (selectedSource.type === 'guest') {
+          changed += await rewriteAttendanceFromGuest(selectedSource.id, { uid:user.uid, name:user.name, email:user.email });
+        } else {
+          changed += await rewriteAttendanceFromLegacy({ id: sourceData.id, email: sourceData.email || '', name: sourceData.name || '' }, { uid:user.uid, name:user.name, email:user.email });
+        }
+
+        mergeMsg.textContent = `Merge complete. Rewrote ${changed} attendance docs.`; mergeMsg.classList.add('text-green-700');
+        log('--- Merge complete ---');
+      } catch(err) {
+        console.error(err);
+        mergeMsg.textContent = err.message || 'Merge failed.'; mergeMsg.classList.add('text-red-600');
+        log(`ERROR: ${err.message || err}`);
+      } finally {
+        btnMerge.disabled = false;
+      }
+    }
+
+    // Wire up UI
+    filterUsers.addEventListener('input', ()=> renderUsers(filterUsers.value));
+    filterSources.addEventListener('input', ()=> renderSources(filterSources.value));
+    btnMerge.addEventListener('click', doMerge);
+
+    // Auth/admin gate
+    onUserChanged(async (u)=>{
+      if (!u) { hide(adminUI); show(notAdmin); return; }
+      const prof = await getUserProfile(u.uid);
+      const isAdmin = !!(prof && prof.roles && prof.roles.admin);
+      if (!isAdmin) { hide(adminUI); show(notAdmin); return; }
+      show(adminUI); hide(notAdmin);
+      log(`Signed in as admin: ${u.email}`);
+
+      await Promise.all([loadUsers(), loadGuests(), loadLegacy()]);
+      renderUsers();
+      renderSources();
+    });
+  </script>
+</body>
+</html>

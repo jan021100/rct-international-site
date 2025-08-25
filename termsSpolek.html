@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Terms of Membership & Privacy — RCT International, z.s.</title>
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode:'class',
+      theme:{ extend:{
+        colors:{
+          base:{50:'#F6F5F2',900:'#0D0D0F'},
+          neutral:{800:'#1f2328',700:'#2B2B2E',600:'#4b5563',500:'#64748b',300:'#cbd5e1'},
+          gold:'#D6B25E', accent:'#D36B1F',
+          earth:{100:'#F3EFE6',200:'#E8E0CF',300:'#DCCEB5',400:'#CDBA96',500:'#BFA77C',600:'#987E58'}
+        },
+        fontFamily:{sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif']},
+        boxShadow:{soft:'0 10px 30px rgba(0,0,0,.08)'}
+      }}
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .card{border:1px solid rgb(203 213 225 / .6)}
+    .dark .card{border-color:#374151}
+    .badge{border:1px solid rgb(203 213 225 / .6); border-radius:9999px; padding:.125rem .5rem; font-size:.75rem}
+    .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.10) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.12) 0%, transparent 55%);
+    }
+    .dark .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.18) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.18) 0%, transparent 55%);
+    }
+    .content h2{font-size:1.25rem;margin-top:1.25rem}
+    .content h3{font-size:1.05rem;margin-top:.75rem}
+    .content p{margin:.5rem 0}
+    .content ul{list-style:disc;margin-left:1.25rem}
+    .content ol{list-style:decimal;margin-left:1.25rem}
+    .lang-btn[aria-selected="true"]{border-color:#0f172a;color:#0f172a}
+    .dark .lang-btn[aria-selected="true"]{border-color:#f4f4f5;color:#f4f4f5}
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header -->
+  <div id="site-header"></div>
+
+  <!-- Hero -->
+  <section class="py-10">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-6 sm:p-8">
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <div class="text-sm uppercase tracking-wide opacity-70">RCT International, z.s.</div>
+            <h1 class="mt-1 font-serif text-3xl sm:text-4xl text-neutral-900 dark:text-base-50">
+              Terms of Membership & Privacy Notice
+            </h1>
+            <p class="mt-2 opacity-80 text-sm">
+              Comprehensive conditions for club membership, participation, media, and data protection (GDPR/BDSG/CZ law).
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-en" class="lang-btn px-3 py-1.5 rounded-lg border anim" aria-selected="true">EN</button>
+            <button id="btn-cz" class="lang-btn px-3 py-1.5 rounded-lg border anim" aria-selected="false">CZ</button>
+            <button id="btn-de" class="lang-btn px-3 py-1.5 rounded-lg border anim" aria-selected="false">DE</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Helpful CTA -->
+      <div class="mt-4 rounded-xl card cta-grad bg-white dark:bg-neutral-950 shadow-soft px-5 py-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="leading-tight">
+            <div class="text-[11px] uppercase tracking-wide opacity-70">Membership • Privacy • Liability</div>
+            <div class="font-serif text-xl mt-0.5">Please read before applying</div>
+            <div class="text-sm opacity-80 mt-0.5">
+              Acceptance happens on the application form. This page explains all terms in full.
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <a href="/spolekjoin.html" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 hover:opacity-90 anim text-sm">Apply for membership</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content -->
+  <section class="pb-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- EN -->
+      <article id="lang-en" class="content rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-6 sm:p-8 space-y-4">
+        <div class="text-sm opacity-70">Version: 1.0 • Last updated: <span id="last-upd-en"></span></div>
+
+        <h2>1. Who we are and what these Terms cover</h2>
+        <p>
+          These <strong>Terms of Membership and Privacy Notice</strong> (“Terms”) govern membership in
+          <strong>RCT International, z.s.</strong> (a voluntary association registered in the Czech Republic)
+          and participation in its activities, including rides, runs, training, events, and community initiatives.
+          By applying for membership and/or participating in club activities, you acknowledge and accept these Terms.
+        </p>
+        <p>
+          Contact for all matters (including privacy): <a class="underline" href="mailto:info@rct-prague.de">info@rct-prague.de</a>.
+          The club operates internationally; the <strong>primary applicable law</strong> is Czech law.
+          For data protection, we comply with <strong>GDPR</strong> (EU) including German rules where relevant.
+        </p>
+
+        <h2>2. Membership admission and status</h2>
+        <ol>
+          <li><strong>Eligibility.</strong> Anyone supportive of the club’s aims may apply; minors require legal guardian consent.</li>
+          <li><strong>Application & approval.</strong> Submitting the online membership form creates an <em>application</em>.
+              Admission is subject to <strong>board approval at its discretion</strong> (e.g., alignment with club values, safety, capacity).
+              The club may decline applications without stating reasons, within the bounds of anti-discrimination laws.</li>
+          <li><strong>Start of membership.</strong> Membership begins once the board approves your application and you receive confirmation.</li>
+          <li><strong>Fees (if introduced).</strong> Membership fees, if applicable, will be announced transparently and collected lawfully.
+              Non-payment may lead to suspension or termination in line with statutes.</li>
+          <li><strong>Changes to details.</strong> You must keep your details (e.g., contact, medical alerts relevant to safety) accurate and up to date.</li>
+        </ol>
+
+        <h2>3. Participation rules & code of conduct</h2>
+        <ul>
+          <li><strong>Safety first.</strong> Participate only if you are medically fit. Follow traffic rules and local regulations at all times.</li>
+          <li><strong>Equipment responsibility.</strong> You are responsible for your own equipment (e.g., bicycle, shoes, helmet, lights), ensuring it is safe and roadworthy.</li>
+          <li><strong>Respect & integrity.</strong> Uphold fair play, no harassment or discrimination, follow reasonable instructions of ride leaders and officials.</li>
+          <li><strong>No doping / substance misuse.</strong> The club supports clean sport. Substance misuse is prohibited at all club activities.</li>
+          <li><strong>External links.</strong> The club uses platforms like Strava and Atlans for community coordination. Their terms and privacy apply when you use them.</li>
+        </ul>
+
+        <h2>4. Liability waiver & risk assumption</h2>
+        <p>
+          You acknowledge that participation in cycling, running, and associated activities involves inherent risks (e.g., accidents, weather, road conditions,
+          third‑party conduct). You <strong>participate at your own risk</strong>.
+        </p>
+        <p>
+          To the <strong>maximum extent permitted by law</strong>, the club, its board members, volunteers, and leaders are not liable for
+          accidental injury, property damage, or losses arising from participation, except in cases of <strong>intent or gross negligence</strong>.
+          Mandatory statutory rights (e.g., under Czech civil law or German BGB) remain unaffected.
+        </p>
+        <p>
+          You are responsible for your adequate <strong>health and accident insurance</strong>. The club does not provide personal insurance cover.
+        </p>
+
+        <h2>5. Minors</h2>
+        <p>
+          Applicants under 18 require the express consent of a legal guardian (name, email, consent and signature collected).
+          Guardians confirm that the minor is fit to participate and that adequate supervision and insurance exist as appropriate.
+          The club may set participation limitations for minors for safety reasons.
+        </p>
+
+        <h2>6. Media, name use, and publicity</h2>
+        <p>
+          During activities, <strong>photos and videos</strong> may be created for the club’s public relations (website, social media, print).
+          By opting in on the application form, you consent to the creation and publication of such media and to the use of your name in that context.
+          You derive no rights (e.g., remuneration) from such use. <strong>You may revoke consent at any time</strong> with effect for the future; upon revocation,
+          we will remove media from channels we control. Content shared by third parties or in media outside our control may persist.
+        </p>
+
+        <h2>7. Data protection (GDPR)</h2>
+        <h3>7.1 Controller</h3>
+        <p>
+          RCT International, z.s. (Czech Republic). Contact: <a class="underline" href="mailto:info@rct-prague.de">info@rct-prague.de</a>.
+        </p>
+
+        <h3>7.2 Personal data we process</h3>
+        <ul>
+          <li>Identification/contact: name, email, phone, address, nationality, date of birth.</li>
+          <li>Membership data: application details, approvals, roles/committee membership, payment records (if applicable).</li>
+          <li>Activity data: voluntary activity logs relevant to club events (e.g., attendance), Strava profile link (if provided).</li>
+          <li>Guardian data (minors): guardian name, email, consent, signature.</li>
+          <li>Technical meta: submission timestamps, IP (for fraud/security), user agent.</li>
+        </ul>
+
+        <h3>7.3 Purposes & legal bases</h3>
+        <ul>
+          <li><strong>Membership administration</strong> (Art. 6(1)(b) GDPR – performance of a contract; Art. 6(1)(c) – legal obligations; accounting/record‑keeping).</li>
+          <li><strong>Safety & event coordination</strong> (Art. 6(1)(f) – legitimate interests, e.g., safe group rides, participant lists).</li>
+          <li><strong>Public relations media</strong> (Art. 6(1)(a) – consent for photos/videos and name publication; revocable at any time).</li>
+          <li><strong>Minors</strong> (Art. 6(1)(a) – guardian consent; additional safeguards under national law).</li>
+        </ul>
+
+        <h3>7.4 Recipients & processors</h3>
+        <p>
+          Access is limited to board members and designated volunteers who need it. We use reputable service providers (e.g., Google/Firebase)
+          under data‑processing agreements. External platforms you choose to use (e.g., Strava, Atlans) process data under their own terms.
+        </p>
+
+        <h3>7.5 International transfers</h3>
+        <p>
+          Where data are stored or accessed outside the EEA, we rely on GDPR mechanisms (e.g., Standard Contractual Clauses). We aim to use EU/EEA data centers where feasible.
+        </p>
+
+        <h3>7.6 Retention</h3>
+        <ul>
+          <li>Core membership records: for the duration of membership and for up to 10 years thereafter to meet legal/accounting obligations.</li>
+          <li>Media with consent: until consent is withdrawn, then removed from channels we control.</li>
+          <li>Guardian data: retained while the member is a minor and for a reasonable period thereafter for legal protection.</li>
+        </ul>
+
+        <h3>7.7 Your rights</h3>
+        <p>
+          You have the rights of access, rectification, erasure, restriction, portability, and objection (Art. 15–21 GDPR).
+          You may withdraw consent at any time, without affecting prior processing. You can complain to your local authority;
+          for the Czech Republic: <em>Úřad pro ochranu osobních údajů (UOOU)</em>; in Germany: your competent state authority or the <em>BfDI</em>.
+        </p>
+
+        <h2>8. Discipline & termination</h2>
+        <p>
+          Breaches of these Terms or the Statutes may lead to warnings, suspension, or termination by the board.
+          You may resign by written notice; statutory and fee rules (if any) apply.
+        </p>
+
+        <h2>9. Changes to these Terms</h2>
+        <p>
+          We may update these Terms to reflect legal or operational changes. The latest version is published here.
+          Material changes will be highlighted; continued participation after notice indicates acceptance.
+        </p>
+
+        <h2>10. Priority & language</h2>
+        <p>
+          These Terms are provided in English, Czech, and German. In case of doubt, the Czech version may guide interpretation together with the club statutes.
+        </p>
+      </article>
+
+      <!-- CZ -->
+      <article id="lang-cz" class="content rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-6 sm:p-8 space-y-4 hidden">
+        <div class="text-sm opacity-70">Verze: 1.0 • Aktualizováno: <span id="last-upd-cz"></span></div>
+
+        <h2>1. O nás a předmět těchto Podmínek</h2>
+        <p>
+          Tyto <strong>Podmínky členství a Zásady ochrany osobních údajů</strong> („Podmínky“) upravují členství ve
+          <strong>RCT International, z.s.</strong> (dobrovolný spolek registrovaný v České republice) a účast na jeho aktivitách,
+          včetně vyjížděk, běhů, tréninků, akcí a komunitních iniciativ. Podáním přihlášky a/nebo účastí na aktivitách
+          potvrzujete souhlas s těmito Podmínkami.
+        </p>
+        <p>
+          Kontakt pro veškeré záležitosti (včetně ochrany osobních údajů): <a class="underline" href="mailto:info@rct-prague.de">info@rct-prague.de</a>.
+          Hlavním rozhodným právem je <strong>české právo</strong>; v oblasti ochrany osobních údajů dodržujeme <strong>GDPR</strong>.
+        </p>
+
+        <h2>2. Přijetí za člena a členství</h2>
+        <ol>
+          <li><strong>Způsobilost.</strong> Přihlásit se může každý, kdo podporuje cíle spolku; nezletilí potřebují souhlas zákonného zástupce.</li>
+          <li><strong>Přihláška a schválení.</strong> Odesláním online formuláře vzniká <em>žádost</em>. Přijetí za člena podléhá
+              <strong>schválení výborem dle jeho uvážení</strong> (soulad s hodnotami, kapacita apod.). Spolek může žádost odmítnout,
+              a to v mezích antidiskriminačních předpisů.</li>
+          <li><strong>Vznik členství.</strong> Členství vzniká po schválení výborem a zaslání potvrzení.</li>
+          <li><strong>Členské příspěvky (pokud budou zavedeny).</strong> Případné příspěvky budou zveřejněny transparentně; neplacení může vést
+              k pozastavení nebo zániku členství v souladu se stanovami.</li>
+          <li><strong>Aktualizace údajů.</strong> Člen odpovídá za správnost a aktuálnost údajů (kontakt, relevantní zdravotní upozornění pro bezpečnost atd.).</li>
+        </ol>
+
+        <h2>3. Pravidla účasti a kodex chování</h2>
+        <ul>
+          <li><strong>Bezpečnost.</strong> Účastněte se jen jste‑li zdravotně způsobilí. Vždy dodržujte dopravní předpisy a místní nařízení.</li>
+          <li><strong>Vybavení.</strong> Za své vybavení (kolo, helma, osvětlení, obuv) nesete odpovědnost; musí být bezpečné a způsobilé.</li>
+          <li><strong>Respekt & fair play.</strong> Zákaz obtěžování a diskriminace; dbejte pokynů vedoucích jízd a pořadatelů.</li>
+          <li><strong>Zákaz dopingu/abusu.</strong> Spolek podporuje čistý sport; zneužití návykových látek je zakázáno.</li>
+          <li><strong>Externí platformy.</strong> Pro organizaci využíváme např. Stravu a Atlans; jejich podmínky platí při používání.</li>
+        </ul>
+
+        <h2>4. Odpovědnost a rizika</h2>
+        <p>
+          Berete na vědomí, že cyklistika, běh a související aktivity nesou rizika (nehody, počasí, povrchy, chování třetích osob).
+          Účast je <strong>na vlastní riziko</strong>.
+        </p>
+        <p>
+          V <strong>nejvyšší míře dovolené právem</strong> nenese spolek, jeho orgány, dobrovolníci a vedoucí odpovědnost
+          za újmu na zdraví, majetkovou škodu či ztráty vzniklé při účasti, s výjimkou případů <strong>úmyslu či hrubé nedbalosti</strong>.
+          Vaše zákonná práva zůstávají nedotčena.
+        </p>
+        <p>
+          Jste zodpovědní za vlastní <strong>zdravotní a úrazové pojištění</strong>. Spolek neposkytuje osobní pojistné krytí.
+        </p>
+
+        <h2>5. Nezletilí</h2>
+        <p>
+          U osob mladších 18 let vyžadujeme výslovný souhlas zákonného zástupce (jméno, e‑mail, souhlas a podpis).
+          Zástupce potvrzuje způsobilost nezletilého a přiměřené pojištění/dohled. Spolek může z bezpečnostních důvodů
+          omezit účast nezletilých.
+        </p>
+
+        <h2>6. Média a publicita</h2>
+        <p>
+          V rámci aktivit mohou vznikat <strong>fotografie a videa</strong> pro PR spolku (web, sociální sítě, tisk).
+          Udělením souhlasu ve formuláři souhlasíte s pořízením a zveřejněním takových materiálů a se zveřejněním jména v této souvislosti.
+          Ze souhlasu neplynou další nároky (např. odměna). <strong>Souhlas lze kdykoli odvolat</strong> s účinky do budoucna; po odvolání
+          materiály odstraníme z kanálů, které kontrolujeme. Šíření třetími osobami mimo naši kontrolu nelze vždy zcela odstranit.
+        </p>
+
+        <h2>7. Ochrana osobních údajů (GDPR)</h2>
+        <h3>7.1 Správce</h3>
+        <p>RCT International, z.s. • Kontakt: <a class="underline" href="mailto:info@rct-prague.de">info@rct-prague.de</a>.</p>
+
+        <h3>7.2 Zpracovávané údaje</h3>
+        <ul>
+          <li>Identifikační/kontaktní: jméno, e‑mail, telefon, adresa, státní příslušnost, datum narození.</li>
+          <li>Členská agenda: přihlášky, schválení, role/funkce, platby (je‑li relevantní).</li>
+          <li>Aktivity: dobrovolné záznamy a účast, odkaz na Stravu (při poskytnutí).</li>
+          <li>Údaje zástupců nezletilých: jméno, e‑mail, souhlas, podpis.</li>
+          <li>Technické meta: časová razítka, IP (bezpečnost), uživatelský agent.</li>
+        </ul>
+
+        <h3>7.3 Účely a právní základy</h3>
+        <ul>
+          <li><strong>Členská evidence</strong> (čl. 6(1)(b) GDPR – plnění smlouvy; 6(1)(c) – právní povinnosti; účetnictví).</li>
+          <li><strong>Bezpečnost a organizace</strong> (čl. 6(1)(f) – oprávněný zájem, např. bezpečné skupinové jízdy).</li>
+          <li><strong>PR média</strong> (čl. 6(1)(a) – souhlas se snímky a zveřejněním jména; odvolatelné kdykoli).</li>
+          <li><strong>Nezletilí</strong> (čl. 6(1)(a) – souhlas zákonného zástupce; další záruky dle vnitrostátního práva).</li>
+        </ul>
+
+        <h3>7.4 Příjemci a zpracovatelé</h3>
+        <p>
+          Přístup mají členové výboru a pověření dobrovolníci. Využíváme důvěryhodné poskytovatele (např. Google/Firebase)
+          na základě zpracovatelských smluv. Externí platformy (Strava, Atlans) mají vlastní podmínky a zásady.
+        </p>
+
+        <h3>7.5 Předávání do třetích zemí</h3>
+        <p>
+          Je‑li přenos mimo EHP nezbytný, používáme mechanismy GDPR (např. standardní smluvní doložky). Preferujeme ukládání v EU/EHP.
+        </p>
+
+        <h3>7.6 Doba uchování</h3>
+        <ul>
+          <li>Členská agenda: po dobu členství a až 10 let poté (právní/účetní povinnosti).</li>
+          <li>Média na základě souhlasu: do odvolání; poté odstraníme z kanálů pod naší kontrolou.</li>
+          <li>Údaje zástupců: po dobu nezletilosti člena a přiměřenou dobu poté.</li>
+        </ul>
+
+        <h3>7.7 Vaše práva</h3>
+        <p>
+          Máte práva dle čl. 15–21 GDPR (přístup, oprava, výmaz, omezení, přenositelnost, námitka).
+          Souhlas lze kdykoli odvolat bez vlivu na dřívější zpracování. Stížnost lze podat u místního dozorového úřadu;
+          v ČR u <em>ÚOOÚ</em>.
+        </p>
+
+        <h2>8. Kázeň a ukončení</h2>
+        <p>
+          Porušení Podmínek či Stanov může vést k napomenutí, pozastavení nebo ukončení členství rozhodnutím výboru.
+          Člen může vystoupit písemným oznámením; uplatní se příslušná pravidla.
+        </p>
+
+        <h2>9. Změny Podmínek</h2>
+        <p>
+          Podmínky můžeme aktualizovat. Aktuální verzi zveřejňujeme zde; podstatné změny zvýrazníme.
+        </p>
+
+        <h2>10. Přednost a jazyk</h2>
+        <p>
+          Text je k dispozici v EN/CZ/DE. V případě pochybností lze při výkladu vycházet z českého znění spolu se Stanovami spolku.
+        </p>
+      </article>
+
+      <!-- DE -->
+      <article id="lang-de" class="content rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-6 sm:p-8 space-y-4 hidden">
+        <div class="text-sm opacity-70">Version: 1.0 • Aktualisiert am: <span id="last-upd-de"></span></div>
+
+        <h2>1. Über uns und Geltungsbereich</h2>
+        <p>
+          Diese <strong>Mitgliedschaftsbedingungen und Datenschutzerklärung</strong> („Bedingungen“) regeln die Mitgliedschaft bei
+          <strong>RCT International, z.s.</strong> (eingetragener Verein in der Tschechischen Republik) und die Teilnahme an Aktivitäten
+          wie Ausfahrten, Läufen, Trainings, Veranstaltungen und Community‑Initiativen. Mit Antragstellung und/oder Teilnahme
+          erkennen Sie diese Bedingungen an.
+        </p>
+        <p>
+          Kontakt (auch Datenschutz): <a class="underline" href="mailto:info@rct-prague.de">info@rct-prague.de</a>.
+          Anwendbares Recht primär: <strong>tschechisches Recht</strong>. Für Datenschutz gilt die <strong>DSGVO</strong>;
+          deutsche Besonderheiten werden berücksichtigt.
+        </p>
+
+        <h2>2. Aufnahme und Mitgliedschaft</h2>
+        <ol>
+          <li><strong>Zulassung.</strong> Grundsätzlich kann jede Person einen Antrag stellen; Minderjährige benötigen die Zustimmung der Erziehungsberechtigten.</li>
+          <li><strong>Antrag & Genehmigung.</strong> Durch das Online‑Formular stellen Sie einen <em>Antrag</em>.
+              Die Aufnahme erfolgt <strong>nach Ermessen des Vorstands</strong> (Werte, Sicherheit, Kapazität etc.).
+              Eine Ablehnung kann ohne Angabe von Gründen erfolgen, im Rahmen der Anti‑Diskriminierungsgesetze.</li>
+          <li><strong>Beginn.</strong> Die Mitgliedschaft beginnt mit der Vorstandsbestätigung.</li>
+          <li><strong>Beiträge (falls eingeführt).</strong> Beiträge werden transparent mitgeteilt. Nichtzahlung kann zu Ruhendstellung oder Beendigung führen.</li>
+          <li><strong>Datenaktualität.</strong> Mitglieder halten ihre Angaben aktuell (Kontakt, sicherheitsrelevante Hinweise etc.).</li>
+        </ol>
+
+        <h2>3. Teilnahme & Verhaltenskodex</h2>
+        <ul>
+          <li><strong>Sicherheit.</strong> Teilnahme nur bei gesundheitlicher Eignung. Verkehrsregeln sind stets einzuhalten.</li>
+          <li><strong>Ausrüstung.</strong> Eigenverantwortung für einwandfreie Ausrüstung (Rad, Helm, Beleuchtung, Schuhe).</li>
+          <li><strong>Respekt & Fair Play.</strong> Kein Mobbing/Diskriminierung; Anweisungen von Leitern/Organisatoren folgen.</li>
+          <li><strong>Anti‑Doping.</strong> Missbrauch von Substanzen ist untersagt.</li>
+          <li><strong>Externe Plattformen.</strong> Für Koordination nutzen wir u. a. Strava und Atlans; deren Bedingungen gelten bei Nutzung.</li>
+        </ul>
+
+        <h2>4. Haftungsausschluss & Risikoübernahme</h2>
+        <p>
+          Radfahren, Laufen und verwandte Aktivitäten bergen Risiken (Unfälle, Witterung, Straßenverhältnisse, Verhalten Dritter).
+          Teilnahme erfolgt <strong>auf eigenes Risiko</strong>.
+        </p>
+        <p>
+          <strong>Soweit gesetzlich zulässig</strong>, haften der Verein, Vorstandsmitglieder, Freiwillige und Leiter nicht
+          für Verletzungen, Sachschäden oder Verluste aus der Teilnahme, außer bei <strong>Vorsatz oder grober Fahrlässigkeit</strong>.
+          Zwingende gesetzliche Rechte bleiben unberührt.
+        </p>
+        <p>
+          Sie sind für einen angemessenen <strong>Versicherungsschutz</strong> (z. B. Unfall/Krankenversicherung) selbst verantwortlich.
+        </p>
+
+        <h2>5. Minderjährige</h2>
+        <p>
+          Für unter 18‑Jährige ist die ausdrückliche Zustimmung eines Erziehungsberechtigten erforderlich
+          (Name, E‑Mail, Einwilligung, Unterschrift). Der/die Erziehungsberechtigte bestätigt die Eignung des Minderjährigen
+          und einen angemessenen Versicherungsschutz/Beaufsichtigung. Aus Sicherheitsgründen können Teilnahmebeschränkungen gelten.
+        </p>
+
+        <h2>6. Medien & Öffentlichkeitsarbeit</h2>
+        <p>
+          Bei Aktivitäten können <strong>Foto-/Videoaufnahmen</strong> für die Öffentlichkeitsarbeit (Website, Social Media, Print) erstellt werden.
+          Mit entsprechender Einwilligung im Antrag erklären Sie sich mit Erstellung und Veröffentlichung sowie der Namensnennung einverstanden.
+          Hieraus entstehen keine Ansprüche (z. B. Vergütung). <strong>Widerruf ist jederzeit möglich</strong> mit Wirkung für die Zukunft;
+          nach Widerruf entfernen wir Inhalte aus von uns kontrollierten Kanälen. Inhalte Dritter lassen sich ggf. nicht vollständig entfernen.
+        </p>
+
+        <h2>7. Datenschutz (DSGVO)</h2>
+        <h3>7.1 Verantwortlicher</h3>
+        <p>RCT International, z.s. (Tschechien). Kontakt: <a class="underline" href="mailto:info@rct-prague.de">info@rct-prague.de</a>.</p>
+
+        <h3>7.2 Verarbeitete Daten</h3>
+        <ul>
+          <li>Identifikation/Kontakt: Name, E‑Mail, Telefon, Adresse, Staatsangehörigkeit, Geburtsdatum.</li>
+          <li>Mitgliedsdaten: Antrag, Beschlüsse, Rollen, Zahlungen (falls relevant).</li>
+          <li>Aktivitätsbezogene Daten: freiwillige Aktivitätsinfos, Strava‑Link (falls angegeben).</li>
+          <li>Sorgeberechtigte (Minderjährige): Name, E‑Mail, Einwilligung, Unterschrift.</li>
+          <li>Technische Meta: Zeitstempel, IP (Sicherheit), User‑Agent.</li>
+        </ul>
+
+        <h3>7.3 Zwecke & Rechtsgrundlagen</h3>
+        <ul>
+          <li><strong>Mitgliedsverwaltung</strong> (Art. 6 Abs. 1 lit. b DSGVO – Vertrag; lit. c – rechtliche Pflichten; Buchhaltung).</li>
+          <li><strong>Sicherheit & Organisation</strong> (Art. 6 Abs. 1 lit. f – berechtigte Interessen, z. B. sichere Gruppenfahrten).</li>
+          <li><strong>PR‑Medien</strong> (Art. 6 Abs. 1 lit. a – Einwilligung; jederzeit widerrufbar).</li>
+          <li><strong>Minderjährige</strong> (Art. 6 Abs. 1 lit. a – Einwilligung der Sorgeberechtigten; zusätzliche nationale Vorgaben).</li>
+        </ul>
+
+        <h3>7.4 Empfänger & Auftragsverarbeiter</h3>
+        <p>
+          Zugriff nur für Vorstandsmitglieder und befugte Ehrenamtliche. Einsatz seriöser Dienstleister (z. B. Google/Firebase)
+          auf Basis von Auftragsverarbeitungsverträgen. Externe Plattformen (Strava, Atlans) arbeiten nach deren eigenen Bedingungen.
+        </p>
+
+        <h3>7.5 Drittländer</h3>
+        <p>
+          Bei Übermittlungen außerhalb des EWR verwenden wir DSGVO‑Mechanismen (Standardvertragsklauseln). EU/EWR‑Standorte werden bevorzugt.
+        </p>
+
+        <h3>7.6 Speicherdauer</h3>
+        <ul>
+          <li>Kerneinträge: für die Dauer der Mitgliedschaft und bis zu 10 Jahre danach (gesetzl./buchhalterische Pflichten).</li>
+          <li>Medien mit Einwilligung: bis zum Widerruf; danach Entfernung aus kontrollierten Kanälen.</li>
+          <li>Daten der Sorgeberechtigten: während der Minderjährigkeit und für eine angemessene Zeit danach.</li>
+        </ul>
+
+        <h3>7.7 Ihre Rechte</h3>
+        <p>
+          Rechte nach Art. 15–21 DSGVO (Auskunft, Berichtigung, Löschung, Einschränkung, Übertragbarkeit, Widerspruch).
+          Einwilligungen können jederzeit widerrufen werden. Beschwerden bei der zuständigen Aufsichtsbehörde Ihres Wohnsitzes
+          (z. B. in Deutschland Landesdatenschutzbehörde/BfDI) oder in Tschechien (UOOU).
+        </p>
+
+        <h2>8. Maßnahmen & Beendigung</h2>
+        <p>
+          Verstöße gegen diese Bedingungen oder die Satzung können zu Verwarnung, Suspendierung oder Beendigung führen.
+          Austritt per schriftlicher Mitteilung; einschlägige Regelungen gelten.
+        </p>
+
+        <h2>9. Änderungen</h2>
+        <p>
+          Anpassungen dieser Bedingungen sind möglich; die jeweils aktuelle Fassung wird hier veröffentlicht. Wesentliche Änderungen werden hervorgehoben.
+        </p>
+
+        <h2>10. Sprache & Auslegung</h2>
+        <p>
+          Text verfügbar in EN/CZ/DE. Bei Auslegungszweifeln kann die tschechische Fassung zusammen mit der Vereinssatzung herangezogen werden.
+        </p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader + sticky header offset -->
+  <script defer>
+    async function loadComponent(id, file) {
+      const host = document.getElementById(id);
+      if (!host) return;
+      const res = await fetch(file, { cache: 'no-cache' });
+      host.innerHTML = await res.text();
+    }
+    function applyHeaderOffset() {
+      const header = document.getElementById('main-header');
+      document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+    }
+    (async () => {
+      await Promise.all([
+        loadComponent('site-header','/components/header.html'),
+        loadComponent('site-footer','/components/footer.html')
+      ]);
+      const header = document.getElementById('main-header');
+      if (header) {
+        applyHeaderOffset();
+        const ro = new ResizeObserver(applyHeaderOffset);
+        ro.observe(header);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(applyHeaderOffset);
+        window.addEventListener('resize', applyHeaderOffset);
+        window.addEventListener('orientationchange', applyHeaderOffset);
+      }
+    })();
+  </script>
+
+  <!-- Language toggle + dates -->
+  <script>
+    const btnEN = document.getElementById('btn-en');
+    const btnCZ = document.getElementById('btn-cz');
+    const btnDE = document.getElementById('btn-de');
+    const secEN = document.getElementById('lang-en');
+    const secCZ = document.getElementById('lang-cz');
+    const secDE = document.getElementById('lang-de');
+
+    function showLang(which){
+      secEN.classList.toggle('hidden', which!=='en');
+      secCZ.classList.toggle('hidden', which!=='cz');
+      secDE.classList.toggle('hidden', which!=='de');
+      btnEN.setAttribute('aria-selected', which==='en');
+      btnCZ.setAttribute('aria-selected', which==='cz');
+      btnDE.setAttribute('aria-selected', which==='de');
+      document.documentElement.lang = (which==='cz'?'cs':which);
+    }
+    btnEN.addEventListener('click', ()=>showLang('en'));
+    btnCZ.addEventListener('click', ()=>showLang('cz'));
+    btnDE.addEventListener('click', ()=>showLang('de'));
+    showLang('en');
+
+    // date stamps
+    const today = new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+    document.getElementById('last-upd-en').textContent = today;
+    document.getElementById('last-upd-cz').textContent = today;
+    document.getElementById('last-upd-de').textContent = today;
+  </script>
+</body>
+</html>

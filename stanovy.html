@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Stanovy — RCT International, z.s.</title>
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode:'class',
+      theme:{ extend:{
+        colors:{
+          base:{50:'#F6F5F2',900:'#0D0D0F'},
+          neutral:{800:'#1f2328',700:'#2B2B2E',600:'#4b5563',500:'#64748b',300:'#cbd5e1'},
+          gold:'#D6B25E', accent:'#D36B1F',
+          earth:{100:'#F3EFE6',200:'#E8E0CF',300:'#DCCEB5',400:'#CDBA96',500:'#BFA77C',600:'#987E58'}
+        },
+        fontFamily:{sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif']},
+        boxShadow:{soft:'0 10px 30px rgba(0,0,0,.08)'}
+      }}
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .card{border:1px solid rgb(203 213 225 / .6)}
+    .dark .card{border-color:#374151}
+    .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.10) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.12) 0%, transparent 55%);
+    }
+    .dark .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.18) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.18) 0%, transparent 55%);
+    }
+    /* Responsive PDF container */
+    .pdf-wrap{position:relative; width:100%;}
+    .pdf-frame{width:100%; height:80vh; border:0; background:#fff}
+    @media (max-width: 640px){ .pdf-frame{height:70vh} }
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header -->
+  <div id="site-header"></div>
+
+  <!-- Hero -->
+  <section class="py-10">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-6 sm:p-8">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <div class="text-sm uppercase tracking-wide opacity-70">Stanovy spolku • Bylaws</div>
+            <h1 class="mt-1 font-serif text-3xl sm:text-4xl text-neutral-900 dark:text-base-50">
+              RCT International, z.s. — Stanovy
+            </h1>
+            <p class="mt-2 opacity-80 text-sm">
+              Originální znění právního dokumentu níže • The official legal text is embedded below.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions (download / print) -->
+      <div class="mt-4 rounded-xl card cta-grad bg-white dark:bg-neutral-950 shadow-soft px-5 py-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="leading-tight">
+            <div class="text-[11px] uppercase tracking-wide opacity-70">Oficiální dokument • Official document</div>
+            <div class="font-serif text-xl mt-0.5">Zobrazit, stáhnout nebo vytisknout • View, download or print</div>
+          </div>
+          <div class="flex gap-3">
+            <a id="btn-download"
+               href="/assets/docs/RCT-Stanovy.pdf"
+               target="_blank" rel="noopener"
+               class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 hover:opacity-90 anim text-sm">
+              Download PDF
+            </a>
+            <button id="btn-print"
+                    class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 anim text-sm">
+              Print
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PDF viewer -->
+  <section class="pb-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+        <div class="pdf-wrap">
+          <!--
+            Keep this path pointing to your canonical PDF.
+            Place the PDF at /assets/docs/RCT-Stanovy.pdf
+          -->
+          <object id="pdf-object"
+                  class="pdf-frame"
+                  data="/assets/docs/RCT-Stanovy.pdf#view=FitH"
+                  type="application/pdf">
+            <div class="p-6 sm:p-8 text-sm">
+              <p class="opacity-80">
+                Your browser can’t display PDFs inline. You can download the bylaws here:
+                <a class="underline" href="/assets/docs/RCT-Stanovy.pdf" target="_blank" rel="noopener">RCT‑Stanovy.pdf</a>.
+              </p>
+            </div>
+          </object>
+        </div>
+      </div>
+      <p class="mt-3 text-xs opacity-70">
+        Pozn.: Vložený PDF zajišťuje naprosto shodné znění se schváleným právním dokumentem. /
+        Note: The embedded PDF guarantees the text is 1:1 with the officially approved legal document.
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader + sticky header offset -->
+  <script defer>
+    async function loadComponent(id, file) {
+      const host = document.getElementById(id);
+      if (!host) return;
+      const res = await fetch(file, { cache: 'no-cache' });
+      host.innerHTML = await res.text();
+    }
+    function applyHeaderOffset() {
+      const header = document.getElementById('main-header');
+      document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+    }
+    (async () => {
+      await Promise.all([
+        loadComponent('site-header','/components/header.html'),
+        loadComponent('site-footer','/components/footer.html')
+      ]);
+      const header = document.getElementById('main-header');
+      if (header) {
+        applyHeaderOffset();
+        const ro = new ResizeObserver(applyHeaderOffset);
+        ro.observe(header);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(applyHeaderOffset);
+        window.addEventListener('resize', applyHeaderOffset);
+        window.addEventListener('orientationchange', applyHeaderOffset);
+      }
+    })();
+
+    // Print helper: open the PDF in a new tab and trigger print (best cross-browser)
+    document.addEventListener('click', (e)=>{
+      const btnPrint = e.target.closest('#btn-print');
+      if (btnPrint) {
+        e.preventDefault();
+        const url = document.getElementById('btn-download').getAttribute('href') || '/assets/docs/RCT-Stanovy.pdf';
+        const w = window.open(url, '_blank', 'noopener');
+        // Some browsers block auto-print; still opening the PDF is useful
+        if (w) {
+          // Try to trigger print once it loads (not guaranteed across PDF viewers)
+          const t = setInterval(()=>{
+            try {
+              w.focus();
+              w.print();
+              clearInterval(t);
+            } catch (_) {}
+          }, 1000);
+          setTimeout(()=>clearInterval(t), 7000);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

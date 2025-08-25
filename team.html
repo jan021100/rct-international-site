@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Team — RCT International</title>
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode:'class',
+      theme:{ extend:{
+        colors:{
+          base:{50:'#F6F5F2',900:'#0D0D0F'},
+          neutral:{800:'#1f2328',700:'#2B2B2E',600:'#4b5563',500:'#64748b',300:'#cbd5e1'},
+          gold:'#D6B25E', accent:'#D36B1F'
+        },
+        fontFamily:{sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif']},
+        boxShadow:{soft:'0 10px 30px rgba(0,0,0,.08)'}
+      }}
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .card{border:1px solid rgb(203 213 225 / .6)}
+    .dark .card{border-color:#374151}
+    .badge{border:1px solid rgb(203 213 225 / .6); border-radius:9999px; padding:.125rem .5rem; font-size:.75rem}
+    .dark .badge{border-color:#374151}
+    .skeleton{background:linear-gradient(90deg,rgba(0,0,0,0.06),rgba(0,0,0,0.12),rgba(0,0,0,0.06)); background-size:200% 100%; animation:sheen 1.2s infinite}
+    @keyframes sheen{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.10) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.12) 0%, transparent 55%);
+    }
+    .dark .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.18) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.18) 0%, transparent 55%);
+    }
+    .portrait{aspect-ratio:1/1; object-fit:cover}
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header -->
+  <div id="site-header"></div>
+
+  <!-- Hero -->
+  <section class="py-10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-6 sm:p-8">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <div class="text-sm uppercase tracking-wide opacity-70">People • Community • Performance</div>
+            <h1 class="mt-1 font-serif text-3xl sm:text-4xl text-neutral-900 dark:text-base-50">The Team</h1>
+            <p class="mt-2 opacity-80 max-w-2xl">
+              Athletes, captains, coaches, and community leaders across cycling, running, and triathlon.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="mt-4 rounded-xl card cta-grad bg-white dark:bg-neutral-950 shadow-soft p-4">
+        <div class="flex flex-col lg:flex-row lg:items-end gap-4">
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 flex-1">
+            <div>
+              <label class="block text-xs uppercase tracking-wide opacity-70 mb-1">Membership</label>
+              <div class="flex flex-wrap gap-2">
+                <label class="inline-flex items-center gap-2 text-sm">
+                  <input id="f-spolek" type="checkbox" class="h-4 w-4"><span>Spolek (CZ)</span>
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm">
+                  <input id="f-ev" type="checkbox" class="h-4 w-4"><span>e.V. (DE)</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs uppercase tracking-wide opacity-70 mb-1">Sports</label>
+              <div id="sports-chips" class="flex flex-wrap gap-2">
+                <!-- populated from TEAM -->
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs uppercase tracking-wide opacity-70 mb-1">Search</label>
+              <input id="f-search" placeholder="Name, role, qualification…" class="w-full px-3 py-2 rounded-lg border dark:bg-neutral-900">
+            </div>
+          </div>
+          <button id="btn-clear" class="px-3 py-2 rounded-lg border anim hover:bg-neutral-100 dark:hover:bg-neutral-800 text-sm">Clear filters</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Grid -->
+  <section class="pb-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <!-- skeletons (removed when data renders) -->
+        <div class="rounded-2xl card bg-white dark:bg-neutral-950 p-4">
+          <div class="h-48 w-full rounded-xl skeleton"></div>
+          <div class="mt-3 h-5 w-2/3 skeleton rounded"></div>
+          <div class="mt-2 h-3 w-1/2 skeleton rounded"></div>
+          <div class="mt-2 h-3 w-4/5 skeleton rounded"></div>
+        </div>
+        <div class="rounded-2xl card bg-white dark:bg-neutral-950 p-4">
+          <div class="h-48 w-full rounded-xl skeleton"></div>
+          <div class="mt-3 h-5 w-2/3 skeleton rounded"></div>
+          <div class="mt-2 h-3 w-1/2 skeleton rounded"></div>
+          <div class="mt-2 h-3 w-4/5 skeleton rounded"></div>
+        </div>
+        <div class="rounded-2xl card bg-white dark:bg-neutral-950 p-4">
+          <div class="h-48 w-full rounded-xl skeleton"></div>
+          <div class="mt-3 h-5 w-2/3 skeleton rounded"></div>
+          <div class="mt-2 h-3 w-1/2 skeleton rounded"></div>
+          <div class="mt-2 h-3 w-4/5 skeleton rounded"></div>
+        </div>
+        <div class="rounded-2xl card bg-white dark:bg-neutral-950 p-4">
+          <div class="h-48 w-full rounded-xl skeleton"></div>
+          <div class="mt-3 h-5 w-2/3 skeleton rounded"></div>
+          <div class="mt-2 h-3 w-1/2 skeleton rounded"></div>
+          <div class="mt-2 h-3 w-4/5 skeleton rounded"></div>
+        </div>
+      </div>
+
+      <!-- empty-state -->
+      <div id="empty" class="hidden mt-6 rounded-2xl card bg-white dark:bg-neutral-950 p-6 text-center">
+        <p class="opacity-80">No team members match your filters.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader + sticky header offset -->
+  <script defer>
+    async function loadComponent(id, file) {
+      const host = document.getElementById(id);
+      if (!host) return;
+      const res = await fetch(file, { cache: 'no-cache' });
+      host.innerHTML = await res.text();
+    }
+    function applyHeaderOffset() {
+      const header = document.getElementById('main-header');
+      document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+    }
+    (async () => {
+      await Promise.all([
+        loadComponent('site-header','/components/header.html'),
+        loadComponent('site-footer','/components/footer.html')
+      ]);
+      const header = document.getElementById('main-header');
+      if (header) {
+        applyHeaderOffset();
+        const ro = new ResizeObserver(applyHeaderOffset);
+        ro.observe(header);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(applyHeaderOffset);
+        window.addEventListener('resize', applyHeaderOffset);
+        window.addEventListener('orientationchange', applyHeaderOffset);
+      }
+    })();
+  </script>
+
+  <script>
+  // ========= MANUAL DATA =========
+  // Only set photoFile if the file actually exists in /assets/img/portraits/.
+  // If you leave photoFile undefined, the card will render without an image (no placeholders).
+  const TEAM = [
+    {
+      name: "Jan Hanke",
+      memberships: { spolek: true, ev: false },
+      sports: ["Cycling", "Gravel", "Running"],
+      roleTitle: "Founder • Captain",
+      qualifications: [],
+      bio: "Leads cross-chapter initiatives and endurance projects.",
+      photoFile: "jan-hanke.png"
+    },
+    {
+      name: "Cory Eaton",
+      memberships: { spolek: true, ev: false },
+      sports: ["Cycling", "Gravel", "Running"],
+      roleTitle: "Vize-President",
+      qualifications: [""],
+      bio: "Leading group rides and runs.",
+      photoFile: "coryeaton.png"
+    },
+    {
+      name: "Matyáš Richter",
+      memberships: { spolek: true, ev: false },
+      sports: ["Cycling"],
+      roleTitle: "Treasurer • Ride Leader",
+      qualifications: [],
+      bio: "",
+      photoFile: "matyasrichter.jpg"
+    },
+    {
+      name: "Fox Ruben Putz",
+      memberships: { spolek: false, ev: false },
+      sports: ["Cycling"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "Building the Hochtaunus chapter.",
+      photoFile: "foxrubenputz.jpg"
+    },
+    {
+      name: "Jan Ristovský",
+      memberships: { spolek: true, ev: false },
+      sports: ["Running"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "janristovsky.jpg"
+    },
+    {
+      name: "Miriam Kavec",
+      memberships: { spolek: true, ev: false },
+      sports: ["Running"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "miriam-kavec.jpg"
+    },
+    {
+      name: "Kateřina Špačková",
+      memberships: { spolek: true, ev: false },
+      sports: ["Running","Swimming"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "katerina-spackova.jpg"
+    },
+    {
+      name: "Eliška Klepková",
+      memberships: { spolek: true, ev: false },
+      sports: ["Running"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "eliska-klepkova.jpg"
+    },
+    {
+      name: "Sean Jozef Knudson",
+      memberships: { spolek: true, ev: false },
+      sports: ["Running"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "sean-jozef-knudson.jpg"
+    },
+    {
+      name: "Jan Griga",
+      memberships: { spolek: true, ev: false },
+      sports: ["Road","Gravel","MTB"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "jan-griga.jpg"
+    },
+    {
+      name: "Adam Krejčí",
+      memberships: { spolek: true, ev: false },
+      sports: ["Triathlon"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "adam-krejci.jpg"
+    },
+    {
+      name: "Ken Uchimura",
+      memberships: { spolek: true, ev: false },
+      sports: ["Cycling"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "ken-uchimura.jpg"
+    },
+    {
+      name: "Ondrej Pleva",
+      memberships: { spolek: true, ev: false },
+      sports: ["Running"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "ondrej-pleva.jpg"
+    },
+    {
+      name: "Michal Vašička",
+      memberships: { spolek: true, ev: false },
+      sports: ["Cycling","Gravel"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "michal-vasicka.jpg"
+    },
+    {
+  name: "Terezie Martinková",
+  memberships: { spolek: false, ev: false },
+  sports: ["Running"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "terezie-martinkova.jpg"
+},
+{
+  name: "Přemysl Maxa",
+  memberships: { spolek: false, ev: false },
+  sports: ["Cycling"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "premekmaxa.png"
+},
+{
+  name: "Sára Škardová",
+  memberships: { spolek: false, ev: false },
+  sports: ["Running"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "sara-skardova.jpg"
+},
+{
+  name: "Jan Timotej Škarda",
+  memberships: { spolek: false, ev: false },
+  sports: ["MTB"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "jan-timotej-skarda.jpg"
+},
+{
+  name: "Aqeel Shahul",
+  memberships: { spolek: false, ev: false },
+  sports: ["Running"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "aqeel-shahul.jpg"
+},
+{
+  name: "Erfan Abroun",
+  memberships: { spolek: false, ev: false },
+  sports: ["Road"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "erfan-abroun.jpg"
+},
+{
+  name: "Tim Lakemann",
+  memberships: { spolek: false, ev: false },
+  sports: ["Road","Gravel"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "tim-lakemann.jpg"
+},
+{
+  name: "Petr Osmík",
+  memberships: { spolek: false, ev: false },
+  sports: ["Running"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "petr-osmik.jpg"
+},
+{
+  name: "Tom Hanke",
+  memberships: { spolek: false, ev: false },
+  sports: ["Cycling"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "tom-hanke.jpg"
+},
+{
+  name: "Hartmut Johannes Thiele",
+  memberships: { spolek: false, ev: false },
+  sports: ["Cycling","Running"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "hartmut-johannes-thiele.jpg"
+},
+{
+  name: "Kuno Schulte Kellinghaus",
+  memberships: { spolek: false, ev: false },
+  sports: ["Cycling","Gravel"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "kuno-schulte-kellinghaus.jpg"
+},
+{
+  name: "Nicolas Danner",
+  memberships: { spolek: false, ev: false },
+  sports: ["Triathlon"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "nicolas-danner.jpg"
+},
+{
+  name: "Maximilian Woellersdorfer",
+  memberships: { spolek: false, ev: false },
+  sports: ["Running"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "maximilian-woellersdorfer.jpg"
+},
+{
+  name: "Dominik Greib",
+  memberships: { spolek: false, ev: false },
+  sports: ["Cycling"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "dominik-greib.jpg"
+},
+{
+  name: "Magnus Stücher",
+  memberships: { spolek: false, ev: false },
+  sports: ["Cycling","Running"],
+  roleTitle: "",
+  qualifications: [],
+  bio: "",
+  photoFile: "magnus-stucher.jpg"
+},
+    {
+      name: "Magdalena Rašková",
+      memberships: { spolek: true, ev: false },
+      sports: ["Cycling", "Gravel", "Running"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "magdalena-raskova.jpg"
+    },
+    {
+      name: "Adéla Martínková",
+      memberships: { spolek: true, ev: false },
+      sports: ["Running"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "adela-martinkova.jpg"
+    },
+    {
+      name: "Shrey Ghadigaonkar",
+      memberships: { spolek: true, ev: false },
+      sports: ["Running"],
+      roleTitle: "Running",
+      qualifications: [],
+      bio: "",
+      photoFile: "shrey-ghadigaonkar.jpg"
+    },
+    {
+      name: "Jaroslav Paroulek",
+      memberships: { spolek: true, ev: false },
+      sports: ["Running"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "jaroslav-paroulek.jpg"
+    },
+    {
+      name: "Monika Fischer",
+      memberships: { spolek: true, ev: false },
+      sports: ["Cycling","Running"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "monika-fischer.jpg"
+    },
+    {
+      name: "Alexandra Žigová",
+      memberships: { spolek: true, ev: false },
+      sports: ["Running"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "alexandra-zigova.jpg"
+    },
+    {
+      name: "Virginia Cox",
+      memberships: { spolek: true, ev: false },
+      sports: [],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "virginia-cox.jpg"
+    },
+    {
+      name: "Tina Ghanbarian",
+      memberships: { spolek: true, ev: false },
+      sports: ["Running","Swimming"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "tina-ghanbarian.jpg"
+    },
+    {
+      name: "Jonas Wendler",
+      memberships: { spolek: true, ev: false },
+      sports: ["Running","Swimming"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "jonas-wendler.jpg"
+    },
+    {
+      name: "Robin Opletal",
+      memberships: { spolek: true, ev: false },
+      sports: ["Triathlon"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "robin-opletal.jpg"
+    },
+    {
+      name: "Prem Wongsagoon",
+      memberships: { spolek: true, ev: false },
+      sports: ["Cycling","Running","Swimming"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "prem-wongsagoon.jpg"
+    },
+    {
+      name: "Achim Clausius Baar",
+      memberships: { spolek: true, ev: false },
+      sports: ["Cycling","Running","Swimming"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "achim-clausius-baar.jpg"
+    },
+    {
+      name: "Shuvangini Ranjitkar",
+      memberships: { spolek: true, ev: false },
+      sports: ["Running"],
+      roleTitle: "",
+      qualifications: [],
+      bio: "",
+      photoFile: "shuvangini-ranjitkar.jpg"
+    },
+  ];
+  // ========= END MANUAL DATA =========
+
+  (function(){
+    const $ = (id)=>document.getElementById(id);
+    const safe = (v)=> (v==null ? '' : String(v));
+
+    // Use a relative path so it works under subdirectories too
+    const imgBase = 'assets/img/portraits/';
+
+    // ---- utilities
+    const norm = (s)=>
+      safe(s)
+        .normalize('NFKD').replace(/[\u0300-\u036f]/g,'') // strip accents
+        .toLowerCase().trim();
+
+    // Nice label for UI (keeps MTB uppercase etc.)
+    const labelize = (s) => {
+      const n = norm(s);
+      if (n === 'mtb') return 'MTB';
+      if (n === 'tt')  return 'TT';
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    };
+
+    // ---- Org badges (match your Join buttons)
+    function orgBadges(m){
+      const out = [];
+      if (m?.memberships?.spolek) {
+        out.push(`
+          <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium
+                       text-neutral-900 dark:text-neutral-50 border border-neutral-300/60 dark:border-neutral-700
+                       bg-gradient-to-br from-[#D03C3F]/10 via-[#2E6DB4]/10 to-[#F5F5F3]/30">
+            Spolek (CZ)
+          </span>
+        `);
+      }
+      if (m?.memberships?.ev) {
+        out.push(`
+          <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium
+                       text-neutral-900 dark:text-neutral-50 border border-neutral-300/60 dark:border-neutral-700
+                       bg-gradient-to-br from-black/10 via-[#D03C3F]/10 to-[#FFD700]/20">
+            e.V. (DE)
+          </span>
+        `);
+      }
+      return out.join('');
+    }
+
+    // ---- Sport chip colors (subtle)
+    // tweak colors here anytime
+    const SPORT_CLASS = {
+      cycling:    'bg-blue-500/10 border-blue-500/30',
+      road:       'bg-slate-500/10 border-slate-500/30',
+      gravel:     'bg-amber-600/10 border-amber-600/30',
+      mtb:        'bg-emerald-600/10 border-emerald-600/30',
+      running:    'bg-rose-600/10 border-rose-600/30',
+      triathlon:  'bg-violet-600/10 border-violet-600/30',
+      swimming:   'bg-cyan-600/10 border-cyan-600/30',
+      strength:   'bg-orange-600/10 border-orange-600/30',
+      weightlifting: 'bg-orange-600/10 border-orange-600/30',
+    };
+
+    function sportChip(s){
+      const key = norm(s);
+      const cls = SPORT_CLASS[key] || 'bg-neutral-500/10 border-neutral-500/30';
+      return `<span class="px-2 py-0.5 rounded-full text-xs border ${cls}">${labelize(s)}</span>`;
+    }
+
+    // Build image block only if photoFile/photoUrl is provided.
+    function imageBlock(m){
+      const src = m.photoUrl || (m.photoFile ? (imgBase + m.photoFile) : null);
+      if (!src) return ''; // no photo -> no image block at all
+      return `
+        <div class="relative overflow-hidden rounded-xl border border-neutral-200/70 dark:border-neutral-800" data-imgwrap>
+          <img
+            src="${src}"
+            alt="${safe(m.name)||'Member portrait'}"
+            class="w-full portrait"
+            loading="lazy"
+            onerror="const w=this.closest('[data-imgwrap]'); if(w) w.remove();"
+          >
+        </div>
+      `;
+    }
+
+    const cardHTML = (m) => {
+      const quals = (m.qualifications||[]).filter(Boolean).join(' • ');
+      const sports = (m.sports||[]).map(sportChip).join(' ');
+      return `
+        <article class="rounded-2xl card bg-white dark:bg-neutral-950 p-4 hover:shadow-soft anim">
+          ${imageBlock(m)}
+          <h3 class="mt-3 font-semibold text-neutral-900 dark:text-base-50">${safe(m.name)||'—'}</h3>
+          <div class="text-sm opacity-80">${safe(m.roleTitle)}</div>
+          <div class="mt-2 flex flex-wrap gap-2">${orgBadges(m)}</div>
+          ${quals ? `<div class="mt-2 text-sm opacity-80">${quals}</div>` : ''}
+          ${m.bio ? `<p class="mt-2 text-sm opacity-90">${safe(m.bio)}</p>` : ''}
+          ${sports ? `<div class="mt-3 flex flex-wrap gap-2">${sports}</div>` : ''}
+        </article>
+      `;
+    };
+
+    // ---------- filters ----------
+    // Build chips from the data itself (normalized)
+    function buildSportChips(list){
+      const wrap = $('sports-chips'); if (!wrap) return;
+      const set = new Set();
+      list.forEach(m => (m.sports||[]).forEach(s => set.add(norm(s))));
+      const preferred = ['cycling','running','triathlon','road','gravel','mtb','swimming'];
+      const rest = [...set].filter(s=>!preferred.includes(s)).sort();
+      const ordered = [...preferred.filter(s=>set.has(s)), ...rest];
+
+      wrap.innerHTML = ordered.map(s => `
+        <label class="inline-flex items-center gap-2 text-sm">
+          <input type="checkbox" class="h-4 w-4" data-sport="${s}">
+          <span>${labelize(s)}</span>
+        </label>
+      `).join('');
+
+      wrap.querySelectorAll('[data-sport]').forEach(i => i.addEventListener('change', render));
+    }
+
+    function currentFilters(){
+      const spolek = $('f-spolek')?.checked ?? false;
+      const ev     = $('f-ev')?.checked ?? false;
+      const sports = [...document.querySelectorAll('[data-sport]:checked')].map(i=>i.dataset.sport); // already normalized
+      const q = norm($('f-search')?.value || '');
+      return { spolek, ev, sports, q };
+    }
+
+    function matches(m, F){
+      if (F.spolek && !m?.memberships?.spolek) return false;
+      if (F.ev && !m?.memberships?.ev) return false;
+
+      // normalize member sports once
+      const mSports = new Set((m.sports||[]).map(norm));
+
+      // "AND" semantics: member must have *all* selected sports
+      if (F.sports.length && !F.sports.every(s => mSports.has(s))) return false;
+
+      // search across name/role/quals/sports (all normalized)
+      if (F.q){
+        const hay = [
+          m.name, m.roleTitle,
+          ...(m.qualifications||[]),
+          ...(m.sports||[])
+        ].map(norm).join(' ');
+        if (!hay.includes(F.q)) return false;
+      }
+      return true;
+    }
+
+    let ALL = []; // keep manual order
+
+    function render(){
+      const grid = $('grid'); const empty = $('empty');
+      if (!grid || !empty) return;
+      const F = currentFilters();
+      const out = ALL.filter(m => matches(m, F));
+      if (!out.length){
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      grid.innerHTML = out.map(cardHTML).join('');
+    }
+
+    function bindUI(){
+      $('f-spolek')?.addEventListener('change', render);
+      $('f-ev')?.addEventListener('change', render);
+      $('f-search')?.addEventListener('input', render);
+      $('btn-clear')?.addEventListener('click', ()=>{
+        const spk=$('f-spolek'), ev=$('f-ev'), q=$('f-search');
+        if (spk) spk.checked = false;
+        if (ev)  ev.checked = false;
+        document.querySelectorAll('[data-sport]').forEach(i => i.checked = false);
+        if (q) q.value = '';
+        render();
+      });
+    }
+
+    function init(){
+      ALL = [...TEAM]; // manual order
+      buildSportChips(ALL);
+      bindUI();
+      render();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+</script>
+
+  <!-- Global site script (ES module; imports firebase.js internally if needed elsewhere) -->
+  <script type="module" src="assets/js/site.js"></script>
+</body>
+</html>

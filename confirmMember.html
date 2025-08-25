@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Confirm Membership — RCT Admin</title>
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode:'class',
+      theme:{ extend:{
+        colors:{
+          base:{50:'#F6F5F2',900:'#0D0D0F'},
+          neutral:{800:'#1f2328',700:'#2B2B2E',600:'#4b5563',500:'#64748b',300:'#cbd5e1'},
+          gold:'#D6B25E', accent:'#D36B1F'
+        },
+        fontFamily:{sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif']},
+        boxShadow:{soft:'0 10px 30px rgba(0,0,0,.08)'}
+      }}
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .card{border:1px solid rgb(203 213 225 / .6)}
+    .dark .card{border-color:#374151}
+    .badge{border:1px solid rgb(203 213 225 / .6); border-radius:9999px; padding:.125rem .5rem; font-size:.75rem}
+    .skeleton{background:linear-gradient(90deg,rgba(0,0,0,0.06),rgba(0,0,0,0.12),rgba(0,0,0,0.06)); background-size:200% 100%; animation:sheen 1.2s infinite}
+    @keyframes sheen{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.10) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.12) 0%, transparent 55%);
+    }
+    .dark .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.18) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.18) 0%, transparent 55%);
+    }
+    .pill{border:1px solid rgb(203 213 225 / .6); border-radius:9999px; padding:.25rem .6rem; font-size:.75rem}
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header -->
+  <div id="site-header"></div>
+
+  <main class="py-10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Title / gate -->
+      <div class="rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-6 sm:p-8 mb-6">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <div class="text-sm uppercase tracking-wide opacity-70">Admin • Membership approvals</div>
+            <h1 class="mt-1 font-serif text-3xl sm:text-4xl text-neutral-900 dark:text-base-50">Confirm new members</h1>
+            <p class="mt-2 opacity-80 text-sm">Review applications for the Czech <span class="whitespace-nowrap">spolek</span> and the German e.V., assign the next number, and activate membership.</p>
+          </div>
+          <div id="admin-badge" class="pill bg-gold/10 hidden">Admin</div>
+        </div>
+        <div id="not-admin" class="hidden mt-4 p-4 rounded-xl bg-base-50 dark:bg-neutral-900">
+          <p>You need admin rights to use this page.</p>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-4 sm:p-5 mb-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button id="flt-all"     class="pill anim bg-neutral-900 text-white">All</button>
+            <button id="flt-spolek"  class="pill anim">Spolek (CZ)</button>
+            <button id="flt-ev"      class="pill anim">e.V. (DE)</button>
+          </div>
+          <div class="text-sm opacity-70">
+            Pending: <span id="count-pending">—</span> • Recently approved: <span id="count-approved">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Layout: list + detail -->
+      <div class="grid lg:grid-cols-5 gap-4">
+        <!-- Left: list of pending -->
+        <div class="lg:col-span-2 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-semibold">Pending applications</h2>
+            <button id="btn-refresh" class="text-sm underline anim">Refresh</button>
+          </div>
+          <div id="pending-list" class="divide-y divide-neutral-200 dark:divide-neutral-800">
+            <div class="py-3 text-sm opacity-70">Loading…</div>
+          </div>
+        </div>
+
+        <!-- Right: detail / actions -->
+        <div class="lg:col-span-3 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-4">
+          <h2 class="font-semibold">Application detail</h2>
+          <div id="detail-empty" class="mt-3 text-sm opacity-70">Select an application on the left.</div>
+
+          <div id="detail" class="hidden">
+            <div class="mt-3 grid sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <div class="text-xs uppercase tracking-wide opacity-70">Region</div>
+                <div id="d-region" class="mt-1">—</div>
+              </div>
+              <div>
+                <div class="text-xs uppercase tracking-wide opacity-70">Submitted</div>
+                <div id="d-submitted" class="mt-1">—</div>
+              </div>
+
+              <div class="sm:col-span-2 mt-2 font-medium">Applicant</div>
+              <div><div class="text-xs uppercase tracking-wide opacity-70">Name</div><div id="d-name" class="mt-1">—</div></div>
+              <div><div class="text-xs uppercase tracking-wide opacity-70">Email</div><div id="d-email" class="mt-1 break-words">—</div></div>
+              <div><div class="text-xs uppercase tracking-wide opacity-70">Birthdate</div><div id="d-birth" class="mt-1">—</div></div>
+              <div><div class="text-xs uppercase tracking-wide opacity-70">Phone</div><div id="d-phone" class="mt-1">—</div></div>
+              <div class="sm:col-span-2"><div class="text-xs uppercase tracking-wide opacity-70">Address</div><div id="d-address" class="mt-1 break-words">—</div></div>
+              <div><div class="text-xs uppercase tracking-wide opacity-70">Nationality</div><div id="d-nat" class="mt-1">—</div></div>
+              <div class="sm:col-span-2"><div class="text-xs uppercase tracking-wide opacity-70">Strava</div><div id="d-strava" class="mt-1 break-words">—</div></div>
+
+              <div id="guardian-block" class="sm:col-span-2 hidden">
+                <div class="mt-2 font-medium">Guardian</div>
+                <div class="grid sm:grid-cols-2 gap-4 mt-1">
+                  <div><div class="text-xs uppercase tracking-wide opacity-70">Name</div><div id="d-gname" class="mt-1">—</div></div>
+                  <div><div class="text-xs uppercase tracking-wide opacity-70">Email</div><div id="d-gemail" class="mt-1 break-words">—</div></div>
+                </div>
+              </div>
+
+              <div class="sm:col-span-2 mt-2 font-medium">Consents</div>
+              <div><div class="text-xs uppercase tracking-wide opacity-70">Statutes / Terms</div><div id="d-consent" class="mt-1">—</div></div>
+              <div><div class="text-xs uppercase tracking-wide opacity-70">Signature</div><div id="d-sign" class="mt-1">—</div></div>
+            </div>
+
+            <!-- Decision area -->
+            <div class="mt-6 p-4 rounded-xl bg-base-50 dark:bg-neutral-900">
+              <div class="flex flex-wrap items-end gap-3">
+                <div>
+                  <div class="text-xs uppercase tracking-wide opacity-70">Auto‑assigned number</div>
+                  <div class="flex items-center gap-2 mt-1">
+                    <input id="inp-number" class="px-3 py-2 rounded-lg border dark:bg-neutral-900 w-40" placeholder="e.g. CZ28">
+                    <button id="btn-suggest" class="px-3 py-2 rounded-lg border anim hover:bg-neutral-100 dark:hover:bg-neutral-800 text-sm">Suggest</button>
+                  </div>
+                  <p class="text-xs opacity-70 mt-1">Starts at 28 (27 legacy). You can override before confirming.</p>
+                </div>
+                <div class="flex-1"></div>
+                <div class="flex items-center gap-2">
+                  <textarea id="decline-reason" class="hidden px-3 py-2 rounded-lg border dark:bg-neutral-900 w-48" placeholder="Reason (optional)"></textarea>
+                  <button id="btn-decline" class="px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 anim text-sm">Decline</button>
+                  <button id="btn-approve" class="px-4 py-2 rounded-lg bg-neutral-900 text-white hover:opacity-90 anim text-sm">Confirm & Activate</button>
+                </div>
+              </div>
+              <div id="action-msg" class="text-sm mt-2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recently approved -->
+      <div class="mt-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-4">
+        <div class="flex items-center justify-between">
+          <h2 class="font-semibold">Recently approved</h2>
+          <div class="text-sm opacity-70">latest 10</div>
+        </div>
+        <div id="recent-approved" class="mt-2 divide-y divide-neutral-200 dark:divide-neutral-800">
+          <div class="py-3 text-sm opacity-70">Loading…</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Components + sticky header offset -->
+  <script defer>
+    async function loadComponent(id, file) {
+      const host = document.getElementById(id);
+      if (!host) return;
+      const res = await fetch(file, { cache: 'no-cache' });
+      host.innerHTML = await res.text();
+    }
+    function applyHeaderOffset() {
+      const header = document.getElementById('main-header');
+      document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+    }
+    (async () => {
+      await Promise.all([
+        loadComponent('site-header', '/components/header.html'),
+        loadComponent('site-footer', '/components/footer.html')
+      ]);
+      const header = document.getElementById('main-header');
+      if (header) {
+        applyHeaderOffset();
+        const ro = new ResizeObserver(applyHeaderOffset);
+        ro.observe(header);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(applyHeaderOffset);
+        window.addEventListener('resize', applyHeaderOffset);
+        window.addEventListener('orientationchange', applyHeaderOffset);
+      }
+    })();
+  </script>
+
+  <!-- App logic -->
+  <script type="module">
+    import { auth, db, getUserProfile, onUserChanged } from '/assets/js/firebase.js';
+    import {
+      serverTimestamp, collection, collectionGroup, addDoc, getDoc, getDocs, setDoc, updateDoc, doc,
+      query, where, orderBy, limit, runTransaction, Timestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // ---------- Config ----------
+    const ADMIN_EMAILS = ["janhanke@rct-prague.de","janbro0211@icloud.com"]; // fallback
+    const APP_COLLECTIONS = [
+      { id:"applications",     region:"CZ", title:"Spolek (CZ)" },
+      { id:"applications_ev",  region:"DE", title:"e.V. (DE)"   }
+    ];
+    const LEGACY_BASE = { CZ:27, DE:0 }; // first new CZ = 28; adjust DE base if needed
+    const pad = (n)=> String(n).padStart(2,'0');
+
+    // ---------- State ----------
+    const $ = (id)=>document.getElementById(id);
+    let CURRENT = null;            // { collId, docId, data, region }
+    let FILTER = 'ALL';            // 'ALL' | 'CZ' | 'DE'
+    let CURRENT_ADMIN = null;      // {uid, email, name}
+
+    const fmtTS = (ts)=>{
+      if (!ts) return '—';
+      try {
+        const d = ts?.toDate ? ts.toDate() : new Date(ts);
+        return d.toLocaleString();
+      } catch { return '—'; }
+    };
+
+    // ---------- Admin gate ----------
+    function isAdminProfile(p){
+      if (p?.roles?.admin) return true;
+      const email = (p?.email || '').toLowerCase();
+      return ADMIN_EMAILS.map(x=>x.toLowerCase()).includes(email);
+    }
+
+    onUserChanged(async (user)=>{
+      if (!user) { location.replace('login.html?next=confirmMember.html'); return; }
+      const p = await getUserProfile(user.uid);
+      if (!p || !isAdminProfile(p)) {
+        $('not-admin').classList.remove('hidden');
+        return;
+      }
+      CURRENT_ADMIN = { uid:user.uid, email:p.email || user.email || '', name:p.name || '' };
+      $('admin-badge').classList.remove('hidden');
+      refreshAll();
+    });
+
+    // ---------- Fetchers ----------
+    async function fetchPending(){
+      const items = [];
+      for (const c of APP_COLLECTIONS) {
+        try {
+          const qy = query(collection(db, c.id), where('status', '==', 'pending'), orderBy('createdAt','desc'));
+          const snap = await getDocs(qy);
+          snap.forEach(d=>{
+            const x = d.data() || {};
+            items.push({ collId:c.id, region:c.region, id:d.id, data:x });
+          });
+        } catch (e) {
+          // If index missing for orderBy(createdAt), try without order:
+          try {
+            const qy = query(collection(db, c.id), where('status','==','pending'));
+            const snap = await getDocs(qy);
+            snap.forEach(d=> items.push({ collId:c.id, region:c.region, id:d.id, data:d.data()||{} }));
+          } catch {}
+        }
+      }
+      return items;
+    }
+
+    // UPDATED: tolerant recent-approved loader (works without composite index and if reviewedAt missing)
+    async function fetchRecentApproved(){
+      const rows = [];
+      for (const c of APP_COLLECTIONS) {
+        let snap = null;
+        try {
+          const qy = query(
+            collection(db, c.id),
+            where('status','==','approved'),
+            orderBy('reviewedAt','desc'),
+            limit(10)
+          );
+          snap = await getDocs(qy);
+        } catch {
+          try {
+            const qy = query(collection(db, c.id), where('status','==','approved'), limit(20));
+            snap = await getDocs(qy);
+          } catch {}
+        }
+        if (snap) {
+          snap.forEach(d => rows.push({ collId:c.id, region:c.region, id:d.id, data:d.data()||{} }));
+        }
+      }
+      const ts = x => (x?.toMillis?.() ? x.toMillis() : (x instanceof Date ? x.getTime() : 0));
+      rows.sort((a,b)=> ts(b.data?.reviewedAt || b.data?.createdAt) - ts(a.data?.reviewedAt || a.data?.createdAt));
+      return rows.slice(0,10);
+    }
+
+    // Compute next member number with a transaction on counters/memberNumbers
+    async function assignNextNumber(region){
+      const countersRef = doc(db,'counters','memberNumbers');
+      const regionKey = region === 'DE' ? 'deNext' : 'czNext';
+
+      const assigned = await runTransaction(db, async (tx)=>{
+        const snap = await tx.get(countersRef);
+        let data = snap.exists() ? snap.data() : {};
+        let next = data[regionKey];
+
+        // If not initialized, compute from existing users + legacy and base
+        if (!next) {
+          let maxSeen = LEGACY_BASE[region] || 0;
+
+          // users/**
+          try {
+            const usersSnap = await getDocs(collection(db,'users'));
+            usersSnap.forEach(u=>{
+              const mm = (u.data()?.memberNumbers)||{};
+              const val = region==='DE' ? mm.de : mm.cz;
+              if (typeof val === 'string') {
+                const num = parseInt(val.replace(/[A-Z]+/i,'').trim(),10);
+                if (!Number.isNaN(num)) maxSeen = Math.max(maxSeen, num);
+              }
+            });
+          } catch {}
+
+          // legacyMembers/**
+          try {
+            const legSnap = await getDocs(collection(db,'legacyMembers'));
+            legSnap.forEach(u=>{
+              const mm = (u.data()?.memberNumbers)||{};
+              const val = region==='DE' ? mm.de : mm.cz;
+              if (typeof val === 'string') {
+                const num = parseInt(val.replace(/[A-Z]+/i,'').trim(),10);
+                if (!Number.isNaN(num)) maxSeen = Math.max(maxSeen, num);
+              }
+            });
+          } catch {}
+
+          next = maxSeen + 1; // initialize
+        }
+
+        const assign = next;
+        // bump next
+        const newData = Object.assign({}, data, { [regionKey]: assign + 1 });
+        if (snap.exists()) tx.update(countersRef, newData);
+        else tx.set(countersRef, newData);
+
+        return assign;
+      });
+
+      const prefix = region === 'DE' ? 'DE' : 'CZ';
+      return `${prefix}${pad(assigned)}`;
+    }
+
+    // ---------- Rendering ----------
+    function renderPending(list){
+      const box = $('pending-list');
+      box.innerHTML = '';
+      const filtered = list.filter(it => FILTER==='ALL' || it.region===FILTER);
+      $('count-pending').textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        box.innerHTML = `<div class="py-3 text-sm opacity-70">No pending applications.</div>`;
+        return;
+      }
+      for (const it of filtered) {
+        const a = it.data?.applicant || {};
+        const el = document.createElement('button');
+        el.className = 'w-full text-left py-3 anim hover:bg-neutral-50 dark:hover:bg-neutral-900 rounded-lg px-2';
+        el.innerHTML = `
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="font-medium">${a.name || '—'}</div>
+              <div class="text-xs opacity-70">${it.region} • ${(a.email||'—')}</div>
+            </div>
+            <span class="badge">${it.data?.createdAt ? fmtTS(it.data.createdAt).split(',')[0] : '—'}</span>
+          </div>
+        `;
+        el.addEventListener('click', ()=> showDetail(it));
+        box.appendChild(el);
+      }
+    }
+
+    function showDetail(it){
+      CURRENT = it;
+      $('detail-empty').classList.add('hidden');
+      $('detail').classList.remove('hidden');
+      $('action-msg').textContent = '';
+      $('decline-reason').classList.add('hidden');
+
+      const x = it.data || {};
+      const a = x.applicant || {};
+      $('d-region').textContent = (it.region === 'DE' ? 'e.V. (DE)' : 'Spolek (CZ)');
+      $('d-submitted').textContent = x.createdAt ? fmtTS(x.createdAt) : '—';
+      $('d-name').textContent = a.name || '—';
+      $('d-email').textContent = a.email || '—';
+      $('d-birth').textContent = a.birthdate ? fmtTS(a.birthdate) : '—';
+      $('d-phone').textContent = a.phone || '—';
+      $('d-address').textContent = a.address || '—';
+      $('d-nat').textContent = a.nationality || '—';
+      $('d-strava').textContent = x.applicant?.stravaUrl || '—';
+
+      const minor = !!a.isMinor;
+      $('guardian-block').classList.toggle('hidden', !minor);
+      if (minor) {
+        $('d-gname').textContent  = x.guardian?.name || '—';
+        $('d-gemail').textContent = x.guardian?.email || '—';
+      }
+
+      const cons = x.consents || {};
+      const ok = (cons.statutesAccepted || cons.termsAccepted || cons.privacyAccepted) ? 'Yes' : '—';
+      $('d-consent').textContent = ok;
+      $('d-sign').textContent = x.sign?.applicantSignature || '—';
+
+      $('inp-number').value = ''; // clear until "Suggest" or approval assigns
+    }
+
+    function renderRecent(list){
+      $('count-approved').textContent = list.length;
+      const box = $('recent-approved');
+      box.innerHTML = '';
+      if (list.length === 0) {
+        box.innerHTML = `<div class="py-3 text-sm opacity-70">No recent approvals yet.</div>`;
+        return;
+      }
+      list.forEach(it=>{
+        const a = it.data?.applicant || {};
+        const num = it.data?.assignedNumber || '—';
+        const row = document.createElement('div');
+        row.className = 'py-2 flex items-center justify-between gap-3 text-sm';
+        row.innerHTML = `
+          <div>
+            <div class="font-medium">${a.name || '—'}</div>
+            <div class="opacity-70">${it.region} • ${a.email || '—'}</div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="badge">${num}</span>
+            <span class="opacity-70">${it.data?.reviewedAt ? fmtTS(it.data.reviewedAt) : '—'}</span>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+    }
+
+    // ---------- Actions ----------
+    async function suggestNumber(){
+      if (!CURRENT) return;
+      const num = await assignNextNumber(CURRENT.region);
+      $('inp-number').value = num;
+    }
+
+    // UPDATED: write BOTH legacy flat flags and nested roles + rctMember
+    async function approveCurrent(){
+      if (!CURRENT) return;
+      const { collId, id, data, region } = CURRENT;
+      const a = data.applicant || {};
+      const uid = a.userId;
+      if (!uid) { $('action-msg').textContent = 'Missing userId on application.'; $('action-msg').className='text-sm text-red-600'; return; }
+
+      // get or suggest number
+      let number = $('inp-number').value.trim();
+      if (!number) { number = await assignNextNumber(region); }
+
+      const userRef = doc(db,'users', uid);
+      const appRef  = doc(db, collId, id);
+
+      try {
+        const isCZ = region === 'CZ';
+
+        // 1) Upsert user with data + roles + memberNumbers
+        const updates = {
+          name: a.name || null,
+          email: a.email || null,
+          address: a.address || null,
+          nationality: a.nationality || null,
+          phone: a.phone || null,
+          stravaUrl: a.stravaUrl || null,
+          birthdate: a.birthdate || null,
+
+          // Ensure BOTH schemas are set (flat + nested)
+          ...(isCZ
+            ? { spolekMember: true, 'roles.spolekMember': true }
+            : { evMember: true,     'roles.evMember': true }),
+
+          // Global flag for convenience
+          rctMember: true,
+
+          // member number
+          ...(isCZ ? { 'memberNumbers.cz': number } : { 'memberNumbers.de': number }),
+
+          // audit
+          'memberStatus.lastUpdatedAt': serverTimestamp()
+        };
+
+        await setDoc(userRef, updates, { merge:true });
+
+        // 2) Mark application as approved + audit
+        const audit = {
+          status: 'approved',
+          assignedNumber: number,
+          reviewedAt: serverTimestamp(),
+          reviewedBy: {
+            uid: CURRENT_ADMIN?.uid || null,
+            email: CURRENT_ADMIN?.email || null,
+            name: CURRENT_ADMIN?.name || null
+          }
+        };
+        await updateDoc(appRef, audit);
+
+        $('action-msg').textContent = `Approved. Assigned number ${number}.`;
+        $('action-msg').className = 'text-sm text-green-700';
+
+        // Refresh lists
+        await refreshAll(true);
+      } catch (e) {
+        console.error(e);
+        $('action-msg').textContent = e?.message || 'Approval failed.';
+        $('action-msg').className = 'text-sm text-red-600';
+      }
+    }
+
+    async function declineCurrent(){
+      if (!CURRENT) return;
+      const { collId, id } = CURRENT;
+      const reason = $('decline-reason').value.trim() || null;
+
+      try {
+        await updateDoc(doc(db, collId, id), {
+          status: 'declined',
+          declineReason: reason,
+          reviewedAt: serverTimestamp(),
+          reviewedBy: {
+            uid: CURRENT_ADMIN?.uid || null,
+            email: CURRENT_ADMIN?.email || null,
+            name: CURRENT_ADMIN?.name || null
+          }
+        });
+        $('action-msg').textContent = 'Application declined.';
+        $('action-msg').className = 'text-sm text-green-700';
+        await refreshAll(true);
+      } catch (e) {
+        console.error(e);
+        $('action-msg').textContent = e?.message || 'Decline failed.';
+        $('action-msg').className = 'text-sm text-red-600';
+      }
+    }
+
+    // ---------- Wire UI ----------
+    $('btn-refresh').addEventListener('click', ()=>refreshAll());
+    $('flt-all').addEventListener('click', ()=>{ setFilter('ALL'); });
+    $('flt-spolek').addEventListener('click', ()=>{ setFilter('CZ'); });
+    $('flt-ev').addEventListener('click', ()=>{ setFilter('DE'); });
+    $('btn-suggest').addEventListener('click', (e)=>{ e.preventDefault(); suggestNumber(); });
+    $('btn-approve').addEventListener('click', (e)=>{ e.preventDefault(); approveCurrent(); });
+    $('btn-decline').addEventListener('click', (e)=>{
+      e.preventDefault();
+      $('decline-reason').classList.toggle('hidden');
+      if (!$('decline-reason').classList.contains('hidden')) $('decline-reason').focus();
+      else declineCurrent();
+    });
+
+    function setFilter(f){
+      FILTER = f;
+      document.querySelectorAll('.pill.anim').forEach(b=>b.classList.remove('bg-neutral-900','text-white'));
+      ({ALL:'flt-all', CZ:'flt-spolek', DE:'flt-ev'})[f] && $( {ALL:'flt-all', CZ:'flt-spolek', DE:'flt-ev'}[f] ).classList.add('bg-neutral-900','text-white');
+      refreshPendingOnly();
+    }
+
+    async function refreshPendingOnly(){
+      const list = await fetchPending();
+      renderPending(list);
+    }
+
+    async function refreshAll(keepSelection=false){
+      const pend = await fetchPending();
+      renderPending(pend);
+
+      const ok = await fetchRecentApproved();
+      renderRecent(ok);
+
+      if (!keepSelection) {
+        $('detail').classList.add('hidden');
+        $('detail-empty').classList.remove('hidden');
+        CURRENT = null;
+        $('inp-number').value = '';
+        $('action-msg').textContent = '';
+      }
+    }
+  </script>
+</body>
+</html>

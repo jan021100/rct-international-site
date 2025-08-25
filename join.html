@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Join RCT — Cycling • Running • Triathlon</title>
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors:{ base:{50:'#F6F5F2',900:'#0D0D0F'},
+                   neutral:{800:'#1f2328',700:'#2B2B2E',600:'#4b5563',500:'#64748b',300:'#cbd5e1'},
+                   gold:'#D6B25E', accent:'#D36B1F' },
+          fontFamily:{ sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif'] },
+          boxShadow:{ soft:'0 10px 30px rgba(0,0,0,.08)' }
+        }
+      }
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    /* CTA gradient we use elsewhere */
+    .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.10) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.12) 0%, transparent 55%);
+    }
+    .dark .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.18) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.18) 0%, transparent 55%);
+    }
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header (injected) -->
+  <div id="site-header"></div>
+
+  <!-- Intro -->
+  <section class="py-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-serif text-4xl text-neutral-900 dark:text-base-50">Join RCT</h1>
+      <p class="mt-3 opacity-90 max-w-3xl mx-auto">
+        One community across locations. Choose your way in and start riding or running with us.
+        Most coordination happens in our WhatsApp groups and on Strava. The official membership is optional to try things out,
+        but recommended if you plan to stick around.
+      </p>
+    </div>
+  </section>
+  
+  <!-- NEW: Membership CTA (uniform with our CTAs) -->
+<section class="py-4">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="rounded-2xl border border-neutral-300/60 dark:border-neutral-700 shadow-soft bg-white dark:bg-neutral-950 cta-grad px-6 py-5">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="leading-tight">
+          <div class="text-[11px] uppercase tracking-wide opacity-70">Support • Belong • Participate</div>
+          <div class="font-serif text-xl mt-0.5">Become an official member</div>
+          <p class="text-sm opacity-80 mt-1 max-w-2xl">
+            <strong>Spolek (CZ)</strong> is our Czech association; <strong>e.V. (DE)</strong> is our German association.
+            You don’t have to live in either country, and you may join both. Active participation is easier if you’re nearby —
+            but supporting from afar is welcome too.
+          </p>
+        </div>
+        <div class="flex gap-3">
+          <!-- Spolek button: subtle CZ gradient -->
+          <button id="btn-join-spolek"
+            class="inline-flex items-center justify-center px-4 py-2 rounded-lg text-neutral-900 dark:text-neutral-50 font-medium
+                   bg-gradient-to-br from-[#D03C3F]/10 via-[#2E6DB4]/10 to-[#F5F5F3]/30
+                   hover:opacity-90 anim text-sm shadow-soft border border-neutral-300/60 dark:border-neutral-700">
+            Join Spolek (CZ)
+          </button>
+
+          <!-- e.V. button: subtle DE gradient -->
+          <button id="btn-join-ev"
+            class="inline-flex items-center justify-center px-4 py-2 rounded-lg text-neutral-900 dark:text-neutral-50 font-medium
+                   bg-gradient-to-br from-black/10 via-[#D03C3F]/10 to-[#FFD700]/20
+                   hover:opacity-90 anim text-sm shadow-soft border border-neutral-300/60 dark:border-neutral-700">
+            Join e.V. (DE)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <!-- Strava (universal) -->
+  <section class="py-6">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl border border-neutral-300/60 dark:border-neutral-700 p-6 shadow-soft bg-white dark:bg-neutral-950">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+          <div class="flex items-center gap-3">
+            <img src="/assets/img/icons/strava-custom.svg" alt="Strava icon" class="w-10 h-10 opacity-80 rounded">
+            <div>
+              <h2 class="font-semibold text-lg">Strava Club</h2>
+              <p class="text-sm opacity-80">Follow weekly rides and join club events.</p>
+            </div>
+          </div>
+          <a href="https://www.strava.com/clubs/1032760" target="_blank" rel="noopener"
+             class="px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 anim">Open Strava</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Czechia (Prague) -->
+  <section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-4">
+        <h3 class="font-serif text-3xl font-bold text-neutral-900 dark:text-base-50">Czechia</h3>
+        <p class="font-serif text-xl text-neutral-700 dark:text-neutral-300 mt-1">Prague</p>
+      </div>
+      <p class="mt-2 opacity-90 max-w-3xl">
+        Prague is our most active chapter with cycling, running, and triathlon. Join the WhatsApp groups to get ride and run info,
+        and fill out the membership form if you plan to be active with us. You can also reach us on Instagram or via email.
+      </p>
+
+      <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- WhatsApp Cycling -->
+        <a target="_blank" rel="noopener" href="https://chat.whatsapp.com/IFcBokItJHOCPN7w3Hje1N"
+           class="group rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 hover:shadow-soft anim flex items-center gap-3">
+          <img src="/assets/img/icons/whatsapp-custom.png" alt="WhatsApp icon" class="w-5 h-5 opacity-80 rounded">
+          <div>
+            <div class="font-semibold">WhatsApp - Cycling (Prague)</div>
+            <div class="text-xs opacity-70">Join requests are approved manually.</div>
+          </div>
+        </a>
+
+        <!-- WhatsApp Running -->
+        <a target="_blank" rel="noopener" href="https://chat.whatsapp.com/FG9kvIo883i4nhVPONEJYi"
+           class="group rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 hover:shadow-soft anim flex items-center gap-3">
+          <img src="/assets/img/icons/whatsapp-custom.png" alt="WhatsApp icon" class="w-5 h-5 opacity-80 rounded">
+          <div>
+            <div class="font-semibold">WhatsApp - Running (Prague)</div>
+            <div class="text-xs opacity-70">Join requests are approved manually.</div>
+          </div>
+        </a>
+
+        <!-- WhatsApp Triathlon -->
+        <a target="_blank" rel="noopener" href="https://chat.whatsapp.com/Cit2xtAuX0l8kNX1zaYLFo"
+           class="group rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 hover:shadow-soft anim flex items-center gap-3">
+          <img src="/assets/img/icons/whatsapp-custom.png" alt="WhatsApp icon" class="w-5 h-5 opacity-80 rounded">
+          <div>
+            <div class="font-semibold">WhatsApp - Triathlon (Prague)</div>
+            <div class="text-xs opacity-70">Join requests are approved manually.</div>
+          </div>
+        </a>
+
+        <!-- CZ Membership form (legacy link kept for now) -->
+        <a target="_blank" rel="noopener" href="https://docs.google.com/forms/d/e/1FAIpQLSdxph5X3hY3C95WhuUzSX0FB-cJq6rBMr7ME2n0hdx01w__gw/viewform"
+           class="group rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 hover:shadow-soft anim flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 002-2v-7H3v7a2 2 0 002 2z"/></svg>
+          <div>
+            <div class="font-semibold">Membership form (CZ)</div>
+            <div class="text-xs opacity-70">RCT International z.s. - nationwide, Prague based.</div>
+          </div>
+        </a>
+
+        <!-- Instagram Prague Cycling -->
+        <a target="_blank" rel="noopener" href="https://www.instagram.com/rct.prague"
+           class="group rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 hover:shadow-soft anim flex items-center gap-3">
+          <img src="/assets/img/icons/instagram.png" alt="Instagram icon" class="w-5 h-5 opacity-80 rounded">
+          <div>
+            <div class="font-semibold">Instagram - Cycling (Prague)</div>
+            <div class="text-xs opacity-70">@rct.prague</div>
+          </div>
+        </a>
+
+        <!-- Instagram Prague Running -->
+        <a target="_blank" rel="noopener" href="https://www.instagram.com/rct.prague.running"
+           class="group rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 hover:shadow-soft anim flex items-center gap-3">
+          <img src="/assets/img/icons/instagram.png" alt="Instagram icon" class="w-5 h-5 opacity-80 rounded">
+          <div>
+            <div class="font-semibold">Instagram - Running (Prague)</div>
+            <div class="text-xs opacity-70">@rct.prague.running</div>
+          </div>
+        </a>
+
+        <!-- Email -->
+        <a target="_blank" rel="noopener" href="mailto:info@rct-prague.de"
+           class="group rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 hover:shadow-soft anim flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <div>
+            <div class="font-semibold">Email us</div>
+            <div class="text-xs opacity-70">Opens your mail app</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Germany (Friedrichsdorf - Hochtaunus) -->
+  <section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-4">
+        <h3 class="font-serif text-3xl font-bold text-neutral-900 dark:text-base-50">Germany</h3>
+        <p class="font-serif text-xl text-neutral-700 dark:text-neutral-300 mt-1">Friedrichsdorf - Hochtaunus</p>
+      </div>
+      <p class="mt-2 opacity-90 max-w-3xl">
+        The Friedrichsdorf - Hochtaunus chapter is growing. Group chat access is invite-only for now while we build the local crew.
+        You are welcome to follow our Strava club for ride postings and send an email if you want to join a ride or request an invite.
+        German e.V. membership form is in the works.
+      </p>
+
+      <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Email for invite -->
+        <a target="_blank" rel="noopener" href="mailto:info@rct-prague.de"
+           class="group rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 hover:shadow-soft anim flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <div>
+            <div class="font-semibold">Email for invite</div>
+            <div class="text-xs opacity-70">We’ll add you to the local chat</div>
+          </div>
+        </a>
+
+        <!-- Strava (global club) -->
+        <a target="_blank" rel="noopener" href="https://www.strava.com/clubs/1032760"
+           class="group rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 hover:shadow-soft anim flex items-center gap-3">
+          <img src="/assets/img/icons/strava-custom.svg" alt="Strava icon" class="w-5 h-5 opacity-80 rounded">
+          <div>
+            <div class="font-semibold">Strava club</div>
+            <div class="text-xs opacity-70">Watch for rides around Hochtaunus</div>
+          </div>
+        </a>
+
+        <!-- Private WhatsApp placeholder -->
+        <div class="rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 flex items-center gap-3 opacity-70">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a6 6 0 016 6v2h1a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V11a1 1 0 011-1h1V8a6 6 0 016-6zm0 2a4 4 0 00-4 4v2h8V8a4 4 0 00-4-4z"/></svg>
+          <div>
+            <div class="font-semibold">WhatsApp - Friedrichsdorf</div>
+            <div class="text-xs">Private for now - request via email</div>
+          </div>
+        </div>
+
+        <!-- Membership form DE placeholder -->
+        <div class="rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 flex items-center gap-3 opacity-70">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 002-2v-7H3v7a2 2 0 002 2z"/></svg>
+          <div>
+            <div class="font-semibold">Membership form (DE)</div>
+            <div class="text-xs">Coming soon - German e.V. in progress</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-xs opacity-70 mt-4">Tip: You can also find all links via our Linktree.</p>
+      <a target="_blank" rel="noopener" href="https://linktr.ee/rct.international"
+         class="mt-2 inline-block px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">Open Linktree</a>
+    </div>
+  </section>
+
+  <!-- Footer (injected) -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader + sticky header offset -->
+  <script defer>
+  async function loadComponent(id, file) {
+    const host = document.getElementById(id);
+    if (!host) return;
+    const res = await fetch(file, { cache: 'no-cache' });
+    host.innerHTML = await res.text();
+  }
+
+  function applyHeaderOffset() {
+    const header = document.getElementById('main-header');
+    document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+  }
+
+  (async () => {
+    await Promise.all([
+      loadComponent('site-header', '/components/header.html'),
+      loadComponent('site-footer', '/components/footer.html'),
+    ]);
+
+    // Keep sticky offset correct
+    const header = document.getElementById('main-header');
+    if (header) {
+      applyHeaderOffset();
+      const ro = new ResizeObserver(applyHeaderOffset);
+      ro.observe(header);
+      if (document.fonts && document.fonts.ready) { document.fonts.ready.then(applyHeaderOffset); }
+      window.addEventListener('resize', applyHeaderOffset);
+      window.addEventListener('orientationchange', applyHeaderOffset);
+    }
+  })();
+  </script>
+
+  <!-- Membership CTA logic (auth-aware routing) -->
+  <script type="module">
+    import { auth, getUserProfile, onUserChanged } from '/assets/js/firebase.js';
+
+    let _currentUser = null;
+    let _currentProfile = null;
+
+    onUserChanged(async (u) => {
+      _currentUser = u || null;
+      _currentProfile = null;
+      if (_currentUser) {
+        try {
+          _currentProfile = await getUserProfile(_currentUser.uid);
+        } catch {}
+      }
+    });
+
+    const spolekBtn = document.getElementById('btn-join-spolek');
+    const evBtn     = document.getElementById('btn-join-ev');
+
+    function goOrLogin(targetPath){
+      const next = encodeURIComponent(targetPath.replace(/^\//,''));
+      location.href = `/login.html?next=${next}`;
+    }
+
+    spolekBtn?.addEventListener('click', async ()=>{
+      const target = '/spolekjoin.html';
+      if (!_currentUser) return goOrLogin(target);
+      // if signed in, check membership
+      const roles = _currentProfile?.roles || {};
+      if (roles.spolekMember === true) {
+        alert('You are already a member of the Spolek (CZ).');
+        return;
+      }
+      location.href = target;
+    });
+
+    evBtn?.addEventListener('click', async ()=>{
+      const target = '/evjoin.html';
+      if (!_currentUser) return goOrLogin(target);
+      const roles = _currentProfile?.roles || {};
+      if (roles.evMember === true) {
+        alert('You are already a member of the e.V. (DE).');
+        return;
+      }
+      location.href = target;
+    });
+  </script>
+
+  <!-- Global site script (if needed) -->
+  <script type="module" src="assets/js/site.js"></script>
+</body>
+</html>

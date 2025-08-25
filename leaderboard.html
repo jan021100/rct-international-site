@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Members Leaderboard</title>
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors:{ base:{50:'#F6F5F2',900:'#0D0D0F'},
+                   neutral:{800:'#1f2328',700:'#2B2B2E',600:'#4b5563',500:'#64748b',300:'#cbd5e1'},
+                   gold:'#D6B25E', accent:'#D36B1F' },
+          fontFamily:{ sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif'] },
+          boxShadow:{ soft:'0 10px 30px rgba(0,0,0,.08)' }
+        }
+      }
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .card{border:1px solid rgb(203 213 225 / .6)}
+    .dark .card{border-color:#374151}
+    .pill{border:1px solid rgb(203 213 225 / .6); border-radius:9999px; padding:.125rem .5rem}
+    .dark .pill{border-color:#374151}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;}
+    table thead th{white-space:nowrap}
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header -->
+  <div id="site-header"></div>
+
+  <!-- Hero -->
+  <section class="py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-serif text-4xl text-neutral-900 dark:text-base-50">Members Leaderboards</h1>
+      <p class="mt-3 opacity-90">Only visible to RCT members (spolek or e.V.). Rankings are based on attendance points.</p>
+    </div>
+  </section>
+
+  <!-- Access gates -->
+  <section class="pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Not signed in / not allowed -->
+      <div id="not-allowed" class="hidden p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+        <h3 class="font-semibold text-lg text-red-600">Access restricted</h3>
+        <p class="opacity-80 mt-1">This page is only available to signed-in RCT members. Please <a class="underline" href="/login.html">sign in</a>.</p>
+      </div>
+
+      <!-- Allowed content -->
+      <div id="members-ui" class="hidden space-y-10">
+
+        <!-- Leaderboards -->
+        <div class="grid lg:grid-cols-2 gap-6">
+          <!-- Cycling -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="font-serif text-2xl dark:text-base-50">Top 10 — Cycling</h2>
+              <span id="lb-cycling-meta" class="text-sm opacity-70"></span>
+            </div>
+            <ol id="lb-cycling" class="mt-4 space-y-2"></ol>
+          </div>
+
+          <!-- Running -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="font-serif text-2xl dark:text-base-50">Top 10 — Running</h2>
+              <span id="lb-running-meta" class="text-sm opacity-70"></span>
+            </div>
+            <ol id="lb-running" class="mt-4 space-y-2"></ol>
+          </div>
+        </div>
+
+        <!-- Admin tools -->
+        <div id="admin-tools" class="hidden p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="font-serif text-2xl dark:text-base-50">Full leaderboard (admin)</h3>
+            <div class="flex items-center gap-2">
+              <input id="full-filter" type="text" placeholder="Filter name/email" class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm">
+              <button id="btn-load-full" class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 text-sm anim hover:bg-neutral-100 dark:hover:bg-neutral-800">Show / Refresh</button>
+            </div>
+          </div>
+          <div class="overflow-auto mt-3">
+            <table class="min-w-full text-sm">
+              <thead class="text-left opacity-70">
+                <tr>
+                  <th class="py-2 pr-4">Name</th>
+                  <th class="py-2 pr-4">Type</th>
+                  <th class="py-2 pr-4">Email</th>
+                  <th class="py-2 pr-4">Total</th>
+                  <th class="py-2 pr-4">Cycling</th>
+                  <th class="py-2 pr-4">Running</th>
+                  <th class="py-2 pr-4">Other</th>
+                </tr>
+              </thead>
+              <tbody id="full-tbody"></tbody>
+            </table>
+          </div>
+          <div id="full-meta" class="text-xs opacity-70 mt-2"></div>
+        </div>
+
+        <!-- Small log -->
+        <div class="p-4 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+          <div class="text-sm font-medium mb-1">Log</div>
+          <div id="log" class="mono text-xs bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-3 h-40 overflow-auto"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader + sticky header offset -->
+  <script defer>
+    async function loadComponent(id, file) {
+      const host = document.getElementById(id);
+      if (!host) return;
+      const res = await fetch(file, { cache: 'no-cache' });
+      host.innerHTML = await res.text();
+    }
+    function applyHeaderOffset() {
+      const header = document.getElementById('main-header');
+      document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+    }
+    (async () => {
+      await Promise.all([
+        loadComponent('site-header','/components/header.html'),
+        loadComponent('site-footer','/components/footer.html'),
+      ]);
+      const header = document.getElementById('main-header');
+      if (header) {
+        applyHeaderOffset();
+        const ro = new ResizeObserver(applyHeaderOffset);
+        ro.observe(header);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(applyHeaderOffset);
+        window.addEventListener('resize', applyHeaderOffset);
+        window.addEventListener('orientationchange', applyHeaderOffset);
+      }
+    })();
+  </script>
+
+  <!-- Firebase + Page Logic -->
+  <script type="module">
+    import { auth, db, onUserChanged, getUserProfile } from '/assets/js/firebase.js';
+    import {
+      collection, collectionGroup, getDocs, getDoc, doc,
+      query, orderBy, limit
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // --- UI refs ---
+    const gate = document.getElementById('not-allowed');
+    const ui = document.getElementById('members-ui');
+
+    const lbCycling = document.getElementById('lb-cycling');
+    const lbRunning = document.getElementById('lb-running');
+    const lbCyclingMeta = document.getElementById('lb-cycling-meta');
+    const lbRunningMeta = document.getElementById('lb-running-meta');
+
+    const adminBox = document.getElementById('admin-tools');
+    const btnLoadFull = document.getElementById('btn-load-full');
+    const fullTbody = document.getElementById('full-tbody');
+    const fullMeta = document.getElementById('full-meta');
+    const fullFilter = document.getElementById('full-filter');
+
+    const logEl = document.getElementById('log');
+    const log = (line) => {
+      const t = new Date().toLocaleTimeString();
+      logEl.textContent += `[${t}] ${line}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    };
+
+    // helpers
+    const norm = s => String(s||'').trim();
+    const keyOf = (att) => {
+      if (att.userId)  return `user:${att.userId}`;
+      if (att.guestId) return `guest:${att.guestId}`;
+      // fallback by normalized display name
+      return `name:${norm(att.displayName).toLowerCase()}`;
+    };
+    const labelFrom = (att) => norm(att.displayName) || norm(att.email) || '—';
+
+    // cache for user names
+    const userNameCache = new Map(); // uid -> {name,email}
+
+    async function resolveUserLabel(uid){
+      if (userNameCache.has(uid)) return userNameCache.get(uid);
+      try {
+        const snap = await getDoc(doc(db,'users',uid));
+        const data = snap.exists() ? snap.data() : {};
+        const obj = { name: data.name || '(member)', email: data.email || '' };
+        userNameCache.set(uid, obj);
+        return obj;
+      } catch { return { name:'(member)', email:'' }; }
+    }
+
+    function renderTopList(el, items){
+      el.innerHTML = '';
+      items.slice(0,10).forEach(([key, rec], idx)=>{
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between gap-3 p-2 rounded-lg bg-white/50 dark:bg-neutral-900/40';
+        const nm = rec.displayName || rec.email || '(n/a)';
+        li.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-6 h-6 rounded-full bg-neutral-100 dark:bg-neutral-800 grid place-items-center text-xs">${idx+1}</div>
+            <div>
+              <div class="font-medium">${nm}</div>
+              <div class="text-xs opacity-70">${rec.type}</div>
+            </div>
+          </div>
+          <div class="pill text-xs">${rec.points} pts</div>
+        `;
+        el.appendChild(li);
+      });
+    }
+
+    function sortEntries(map){
+      return [...map.entries()].sort((a,b)=> (b[1].points||0) - (a[1].points||0));
+    }
+
+    // Build leaderboards
+    async function buildLeaderboards(){
+      log('Loading events (for sport lookup)…');
+      const evSnap = await getDocs(collection(db,'events'));
+      const sportByEvent = new Map(); // eventId -> sport
+      evSnap.forEach(d=> {
+        const v = d.data(); sportByEvent.set(d.id, (v && v.sport) || '');
+      });
+      log(`Loaded ${sportByEvent.size} events.`);
+
+      log('Loading attendance (all)…');
+      const attSnap = await getDocs(collectionGroup(db,'attendance'));
+      log(`Loaded ${attSnap.size} attendance docs.`);
+
+      // per-sport maps: key -> {points, displayName, email, type}
+      const agg = {
+        cycling: new Map(),
+        running: new Map(),
+      };
+
+      // also aggregate for full list
+      const allTotals = new Map(); // key -> {cycling, running, other, total, label/email/type}
+
+      attSnap.forEach(a=>{
+        const x = a.data() || {};
+        const path = a.ref.path; // events/{eventId}/attendance/{attId}
+        const parts = path.split('/');
+        const eventId = parts.length >= 2 ? parts[1] : null;
+        const sport = eventId ? (sportByEvent.get(eventId) || '') : '';
+
+        const key = keyOf(x);
+        const baseRec = {
+          displayName: x.displayName || '',
+          email: x.email || '',
+          type: x.userId ? 'user' : (x.guestId ? 'guest' : 'name'),
+        };
+        const pts = Number(x.awardedPoints || 0);
+
+        // per-sport
+        const bucket = sport === 'cycling' ? 'cycling' : (sport === 'running' ? 'running' : null);
+        if (bucket) {
+          const m = agg[bucket];
+          const cur = m.get(key) || { points:0, ...baseRec };
+          cur.points += pts;
+          // keep the "best" label we see (prefer a proper displayName)
+          if (!cur.displayName && baseRec.displayName) cur.displayName = baseRec.displayName;
+          if (!cur.email && baseRec.email) cur.email = baseRec.email;
+          m.set(key, cur);
+        }
+
+        // overall
+        const overall = allTotals.get(key) || { cycling:0, running:0, other:0, total:0, ...baseRec };
+        if (sport === 'cycling') overall.cycling += pts;
+        else if (sport === 'running') overall.running += pts;
+        else overall.other += pts;
+        overall.total += pts;
+        if (!overall.displayName && baseRec.displayName) overall.displayName = baseRec.displayName;
+        if (!overall.email && baseRec.email) overall.email = baseRec.email;
+        allTotals.set(key, overall);
+      });
+
+      // resolve names for 'user:' keys for nicer display (top lists only)
+      async function hydrateLabelsForTop(map){
+        const entries = sortEntries(map).slice(0,10);
+        for (const [key, rec] of entries) {
+          if (key.startsWith('user:')) {
+            const uid = key.slice(5);
+            const u = await resolveUserLabel(uid);
+            if (u.name) rec.displayName = u.name;
+            if (u.email) rec.email = u.email;
+          }
+        }
+        return entries;
+      }
+
+      const topCycling = await hydrateLabelsForTop(agg.cycling);
+      const topRunning = await hydrateLabelsForTop(agg.running);
+
+      renderTopList(lbCycling, topCycling);
+      renderTopList(lbRunning, topRunning);
+
+      lbCyclingMeta.textContent = `${topCycling.length ? 'All-time' : ''}`;
+      lbRunningMeta.textContent = `${topRunning.length ? 'All-time' : ''}`;
+
+      // store for admin table
+      window._ALL_TOTALS = allTotals;
+    }
+
+    // Admin full list render
+    function renderFullTable(){
+      const allTotals = window._ALL_TOTALS || new Map();
+      const filter = (fullFilter.value || '').trim().toLowerCase();
+
+      // to array & sort
+      let rows = [...allTotals.entries()].map(([key, rec])=>{
+        return {
+          key, type: rec.type,
+          name: rec.displayName || '(n/a)',
+          email: rec.email || '',
+          total: rec.total || 0,
+          cycling: rec.cycling || 0,
+          running: rec.running || 0,
+          other: rec.other || 0,
+        };
+      });
+      if (filter) {
+        rows = rows.filter(r =>
+          r.name.toLowerCase().includes(filter) ||
+          r.email.toLowerCase().includes(filter) ||
+          r.type.toLowerCase().includes(filter)
+        );
+      }
+      rows.sort((a,b)=> b.total - a.total);
+
+      fullTbody.innerHTML = '';
+      rows.forEach(r=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-2 pr-4">${r.name}</td>
+          <td class="py-2 pr-4 opacity-70">${r.type}</td>
+          <td class="py-2 pr-4 opacity-70">${r.email}</td>
+          <td class="py-2 pr-4 font-semibold">${r.total}</td>
+          <td class="py-2 pr-4">${r.cycling}</td>
+          <td class="py-2 pr-4">${r.running}</td>
+          <td class="py-2 pr-4">${r.other}</td>
+        `;
+        fullTbody.appendChild(tr);
+      });
+      fullMeta.textContent = `${rows.length} rows`;
+    }
+
+    // Wire admin controls
+    btnLoadFull?.addEventListener('click', renderFullTable);
+    fullFilter?.addEventListener('input', renderFullTable);
+
+    // Auth gate
+    onUserChanged(async (u)=>{
+      if (!u) { ui.classList.add('hidden'); gate.classList.remove('hidden'); return; }
+      const prof = await getUserProfile(u.uid);
+      const roles = (prof && prof.roles) || {};
+      const isMember = !!(roles.spolekMember || roles.evMember);
+      const isAdmin  = !!roles.admin;
+
+      if (!isMember) { ui.classList.add('hidden'); gate.classList.remove('hidden'); return; }
+
+      gate.classList.add('hidden'); ui.classList.remove('hidden');
+      if (isAdmin) adminBox.classList.remove('hidden'); else adminBox.classList.add('hidden');
+
+      try {
+        await buildLeaderboards();
+        log('Leaderboards built.');
+      } catch (e) {
+        log('ERROR: '+ (e.message || e));
+      }
+    });
+  </script>
+</body>
+</html>

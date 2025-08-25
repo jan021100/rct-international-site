@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Attendance — RCT International</title>
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors:{ base:{50:'#F6F5F2',900:'#0D0D0F'},
+                   neutral:{800:'#1f2328',700:'#2B2B2E',600:'#4b5563',500:'#64748b',300:'#cbd5e1'},
+                   gold:'#D6B25E', accent:'#D36B1F' },
+          fontFamily:{ sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif'] },
+          boxShadow:{ soft:'0 10px 30px rgba(0,0,0,.08)' }
+        }
+      }
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .card{border:1px solid rgb(203 213 225 / .6)}
+    .dark .card{border-color:#374151}
+    .pill{border:1px solid rgb(203 213 225 / .6); border-radius:9999px; padding:.125rem .5rem}
+    .dark .pill{border-color:#374151}
+    dialog::backdrop{background:rgba(0,0,0,.35)}
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin:0 }
+    input[type="number"] { -moz-appearance: textfield }
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header -->
+  <div id="site-header"></div>
+
+  <!-- Title -->
+  <section class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="font-serif text-4xl text-neutral-900 dark:text-base-50">Attendance & Events</h1>
+      <p class="opacity-80 mt-2">Admin tool for creating activities and tracking attendance & points.</p>
+    </div>
+  </section>
+
+  <!-- Admin gate -->
+  <section class="pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Not authorized -->
+      <div id="not-admin" class="hidden p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+        <p class="text-red-600 font-medium">You are not authorized to access this page.</p>
+        <p class="text-sm opacity-80 mt-1">Please sign in with an admin account.</p>
+      </div>
+
+      <!-- Admin UI -->
+      <div id="admin-ui" class="hidden grid lg:grid-cols-[1fr,1.1fr] gap-8 items-start">
+
+        <!-- Left: Past Activities -->
+        <div class="space-y-6">
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between">
+              <h2 class="font-serif text-2xl dark:text-base-50">Past activities</h2>
+              <button id="btn-refresh-events" class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 text-sm anim hover:bg-neutral-100 dark:hover:bg-neutral-800">Refresh</button>
+            </div>
+            <div id="events-list" class="mt-4 divide-y divide-neutral-200 dark:divide-neutral-800">
+              <div class="p-3 text-sm opacity-70">Loading…</div>
+            </div>
+            <p id="events-empty" class="text-sm opacity-70 mt-3 hidden">No events yet.</p>
+          </div>
+
+          <!-- Points guide -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <h3 class="font-semibold">Points guide (automation)</h3>
+            <ul class="mt-2 text-sm list-disc pl-5 opacity-90 space-y-1">
+              <li><span class="font-medium">Default</span>: <span class="pill">5 pts</span></li>
+              <li>Thursday Run / Saturday Ride / Training / Sunday Run / Club Ride / Event / Snow Ride / Virtual Ride → <span class="pill">5 pts</span></li>
+              <li>Special → <span class="pill">10 pts</span></li>
+              <li>Individual Race / Volunteering → <span class="pill">15 pts</span></li>
+              <li>Race → <span class="pill">20 pts</span></li>
+            </ul>
+            <p class="text-xs opacity-60 mt-2">The base points auto-fill from the event name keywords above. You can override base and per-participant values anytime.</p>
+          </div>
+        </div>
+
+        <!-- Right: New Activity -->
+        <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+          <h2 class="font-serif text-2xl dark:text-base-50">New activity</h2>
+
+          <!-- Event form -->
+          <form id="event-form" class="mt-4 space-y-4">
+            <div>
+              <label class="block text-sm mb-1" for="ev-name">Event name</label>
+              <input id="ev-name" type="text" required class="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm mb-1" for="ev-date">Date</label>
+                <input id="ev-date" type="date" required class="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+              </div>
+              <div>
+                <label class="block text-sm mb-1" for="ev-sport">Sport</label>
+                <select id="ev-sport" class="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+                  <option value="cycling">Cycling</option>
+                  <option value="running">Running</option>
+                  <option value="triathlon">Triathlon</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm mb-1" for="ev-chapter">Chapter</label>
+                <select id="ev-chapter" class="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+                  <option value="prague">Prague</option>
+                  <option value="hochtaunus">Hochtaunus</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm mb-1" for="ev-points">Base points</label>
+                <input id="ev-points" type="number" step="1" min="0" value="5" class="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm mb-1" for="ev-km">Distance (km) — optional</label>
+              <input id="ev-km" type="number" step="0.1" min="0" class="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+            </div>
+
+            <!-- Participants -->
+            <div class="grid lg:grid-cols-2 gap-4">
+              <!-- Members -->
+              <div>
+                <div class="flex items-center justify-between gap-3">
+                  <label class="font-semibold whitespace-nowrap">Members</label>
+                  <input id="filter-members" type="text" placeholder="Search name/email" class="ml-auto flex-1 px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm">
+                </div>
+                <div id="members-list" class="mt-2 h-64 overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-900/30"></div>
+              </div>
+              <!-- Guests (includes legacy) -->
+              <div>
+                <div class="flex items-center justify-between gap-2">
+                  <label class="font-semibold whitespace-nowrap">Guests & Legacy</label>
+                  <div class="flex items-center gap-2">
+                    <input id="filter-guests" type="text" placeholder="Search name/email" class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm">
+                    <button id="btn-add-guest" type="button" class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 text-sm anim hover:bg-neutral-100 dark:hover:bg-neutral-800">+ Add guest</button>
+                  </div>
+                </div>
+                <div id="guests-list" class="mt-2 h-64 overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-900/30"></div>
+              </div>
+            </div>
+
+            <!-- Selected preview -->
+            <div class="mt-2">
+              <div class="text-sm mb-2 opacity-80">Selected participants (click points to override):</div>
+              <div id="selected-list" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <div class="pt-2 flex items-center gap-3">
+              <button id="btn-save" type="submit" class="px-5 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 anim">Save event</button>
+              <span id="save-msg" class="text-sm"></span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Add Guest Modal -->
+  <dialog id="guest-modal" class="rounded-2xl p-0 w-full max-w-md bg-white dark:bg-neutral-950 text-neutral-800 dark:text-neutral-200">
+    <form id="guest-form" method="dialog" class="p-6">
+      <h3 class="text-lg font-semibold">Add guest</h3>
+      <p class="text-sm opacity-80 mt-1">Create a guest profile for people without an account.</p>
+      <div class="mt-4">
+        <label class="block text-sm mb-1" for="guest-name">Full name</label>
+        <input id="guest-name" required class="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+      </div>
+      <div class="mt-3">
+        <label class="block text-sm mb-1" for="guest-email">Email (optional)</label>
+        <input id="guest-email" type="email" class="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button type="button" id="guest-cancel" class="px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 anim">Create guest</button>
+      </div>
+      <p id="guest-msg" class="text-sm mt-2"></p>
+    </form>
+  </dialog>
+
+  <!-- Components loader + sticky header offset -->
+  <script defer>
+  async function loadComponent(id, file) {
+    const host = document.getElementById(id);
+    if (!host) return;
+    const res = await fetch(file, { cache: 'no-cache' });
+    host.innerHTML = await res.text();
+  }
+  function applyHeaderOffset() {
+    const header = document.getElementById('main-header');
+    document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+  }
+  (async () => {
+    await Promise.all([
+      loadComponent('site-header', '/components/header.html'),
+      loadComponent('site-footer', '/components/footer.html'),
+    ]);
+    const header = document.getElementById('main-header');
+    if (header) {
+      applyHeaderOffset();
+      const ro = new ResizeObserver(applyHeaderOffset);
+      ro.observe(header);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(applyHeaderOffset);
+      window.addEventListener('resize', applyHeaderOffset);
+      window.addEventListener('orientationchange', applyHeaderOffset);
+    }
+  })();
+  </script>
+
+  <!-- Firebase + Page Logic -->
+  <script type="module">
+    import { auth, db, onUserChanged, getUserProfile } from '/assets/js/firebase.js';
+    import {
+      collection, addDoc, setDoc, getDoc, getDocs, doc,
+      query, orderBy, limit, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // --- Elements ---
+    const adminUI = document.getElementById('admin-ui');
+    const notAdmin = document.getElementById('not-admin');
+    const eventsList = document.getElementById('events-list');
+    const eventsEmpty = document.getElementById('events-empty');
+    const btnRefreshEvents = document.getElementById('btn-refresh-events');
+
+    const form = document.getElementById('event-form');
+    const evName = document.getElementById('ev-name');
+    const evDate = document.getElementById('ev-date');
+    const evSport = document.getElementById('ev-sport');
+    const evChapter = document.getElementById('ev-chapter');
+    const evPoints = document.getElementById('ev-points');
+    const evKm = document.getElementById('ev-km');
+    const saveMsg = document.getElementById('save-msg');
+
+    const membersList = document.getElementById('members-list');
+    const guestsList = document.getElementById('guests-list');
+    const filterMembers = document.getElementById('filter-members');
+    const filterGuests = document.getElementById('filter-guests');
+    const selectedList = document.getElementById('selected-list');
+
+    const guestModal = document.getElementById('guest-modal');
+    const guestForm = document.getElementById('guest-form');
+    const guestCancel = document.getElementById('guest-cancel');
+    const guestName = document.getElementById('guest-name');
+    const guestEmail = document.getElementById('guest-email');
+    const guestMsg = document.getElementById('guest-msg');
+    const btnAddGuest = document.getElementById('btn-add-guest');
+
+    // Default date today
+    evDate.valueAsDate = new Date();
+
+    // --- Local state ---
+    let allMembers = []; // {uid, name, email}
+    // guests + legacy as guest-like objects: {id, displayName, email, kind:'guest'|'legacy'}
+    let allGuests = [];
+    const selectedMembers = new Map(); // uid -> {uid, name, email, pointsOverride}
+    const selectedGuests  = new Map(); // id  -> {gid, displayName, email, kind, legacyEmail?, pointsOverride}
+    let isAdmin = false;
+
+    const show = el => el.classList.remove('hidden');
+    const hide = el => el.classList.add('hidden');
+    const niceDate = v => { try { return new Date(v).toLocaleDateString(); } catch { return '—'; } };
+
+    // --- Utils for IDs / normalization ---
+    const ascii = (s)=> (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const slug  = (s)=> ascii(String(s||'').toLowerCase()).replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+    const emailToId = (e)=> String(e||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+
+    // --- Points auto-suggest ---
+    let userTouchedPoints = false;
+    evPoints.addEventListener('input', ()=> userTouchedPoints = true);
+
+    function suggestPointsFromName(nameRaw){
+      const s = (nameRaw || '').toLowerCase();
+      const hit = (kw) => s.includes(kw.toLowerCase());
+      if (hit('race')) return 20;
+      if (hit('individual race')) return 15;
+      if (hit('volunteering')) return 15;
+      if (hit('special')) return 10;
+      if (hit('thursday run') || hit('saturday ride') || hit('training') ||
+          hit('sunday run') || hit('club ride') || hit('snow ride') ||
+          hit('virtual ride') || hit('event')) return 5;
+      return 5;
+    }
+    function maybeAutoFillPoints(){
+      if (userTouchedPoints) return;
+      evPoints.value = String(suggestPointsFromName(evName.value));
+    }
+    evName.addEventListener('input', maybeAutoFillPoints);
+
+    // --- Rendering helpers ---
+    function renderPeople(listEl, data, filterText, type) {
+      listEl.innerHTML = '';
+      const f = (filterText || '').trim().toLowerCase();
+      const filtered = data.filter(x => {
+        const a = (x.name || x.displayName || '').toLowerCase();
+        const b = (x.email || '').toLowerCase();
+        return !f || a.includes(f) || b.includes(f);
+      });
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="p-3 text-sm opacity-70">No matches.</div>';
+        return;
+      }
+      filtered.forEach(p => {
+        const id = type === 'member' ? p.uid : p.id;
+        const checked = type === 'member' ? selectedMembers.has(id) : selectedGuests.has(id);
+        const badge = type==='member' ? 'member' : (p.kind==='legacy' ? 'legacy' : 'guest');
+        const display = type==='member' ? (p.name||'—') : (p.displayName||'—');
+        const label = `
+          <label class="flex items-center gap-3 p-2 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800 anim">
+            <input type="checkbox" data-type="${type}" data-id="${id}" ${checked ? 'checked':''}>
+            <span class="flex-1">
+              <span class="font-medium">${display}</span>
+              <span class="opacity-60 ml-1">${p.email || ''}</span>
+            </span>
+            <span class="pill text-xs">${badge}</span>
+          </label>`;
+        const div = document.createElement('div');
+        div.innerHTML = label;
+        listEl.appendChild(div.firstElementChild);
+      });
+    }
+
+    function renderSelected() {
+      selectedList.innerHTML = '';
+      const base = Number(evPoints.value || 0);
+      const item = (id, label, email, type, pointsOverride) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'flex items-center gap-2 pill bg-white/60 dark:bg-neutral-900/50';
+        wrap.innerHTML = `
+          <span class="font-medium">${label}</span>
+          <span class="opacity-60 text-xs">${email || ''}</span>
+          <input type="number" placeholder="${base}" value="${pointsOverride ?? ''}" class="w-16 px-2 py-0.5 text-sm rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900" data-pt="${id}" data-kind="${type}">
+          <button class="text-xs underline opacity-80" data-remove="${id}" data-kind="${type}">remove</button>
+        `;
+        selectedList.appendChild(wrap);
+      };
+      for (const m of selectedMembers.values()) item(m.uid, m.name || '(member)', m.email, 'member', m.pointsOverride ?? '');
+      for (const g of selectedGuests.values())  item(g.gid, g.displayName || '(guest)', g.email, 'guest', g.pointsOverride ?? '');
+
+      selectedList.querySelectorAll('input[data-pt]').forEach(inp=>{
+        inp.addEventListener('input', e=>{
+          const id = e.target.dataset.pt, kind = e.target.dataset.kind;
+          const num = e.target.value === '' ? null : Number(e.target.value);
+          if (kind === 'member' && selectedMembers.has(id)) selectedMembers.get(id).pointsOverride = num;
+          if (kind === 'guest'  && selectedGuests.has(id))  selectedGuests.get(id).pointsOverride  = num;
+        });
+      });
+      selectedList.querySelectorAll('button[data-remove]').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+          const id = e.target.dataset.remove, kind = e.target.dataset.kind;
+          if (kind === 'member') selectedMembers.delete(id);
+          if (kind === 'guest')  selectedGuests.delete(id);
+          renderPeople(membersList, allMembers, filterMembers.value, 'member');
+          renderPeople(guestsList, allGuests, filterGuests.value, 'guest');
+          renderSelected();
+        });
+      });
+    }
+
+    // --- Data loads ---
+    async function loadMembers(limitN=2000) {
+      const qy = query(collection(db,'users'), orderBy('name'), limit(limitN));
+      const snap = await getDocs(qy);
+      allMembers = snap.docs.map(d => ({ uid:d.id, ...(d.data()||{}) }));
+      renderPeople(membersList, allMembers, filterMembers.value, 'member');
+    }
+    async function loadGuests(limitN=3000) {
+      const gs = await getDocs(query(collection(db,'guests'), orderBy('displayName'), limit(limitN)));
+      const guests = gs.docs.map(d => ({ id:d.id, kind:'guest', ...(d.data()||{}) }));
+
+      const ls = await getDocs(query(collection(db,'legacyMembers'), orderBy('name'), limit(limitN)));
+      const legacy = ls.docs.map(d => {
+        const v = d.data()||{};
+        return { id:`legacy-${d.id}`, kind:'legacy', displayName: v.name, email: v.email || null, legacyEmail: v.email || null };
+      });
+
+      allGuests = [...guests, ...legacy];
+      renderPeople(guestsList, allGuests, filterGuests.value, 'guest');
+    }
+    async function loadEvents() {
+      eventsList.innerHTML = '<div class="p-3 text-sm opacity-70">Loading…</div>';
+      const qy = query(collection(db,'events'), orderBy('date','desc'), limit(25));
+      const snap = await getDocs(qy);
+      eventsList.innerHTML = '';
+      if (snap.empty) { eventsEmpty.classList.remove('hidden'); return; }
+      eventsEmpty.classList.add('hidden');
+      for (const docSnap of snap.docs) {
+        const ev = docSnap.data(); const id = docSnap.id;
+        const attSnap = await getDocs(collection(docSnap.ref,'attendance'));
+        const count = attSnap.size;
+        const row = document.createElement('div');
+        row.className = 'py-3';
+        row.innerHTML = `
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="font-medium">${ev.name || 'Event'}</div>
+              <div class="text-sm opacity-70">${niceDate(ev.date)} • ${ev.sport || '–'} • ${ev.chapter || '–'} • ${count} participant${count===1?'':'s'}</div>
+            </div>
+            <button class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 text-sm anim hover:bg-neutral-100 dark:hover:bg-neutral-800" data-detail="${id}">Details</button>
+          </div>
+          <div id="detail-${id}" class="hidden mt-2 text-sm"></div>
+        `;
+        eventsList.appendChild(row);
+
+        row.querySelector(`[data-detail="${id}"]`).addEventListener('click', async ()=>{
+          const box = document.getElementById(`detail-${id}`);
+          if (!box.classList.contains('hidden')) { box.classList.add('hidden'); box.innerHTML=''; return; }
+          box.classList.remove('hidden');
+          const att = await getDocs(collection(docSnap.ref,'attendance'));
+          if (att.empty) { box.innerHTML = '<div class="opacity-70">No participants recorded.</div>'; return; }
+          const list = document.createElement('div');
+          list.className = 'space-y-1';
+          att.forEach(a=>{
+            const x = a.data();
+            const row = document.createElement('div');
+            row.innerHTML = `
+              <div class="flex items-center justify-between">
+                <span>${x.displayName || '(n/a)'} <span class="opacity-60">${x.email||''}</span></span>
+                <span class="pill text-xs">${x.awardedPoints ?? ev.points ?? 0} pts</span>
+              </div>`;
+            list.appendChild(row);
+          });
+          box.innerHTML = ''; box.appendChild(list);
+        });
+      }
+    }
+
+    // --- Auth / Admin gate ---
+    onUserChanged(async (u)=>{
+      if (!u) { hide(adminUI); show(notAdmin); return; }
+      const prof = await getUserProfile(u.uid);
+      isAdmin = !!(prof && prof.roles && prof.roles.admin);
+      if (!isAdmin) { hide(adminUI); show(notAdmin); return; }
+
+      show(adminUI); hide(notAdmin);
+      await Promise.all([loadMembers(), loadGuests(), loadEvents()]);
+      maybeAutoFillPoints();
+    });
+
+    // --- Filters & selection ---
+    filterMembers.addEventListener('input', ()=> renderPeople(membersList, allMembers, filterMembers.value, 'member'));
+    filterGuests.addEventListener('input', ()=> renderPeople(guestsList, allGuests, filterGuests.value, 'guest'));
+
+    membersList.addEventListener('change', e=>{
+      const cb = e.target.closest('input[type="checkbox"]'); if (!cb) return;
+      const uid = cb.dataset.id;
+      const m = allMembers.find(x=>x.uid===uid); if (!m) return;
+      if (cb.checked) selectedMembers.set(uid, { uid, name:m.name, email:m.email, pointsOverride:null });
+      else selectedMembers.delete(uid);
+      renderSelected();
+    });
+    guestsList.addEventListener('change', e=>{
+      const cb = e.target.closest('input[type="checkbox"]'); if (!cb) return;
+      const gid = cb.dataset.id;
+      const g = allGuests.find(x=>x.id===gid); if (!g) return;
+      // store legacyEmail if legacy
+      if (cb.checked) selectedGuests.set(gid, { gid, displayName:g.displayName, email:g.email||null, kind:g.kind, legacyEmail:g.legacyEmail||null, pointsOverride:null });
+      else selectedGuests.delete(gid);
+      renderSelected();
+    });
+
+    // --- Add guest modal ---
+    btnAddGuest.addEventListener('click', ()=>{ guestMsg.textContent=''; guestName.value=''; guestEmail.value=''; guestModal.showModal(); });
+    guestCancel.addEventListener('click', ()=> guestModal.close());
+    guestForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      guestMsg.textContent = 'Saving…'; guestMsg.className='text-sm';
+      try {
+        const name = guestName.value.trim();
+        const email = guestEmail.value.trim();
+        const ref = await addDoc(collection(db,'guests'), {
+          displayName: name,
+          email: email || null,
+          normalizedEmail: email ? email.toLowerCase() : null,
+          createdAt: serverTimestamp(),
+          mergedToUserId: null,
+        });
+        guestMsg.textContent = 'Guest created.'; guestMsg.classList.add('text-green-700');
+        guestModal.close();
+        await loadGuests();
+        const g = allGuests.find(x=>x.id===ref.id);
+        if (g) {
+          selectedGuests.set(g.id, { gid:g.id, displayName:g.displayName, email:g.email||null, kind:'guest', pointsOverride:null });
+          renderPeople(guestsList, allGuests, filterGuests.value, 'guest');
+          renderSelected();
+        }
+      } catch(err) {
+        guestMsg.textContent = err.message || 'Could not create guest.'; guestMsg.classList.add('text-red-600');
+      }
+    });
+
+    // --- Save event ---
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      saveMsg.textContent = ''; saveMsg.className='text-sm';
+
+      if (!isAdmin) { saveMsg.textContent='Not authorized.'; saveMsg.classList.add('text-red-600'); return; }
+      if (selectedMembers.size + selectedGuests.size === 0) {
+        saveMsg.textContent = 'Please select at least one participant.'; saveMsg.classList.add('text-red-600'); return;
+      }
+
+      const basePts = Number(evPoints.value || 0);
+      const distanceKm = evKm.value ? Number(evKm.value) : null;
+      const dateStr = evDate.value; // yyyy-mm-dd
+      const eventId = `${dateStr}--${slug(evName.value)}`;  // deterministic event id
+
+      try {
+        document.getElementById('btn-save').disabled = true;
+        saveMsg.textContent = 'Saving…';
+
+        // 1) Event (deterministic id, upsert)
+        const eRef = doc(db,'events',eventId);
+        const eSnap = await getDoc(eRef);
+        if (!eSnap.exists()) {
+          await setDoc(eRef, {
+            name: evName.value.trim(),
+            date: new Date(dateStr + 'T00:00:00Z').toISOString(),
+            sport: (evSport.value || 'other').toLowerCase(),
+            chapter: (evChapter.value || 'other').toLowerCase(),
+            points: basePts,
+            distanceKm: distanceKm,
+            createdBy: auth.currentUser?.uid || null,
+            createdAt: serverTimestamp(),
+          });
+        }
+
+        // 2) Attendance (custom doc IDs, no duplicates)
+        const attColl = collection(eRef,'attendance');
+
+        // members
+        for (const m of selectedMembers.values()) {
+          const attId = `att__uid-${m.uid}`;
+          const aRef = doc(attColl, attId);
+          const aSnap = await getDoc(aRef);
+          if (!aSnap.exists()) {
+            await setDoc(aRef, {
+              userId: m.uid,
+              guestId: null,
+              displayName: m.name || '(member)',
+              email: m.email || null,
+              legacyEmail: null,
+              awardedPoints: (m.pointsOverride ?? basePts),
+              km: distanceKm ?? null,
+              createdAt: serverTimestamp(),
+            });
+          }
+        }
+        // guests & legacy
+        for (const g of selectedGuests.values()) {
+          const isLegacy = g.kind === 'legacy';
+          const attId = isLegacy
+            ? `att__legacy-${emailToId(g.legacyEmail || g.email || g.displayName)}`
+            : `att__gid-${g.gid}`;
+          const aRef = doc(attColl, attId);
+          const aSnap = await getDoc(aRef);
+          if (!aSnap.exists()) {
+            await setDoc(aRef, {
+              userId: null,
+              guestId: isLegacy ? null : g.gid,
+              displayName: g.displayName || '(guest)',
+              email: g.email || null,
+              legacyEmail: isLegacy ? (g.legacyEmail || g.email || null) : null,
+              awardedPoints: (g.pointsOverride ?? basePts),
+              km: distanceKm ?? null,
+              createdAt: serverTimestamp(),
+            });
+          }
+        }
+
+        // Reset
+        selectedMembers.clear(); selectedGuests.clear(); renderSelected();
+        evName.value=''; userTouchedPoints=false; evPoints.value='5'; evKm.value=''; evSport.value='cycling';
+        renderPeople(membersList, allMembers, filterMembers.value, 'member');
+        renderPeople(guestsList, allGuests, filterGuests.value, 'guest');
+
+        saveMsg.textContent = 'Event saved.'; saveMsg.classList.add('text-green-700');
+        await loadEvents();
+      } catch(err) {
+        console.error(err);
+        saveMsg.textContent = err.message || 'Failed to save.'; saveMsg.classList.add('text-red-600');
+      } finally {
+        document.getElementById('btn-save').disabled = false;
+      }
+    });
+
+    // Refresh events
+    btnRefreshEvents.addEventListener('click', loadEvents);
+  </script>
+</body>
+</html>

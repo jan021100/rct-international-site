@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Assign CZ Numbers — legacyMembers</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-6 bg-[#F6F5F2] text-[#1f2328]">
+  <h1 class="text-2xl font-semibold">Assign CZ Numbers (legacyMembers)</h1>
+  <p class="mt-2 text-sm opacity-80">Writes <code>memberNumbers.cz</code> into <code>/legacyMembers</code> docs.</p>
+
+  <button id="run" class="mt-4 px-4 py-2 rounded bg-black text-white">Run assignment</button>
+  <pre id="log" class="mt-4 text-sm whitespace-pre-wrap"></pre>
+
+  <script type="module">
+    import { db } from '/assets/js/firebase.js';
+    import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const LOG = m => document.getElementById('log').textContent += m + "\n";
+
+    // Your mapping starting at CZ02 (since CZ01 is already assigned to you in /users)
+    const entries = [
+      ["cdjeaton@gmail.com","CZ02"],
+      ["matyas@mrichter.cz","CZ03"],
+      ["magda.raska@gmail.com","CZ04"],
+      ["miriam.kavec@gmail.com","CZ05"],
+      ["shuvanginir01@gmail.com","CZ06"],
+      ["kackaspackova@gmail.com","CZ07"],
+      ["adejsek@seznam.cz","CZ08"],
+      ["shreyvg753@gmail.com","CZ09"],
+      ["eliska.klepkova@gmail.com","CZ10"],
+      ["sean.j.knudson@gmail.com","CZ11"],
+      ["jan.griga@seznam.cz","CZ12"],
+      ["jaraparo@seznam.cz","CZ13"],
+      ["monifischer99@gmail.com","CZ14"],
+      ["adam@krejci.cz","CZ15"],
+      ["u.ken134@gmail.com","CZ16"],
+      ["saska.zigova@gmail.com","CZ17"],
+      ["virginia.cox6@gmail.com","CZ18"],
+      ["jan.ristovsky@seznam.cz","CZ19"],
+      ["tina.ghanbarian@ff.cuni.cz","CZ20"],
+      ["jonaswendler@icloud.com","CZ21"],
+      ["andpleva@gmail.com","CZ22"],
+      ["me@robinopletal.com","CZ23"],
+      ["vasicka.michal@outlook.cz","CZ24"],
+      ["shiryaev@live.com","CZ25"],
+      ["premwong13@gmail.com","CZ26"],
+      ["bikewithachim@gmail.com","CZ27"],
+    ];
+
+    async function run(){
+      LOG("--- Start assignment ---");
+      for (const [email, cz] of entries){
+        const ref = doc(db, 'legacyMembers', email); // <- key is email
+        try {
+          await updateDoc(ref, {
+            memberNumbers: { cz }
+          });
+          LOG(`ok: ${email} -> ${cz}`);
+        } catch(err){
+          LOG(`!! FAILED: ${email} (${err.message})`);
+        }
+      }
+      LOG("--- Done ---");
+    }
+
+    document.getElementById('run').addEventListener('click', run);
+  </script>
+</body>
+</html>

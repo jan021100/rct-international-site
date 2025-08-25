@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Account — RCT International</title>
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            base: { 50:'#F6F5F2', 900:'#0D0D0F' },
+            neutral: { 800:'#1f2328', 700:'#2B2B2E', 600:'#4b5563', 500:'#64748b', 300:'#cbd5e1' },
+            gold: '#D6B25E', accent: '#D36B1F',
+            earth: { 100:'#F3EFE6', 200:'#E8E0CF', 300:'#DCCEB5', 400:'#CDBA96', 500:'#BFA77C', 600:'#987E58' }
+          },
+          fontFamily: { sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif'] },
+          boxShadow: { soft:'0 10px 30px rgba(0,0,0,.08)' }
+        }
+      }
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .card{border:1px solid rgb(203 213 225 / .6)}
+    .dark .card{border-color:#374151}
+    .badge{border:1px solid rgb(203 213 225 / .6); border-radius:9999px; padding:.125rem .5rem; font-size:.75rem}
+    .dark .badge{border-color:#374151}
+    .skeleton{background:linear-gradient(90deg,rgba(0,0,0,0.06),rgba(0,0,0,0.12),rgba(0,0,0,0.06)); background-size:200% 100%; animation:sheen 1.2s infinite}
+    @keyframes sheen{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .stat-card{background:linear-gradient(180deg,rgba(191,167,124,.12),transparent)}
+    .dark .stat-card{background:linear-gradient(180deg,rgba(191,167,124,.18),transparent)}
+    .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.10) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.12) 0%, transparent 55%);
+    }
+    .dark .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.18) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.18) 0%, transparent 55%);
+    }
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header -->
+  <div id="site-header"></div>
+
+  <!-- Account -->
+  <section class="py-10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Greeting / hero -->
+<div class="rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-6 sm:p-8">
+  <div id="hero-loading" class="space-y-3">
+    <div class="h-6 w-40 skeleton rounded"></div>
+    <div class="h-10 w-2/3 skeleton rounded"></div>
+    <div class="h-4 w-1/3 skeleton rounded"></div>
+  </div>
+
+  <div id="hero" class="hidden">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <div class="text-sm uppercase tracking-wide opacity-70">Welcome back</div>
+        <h1 class="mt-1 font-serif text-3xl sm:text-4xl text-neutral-900 dark:text-base-50">
+          Hi, <span id="hero-name">Member</span> 👋
+        </h1>
+        <div class="mt-2 flex flex-wrap gap-2" id="role-badges"></div>
+
+        <!-- NEW: membership numbers -->
+        <div class="mt-1 flex flex-wrap gap-2 text-sm">
+          <span id="hero-member-cz" class="hidden badge bg-gold/10"># <span></span></span>
+          <span id="hero-member-de" class="hidden badge bg-gold/10"># <span></span></span>
+        </div>
+      </div>
+
+      <!-- Logout inside the hero card, right-aligned -->
+      <button id="btn-logout"
+        class="self-start px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim hover:bg-neutral-100 dark:hover:bg-neutral-800 text-sm">
+        Log out
+      </button>
+    </div>
+  </div>
+</div>
+
+      <!-- Stats -->
+      <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Total points -->
+        <div class="stat-card rounded-2xl card bg-white dark:bg-neutral-950 p-5">
+          <div class="text-xs uppercase tracking-wide opacity-70">Total points</div>
+          <div class="mt-2 text-4xl font-semibold text-neutral-900 dark:text-base-50" id="st-total">—</div>
+          <div class="text-xs opacity-70 mt-1" id="st-events">— attended events</div>
+        </div>
+        <!-- Cycling -->
+        <div class="stat-card rounded-2xl card bg-white dark:bg-neutral-950 p-5">
+          <div class="text-xs uppercase tracking-wide opacity-70">Cycling points</div>
+          <div class="mt-2 text-4xl font-semibold" id="st-cycling">—</div>
+          <div class="text-xs opacity-70 mt-1" id="st-cycling-events">— rides</div>
+        </div>
+        <!-- Running -->
+        <div class="stat-card rounded-2xl card bg-white dark:bg-neutral-950 p-5">
+          <div class="text-xs uppercase tracking-wide opacity-70">Running points</div>
+          <div class="mt-2 text-4xl font-semibold" id="st-running">—</div>
+          <div class="text-xs opacity-70 mt-1">all‑time</div>
+        </div>
+        <!-- Rank -->
+        <div class="stat-card rounded-2xl card bg-white dark:bg-neutral-950 p-5">
+          <div class="text-xs uppercase tracking-wide opacity-70">Team rank</div>
+          <div class="mt-2 text-4xl font-semibold" id="st-rank">—</div>
+          <div class="text-xs opacity-70 mt-1" id="st-rank-note">rank among members</div>
+        </div>
+      </div>
+
+      <!-- Slim Leaderboards CTA (members/admins only) -->
+      <div id="leaderboards-cta" class="hidden mt-4 rounded-xl card cta-grad bg-white dark:bg-neutral-950 shadow-soft px-5 py-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="leading-tight">
+            <div class="text-[11px] uppercase tracking-wide opacity-70">Compete • Celebrate • Improve</div>
+            <div class="font-serif text-xl mt-0.5">Check the RCT Leaderboards</div>
+          </div>
+          <a href="leaderboard.html"
+             class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 hover:opacity-90 anim text-sm">
+            View Leaderboards
+            <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Membership CTA (non-members only; same style) -->
+      <div id="membership-cta" class="hidden mt-4 rounded-xl card cta-grad bg-white dark:bg-neutral-950 shadow-soft px-5 py-5">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="leading-tight">
+            <div class="text-[11px] uppercase tracking-wide opacity-70">Unlock • Belong • Thrive</div>
+            <div class="font-serif text-xl mt-0.5">Become a Member to Unlock Your Stats</div>
+            <div class="text-sm opacity-70 mt-0.5">
+              Join the Czech <span class="whitespace-nowrap">spolek</span> or the German e.V. to see your points, rank, and history.
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <a href="spolekjoin.html"
+               class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 hover:opacity-90 anim text-sm">
+              Join Spolek
+            </a>
+            <a href="evjoin.html"
+               class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 hover:opacity-90 anim text-sm">
+              Join e.V.
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary stats -->
+      <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="rounded-2xl card bg-white dark:bg-neutral-950 p-5">
+          <div class="text-xs uppercase tracking-wide opacity-70">Last attended event</div>
+          <div class="mt-2 font-medium" id="st-last-name">—</div>
+          <div class="text-xs opacity-70" id="st-last-date">—</div>
+        </div>
+        <div class="rounded-2xl card bg-white dark:bg-neutral-950 p-5">
+          <div class="text-xs uppercase tracking-wide opacity-70">Active days</div>
+          <div class="mt-2 font-medium" id="st-active-days">—</div>
+          <div class="text-xs opacity-70">unique event dates</div>
+        </div>
+        <div class="rounded-2xl card bg-white dark:bg-neutral-950 p-5">
+          <div class="text-xs uppercase tracking-wide opacity-70">Most active month</div>
+          <div class="mt-2 font-medium" id="st-top-month">—</div>
+          <div class="text-xs opacity-70" id="st-top-month-pts">—</div>
+        </div>
+      </div>
+      
+      <!-- Slim Events CTA -->
+      <div id="events-cta" class="mt-4 rounded-xl card cta-grad bg-white dark:bg-neutral-950 shadow-soft px-5 py-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="leading-tight">
+            <div class="text-[11px] uppercase tracking-wide opacity-70">Ride • Run • Connect</div>
+            <div class="font-serif text-xl mt-0.5">Check out upcoming RCT Events</div>
+            <div class="text-sm opacity-70 mt-0.5">
+              Weekly rides, runs & other upcoming events
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <!-- Strava button -->
+            <a href="https://www.strava.com/clubs/1032760" target="_blank"
+              class="inline-flex items-center justify-center px-6 py-2 rounded-lg text-white font-medium anim text-sm
+                     bg-gradient-to-r from-[#D36B1F] to-[#B84F0C] hover:opacity-90">
+              Strava
+            </a>
+            <!-- Atlans button -->
+            <a href="https://atlans.com/community/47" target="_blank"
+              class="inline-flex items-center justify-center px-6 py-2 rounded-lg text-white font-medium anim text-sm
+                     bg-gradient-to-r from-[#6E8B3D] to-[#4C6627] hover:opacity-90">
+              Atlans
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent activity + Milestone -->
+      <div class="mt-6 grid lg:grid-cols-3 gap-4">
+        <div class="rounded-2xl card bg-white dark:bg-neutral-950 p-6 lg:col-span-2">
+          <div class="flex items-center justify-between">
+            <h2 class="font-semibold">Recent activity</h2>
+            <button id="btn-toggle-activity" class="text-sm underline opacity-80">Show all activity</button>
+          </div>
+          <div id="recent-activity" class="mt-3 text-sm opacity-80">Loading…</div>
+        </div>
+
+        <div class="rounded-2xl card bg-white dark:bg-neutral-950 p-6">
+          <h2 class="font-semibold">Milestone</h2>
+          <p class="opacity-80 text-sm mt-1">Keep the momentum going.</p>
+          <div class="mt-3 rounded-xl p-4 bg-earth-100/60 dark:bg-neutral-900">
+            <div class="text-xs uppercase tracking-wide opacity-70">Next target</div>
+            <div class="mt-1 text-2xl font-semibold" id="milestone-next">—</div>
+            <div class="text-xs opacity-70 mt-1" id="milestone-note">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Details (collapsed) -->
+      <div id="details" class="hidden mt-6 rounded-2xl card bg-white dark:bg-neutral-950 p-6">
+        <h2 class="font-semibold text-lg">Your profile data</h2>
+        <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div><div class="text-xs uppercase tracking-wide opacity-70">Name</div><div id="acc-name" class="mt-1">—</div></div>
+          <div><div class="text-xs uppercase tracking-wide opacity-70">Email</div><div id="acc-email" class="mt-1">—</div></div>
+          <div><div class="text-xs uppercase tracking-wide opacity-70">Phone</div><div id="acc-phone" class="mt-1">—</div></div>
+          <div><div class="text-xs uppercase tracking-wide opacity-70">Address</div><div id="acc-address" class="mt-1 break-words">—</div></div>
+          <div><div class="text-xs uppercase tracking-wide opacity-70">Nationality</div><div id="acc-nationality" class="mt-1">—</div></div>
+          <div><div class="text-xs uppercase tracking-wide opacity-70">Birthdate</div><div id="acc-birthdate" class="mt-1">—</div></div>
+          <div><div class="text-xs uppercase tracking-wide opacity-70">Sports</div><div id="acc-sports" class="mt-1">—</div></div>
+          <div><div class="text-xs uppercase tracking-wide opacity-70">Profile created</div><div id="acc-created" class="mt-1">—</div></div>
+        </div>
+        <div class="mt-4 flex items-center gap-3">
+          <button id="btn-toggle-details" class="px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim hover:bg-neutral-100 dark:hover:bg-neutral-800">
+            Hide my data
+          </button>
+          <a href="mailto:info@rct-prague.de?subject=Data Change Request"
+             id="btn-request-change"
+             class="inline-block px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 hover:opacity-90 anim">
+            Request to change your data
+          </a>
+        </div>
+      </div>
+
+      <!-- Admin tools (separate block, aligned) -->
+      <div id="admin-section" class="hidden mt-10">
+        <div class="rounded-2xl card bg-white dark:bg-neutral-950 p-6">
+          <div class="flex items-center justify-between">
+            <h2 class="font-serif text-2xl">Admin tools</h2>
+          </div>
+          <div class="mt-3 flex flex-wrap gap-3">
+            <a href="attendance.html" class="px-4 py-2 rounded-lg bg-accent text-white hover:opacity-90 anim">Manage Attendance</a>
+            <a href="merge.html" class="px-4 py-2 rounded-lg bg-accent text-white hover:opacity-90 anim">Merge Profiles</a>
+            <a href="confirmMember.html" class="px-4 py-2 rounded-lg bg-accent text-white hover:opacity-90 anim">Confirm Apllications</a>
+          </div>
+        </div>
+      </div>
+
+      <noscript>
+        <div class="mt-6 p-4 rounded-2xl card bg-white dark:bg-neutral-950">
+          <p>Please enable JavaScript to view your account. You can also <a class="underline" href="login.html">sign in here</a>.</p>
+        </div>
+      </noscript>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader + sticky header offset -->
+  <script defer>
+    async function loadComponent(id, file) {
+      const host = document.getElementById(id);
+      if (!host) return;
+      const res = await fetch(file, { cache: 'no-cache' });
+      host.innerHTML = await res.text();
+    }
+    function applyHeaderOffset() {
+      const header = document.getElementById('main-header');
+      document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+    }
+    (async () => {
+      await Promise.all([
+        loadComponent('site-header', '/components/header.html'),
+        loadComponent('site-footer', '/components/footer.html')
+      ]);
+      const header = document.getElementById('main-header');
+      if (header) {
+        applyHeaderOffset();
+        const ro = new ResizeObserver(applyHeaderOffset);
+        ro.observe(header);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(applyHeaderOffset);
+        window.addEventListener('resize', applyHeaderOffset);
+        window.addEventListener('orientationchange', applyHeaderOffset);
+      }
+    })();
+  </script>
+
+  <!-- Firebase: redirect if not signed in; populate profile and stats -->
+  <script type="module">
+    import { auth, db, getUserProfile, onUserChanged } from '/assets/js/firebase.js';
+    import {
+      collection, collectionGroup, getDocs, getDoc, doc, query, where
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // ------- helpers
+    const $ = (id) => document.getElementById(id);
+    const setText = (id, v) => { const el=$(id); if(el) el.textContent = v ?? '—'; };
+    const fmtDate = (v) => { try { return new Date(v).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); } catch { return '—'; } };
+    const fmtMonth = (yyyyMM) => {
+      try { const [y,m] = yyyyMM.split('-').map(Number); return new Date(y, m-1, 1).toLocaleDateString(undefined, { year:'numeric', month:'long' }); }
+      catch { return yyyyMM; }
+    };
+    const redirectToLogin = () => {
+      const next = encodeURIComponent(location.pathname.replace(/^\//,'') || 'account.html');
+      location.replace(`login.html?next=${next}`);
+    };
+    const norm = (s) => String(s||'').trim().toLowerCase();
+
+    function renderBadges(roles) {
+      const wrap = $('role-badges'); wrap.innerHTML = '';
+      const mk = (t, cls='') => { const s=document.createElement('span'); s.className='badge '+cls; s.textContent=t; return s; };
+      if (roles?.spolekMember) wrap.appendChild(mk('Spolek member','bg-gold/10'));
+      if (roles?.evMember)     wrap.appendChild(mk('e.V. member','bg-gold/10'));
+      if (roles?.legacyMember) wrap.appendChild(mk('Legacy'));
+      if (roles?.rctMember)    wrap.appendChild(mk('RCT'));
+      if (roles?.admin)        wrap.appendChild(mk('Admin','bg-accent text-white'));
+    }
+
+    // ------- stats + helpers (unchanged) -------
+    async function loadStatsForUser(uid) {
+      const events = new Map();
+      try {
+        const evSnap = await getDocs(collection(db,'events'));
+        evSnap.forEach(d => {
+          const e = d.data() || {};
+          events.set(d.id, {
+            sport: (e.sport || '').toString().toLowerCase(),
+            date:  e.date || null,
+            name:  e.name || ''
+          });
+        });
+      } catch {}
+
+      const qy = query(collectionGroup(db,'attendance'), where('userId','==',uid));
+      const snap = await getDocs(qy);
+
+      const stats = {
+        total: 0,
+        cycling: 0, cyclingEvents: 0,
+        running: 0, runningEvents: 0,
+        triathlon: 0, other: 0,
+        eventsAttended: 0,
+        last: null, lastDate: null,
+        activeDates: new Set(),
+        topMonthKey: null, topMonthPts: 0,
+        recent: [], recentAll: []
+      };
+
+      if (snap.empty) return stats;
+
+      const seenEventIds = new Set();
+      const monthPoints = new Map();
+      const rec = [];
+
+      snap.forEach(a => {
+        const x = a.data() || {};
+        const pts = Number(x.awardedPoints || 0);
+        stats.total += pts;
+
+        const parts = a.ref.path.split('/');
+        const eventId = parts.length >= 2 ? parts[1] : null;
+
+        let sport = '', date = null, name = '';
+        if (eventId && events.has(eventId)) { const ev = events.get(eventId); sport=ev.sport; date=ev.date; name=ev.name; }
+
+        if (eventId && !seenEventIds.has(eventId)) seenEventIds.add(eventId);
+        if (date) {
+          const day = date.slice(0,10);
+          stats.activeDates.add(day);
+          const key = day.slice(0,7);
+          monthPoints.set(key, (monthPoints.get(key)||0) + pts);
+          if (!stats.lastDate || new Date(date) > new Date(stats.lastDate)) { stats.lastDate = date; stats.last = name; }
+        }
+
+        if (sport.includes('cycl')) { stats.cycling += pts; stats.cyclingEvents += 1; }
+        else if (sport.includes('run')) { stats.running += pts; stats.runningEvents += 1; }
+        else if (sport.includes('tri')) { stats.triathlon += pts; }
+        else { stats.other += pts; }
+
+        rec.push({ name, date, pts, sport });
+      });
+
+      stats.eventsAttended = seenEventIds.size;
+      for (const [k,v] of monthPoints.entries()) if (v > stats.topMonthPts) { stats.topMonthPts = v; stats.topMonthKey = k; }
+
+      const ordered = rec.filter(r=>r.date).sort((a,b)=> new Date(b.date) - new Date(a.date));
+      stats.recentAll = ordered;
+      stats.recent = ordered.slice(0,5);
+
+      return stats;
+    }
+
+    async function computeRankSmart(uid, profile) {
+      try {
+        const all = await getDocs(collectionGroup(db,'attendance'));
+        const totals = new Map();
+        const myEmail = norm(profile?.email);
+        const myName  = norm(profile?.name);
+        let myTotal = 0;
+
+        all.forEach(d => {
+          const x = d.data() || {};
+          const pts = Number(x.awardedPoints || 0) || 0;
+          let key = null;
+          if (x.userId) key = `u:${x.userId}`;
+          else if (x.guestId) key = `g:${x.guestId}`;
+          else key = `n:${norm(x.displayName)}`;
+          totals.set(key, (totals.get(key)||0) + pts);
+
+          const emailMatch = myEmail && norm(x.email) === myEmail;
+          const nameMatch  = myName  && norm(x.displayName) === myName;
+          const uidMatch   = x.userId === uid;
+          if (uidMatch || emailMatch || nameMatch) myTotal += pts;
+        });
+
+        const population = totals.size;
+        if (population === 0 || myTotal === 0) return { rank:'—', population:'—' };
+        let better = 0; totals.forEach(v => { if (v > myTotal) better += 1; });
+        return { rank: better + 1, population };
+      } catch { return { rank:'—', population:'—' }; }
+    }
+
+    function computeMilestone(total){
+      const step = 50;
+      const next = Math.ceil((total+1)/step)*step;
+      const diff = Math.max(0, next - total);
+      return { next, diff };
+    }
+
+    // Simple lock badge generator
+    function lockedBadge(text='Members only'){
+      return `
+        <span class="inline-flex items-center gap-2 text-sm opacity-80">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-80" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v7a2 2 0 002 2h12a2 2 0 002-2v-7a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 8V7a3 3 0 116 0v3H9z"/>
+          </svg>
+          ${text}
+        </span>
+      `;
+    }
+
+    // Apply locked state to all tiles/panels
+    function applyLockedState(){
+      // top stats
+      setText('st-total','—'); setText('st-events',''); $('st-events').innerHTML = lockedBadge();
+      setText('st-cycling','—'); $('st-cycling-events').innerHTML = lockedBadge();
+      setText('st-running','—');
+      setText('st-rank','—'); $('st-rank-note').innerHTML = lockedBadge('Rank visible to members');
+
+      // secondary stats
+      $('st-last-name').innerHTML = lockedBadge('Hidden for non‑members');
+      setText('st-last-date','—');
+      $('st-active-days').innerHTML = '—';
+      $('st-top-month').innerHTML = '—';
+      $('st-top-month-pts').innerHTML = '';
+
+      // activity & milestone
+      const ra = $('recent-activity');
+      if (ra) ra.innerHTML = lockedBadge('Recent activity is a member perk');
+      const msNext = $('milestone-next'); if (msNext) msNext.innerHTML = '—';
+      const msNote = $('milestone-note'); if (msNote) msNote.innerHTML = lockedBadge('Unlock milestones with membership');
+
+      // controls
+      const btn = $('btn-toggle-activity'); if (btn) btn.classList.add('hidden');
+
+      // show membership CTA
+      const mem = $('membership-cta'); if (mem) mem.classList.remove('hidden');
+    }
+
+    // Expand/collapse helpers
+    function renderActivity(list, full=false){
+      const box = $('recent-activity');
+      if (!list || list.length===0) { box.textContent = 'No recent activity yet.'; return; }
+      const items = full ? list : list.slice(0,5);
+      const wrap = document.createElement('div');
+      wrap.className = 'divide-y divide-neutral-200 dark:divide-neutral-800';
+      items.forEach(r=>{
+        const row = document.createElement('div');
+        row.className = 'py-2 flex items-center justify-between gap-3';
+        const tag = r.sport ? r.sport.charAt(0).toUpperCase()+r.sport.slice(1) : 'Event';
+        row.innerHTML = `
+          <div>
+            <div class="font-medium">${r.name || 'Event'}</div>
+            <div class="text-xs opacity-70">${[fmtDate(r.date), tag].filter(Boolean).join(' • ')}</div>
+          </div>
+          <span class="badge">${r.pts || 0} pts</span>
+        `;
+        wrap.appendChild(row);
+      });
+      box.innerHTML = ''; box.appendChild(wrap);
+      const btn = $('btn-toggle-activity');
+      if (btn) btn.textContent = full ? 'Show less' : 'Show all activity';
+      box.dataset.expanded = full ? '1' : '0';
+    }
+
+    // Global UI clicks
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('#btn-toggle-details');
+      if (btn) {
+        const details = $('details');
+        const open = details.classList.toggle('hidden') === false;
+        btn.textContent = open ? 'Hide my data' : 'Show my data';
+      }
+      const act = e.target.closest('#btn-toggle-activity');
+      if (act) {
+        const full = $('recent-activity').dataset.expanded !== '1';
+        renderActivity(window._RECENT_ALL || [], full);
+      }
+    });
+
+    // ------- auth gate
+    onUserChanged(async (user) => {
+      if (!user) { redirectToLogin(); return; }
+
+      try {
+        const profile = await getUserProfile(user.uid);
+        if (!profile) { redirectToLogin(); return; }
+
+        $('hero-name').textContent = profile.name || (profile.email || 'Member');
+        renderBadges(profile.roles || {});
+        $('hero-loading').classList.add('hidden'); $('hero').classList.remove('hidden');
+        
+        /* === Member numbers in hero (user doc first, then legacy fallback) === */
+async function renderMemberNumbers(profile){
+  const czEl = document.getElementById('hero-member-cz');
+  const deEl = document.getElementById('hero-member-de');
+  const show = (el, val) => { if (el && val) { el.querySelector('span').textContent = val; el.classList.remove('hidden'); } };
+
+  // 1) Try numbers from users/{uid} -> memberNumbers map
+  if (profile?.memberNumbers) {
+    show(czEl, profile.memberNumbers.cz);
+    show(deEl, profile.memberNumbers.de);
+  }
+
+  // 2) Fallback: try legacyMembers by email
+  if ((!profile?.memberNumbers?.cz) && (!profile?.memberNumbers?.de)) {
+    try {
+      const email = (profile?.email || '').trim().toLowerCase();
+      if (!email) return;
+      const qLegacy = query(collection(db,'legacyMembers'), where('email','==', email));
+      const snap = await getDocs(qLegacy);
+      if (!snap.empty) {
+        const legacy = snap.docs[0].data() || {};
+        show(czEl, legacy.memberNumberCZ || legacy.czNumber || legacy.memberNumbers?.cz);
+        show(deEl, legacy.memberNumberDE || legacy.deNumber || legacy.memberNumbers?.de);
+      }
+    } catch (e) {
+      console.warn('Legacy member number lookup failed:', e?.message || e);
+    }
+  }
+}
+await renderMemberNumbers(profile);
+
+        const isMember = !!(profile?.roles?.spolekMember || profile?.roles?.evMember);
+        if (isMember || profile.roles?.admin) {
+          $('leaderboards-cta').classList.remove('hidden');
+        } else {
+          // Non-member: lock everything and skip heavy reads
+          applyLockedState();
+        }
+        if (profile.roles?.admin) $('admin-section').classList.remove('hidden');
+
+        // Profile details
+        setText('acc-name', profile.name);
+        setText('acc-email', profile.email);
+        setText('acc-phone', profile.phone);
+        setText('acc-address', profile.address);
+        setText('acc-nationality', profile.nationality);
+        setText('acc-birthdate', profile.birthdate);
+        setText('acc-sports', profile.sports);
+        setText('acc-created', profile.createdAt ? new Date(profile.createdAt).toLocaleString() : '—');
+
+        // If member, fetch stats/rank as before
+        if (isMember) {
+          try {
+            const s = await loadStatsForUser(user.uid);
+
+            setText('st-total', s.total);
+            setText('st-events', `${s.eventsAttended} attended events`);
+            setText('st-cycling', s.cycling);
+            setText('st-cycling-events', `${s.cyclingEvents} ${s.cyclingEvents===1?'ride':'rides'}`);
+            setText('st-running', s.running);
+            setText('st-last-name', s.last || '—');
+            setText('st-last-date', s.lastDate ? fmtDate(s.lastDate) : '—');
+            setText('st-active-days', s.activeDates.size || 0);
+
+            if (s.topMonthKey) {
+              setText('st-top-month', fmtMonth(s.topMonthKey));
+              setText('st-top-month-pts', `${s.topMonthPts} pts`);
+            } else {
+              setText('st-top-month', '—');
+              setText('st-top-month-pts', '—');
+            }
+
+            window._RECENT_ALL = s.recentAll || [];
+            renderActivity(s.recentAll || [], false);
+
+            const ms = computeMilestone(s.total || 0);
+            setText('milestone-next', `${ms.next} pts`);
+            setText('milestone-note', ms.diff ? `${ms.diff} to go` : 'You just hit a milestone! 🎉');
+
+          } catch (e) {
+            console.error('Stats error:', e?.message||e);
+            setText('st-total','—'); setText('st-events','stats unavailable');
+            setText('st-cycling','—'); setText('st-cycling-events','— rides');
+            setText('st-running','—');
+            setText('st-last-name','—'); setText('st-last-date','—');
+            setText('st-active-days','—');
+            setText('st-top-month','—'); setText('st-top-month-pts','—');
+            $('recent-activity').textContent = '—';
+            setText('milestone-next','—'); setText('milestone-note','—');
+          }
+
+          // Rank
+          const rk = await computeRankSmart(user.uid, profile);
+          setText('st-rank', rk.rank);
+          setText('st-rank-note', rk.population !== '—' ? `out of ${rk.population}` : 'rank among members');
+        }
+
+      } catch (e) {
+        console.error(e);
+        redirectToLogin();
+      }
+    });
+
+    // Logout
+    document.addEventListener('click', async (e) => {
+      if (e.target.closest('#btn-logout')) {
+        try {
+          await auth.signOut();
+          redirectToLogin();
+        } catch (err) {
+          console.error('Logout error:', err);
+          alert('Could not log out, please try again.');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

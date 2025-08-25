@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RCT International — Triathlon</title>
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            base: { 50:'#F6F5F2', 900:'#0D0D0F' },
+            neutral: { 800:'#1f2328', 700:'#2B2B2E', 600:'#4b5563', 500:'#64748b', 300:'#cbd5e1' },
+            gold: '#D6B25E',
+            accent: '#D36B1F'
+          },
+          fontFamily: { sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif'] },
+          boxShadow: { soft:'0 10px 30px rgba(0,0,0,.08)' }
+        }
+      }
+    }
+  </script>
+  <style>.anim{transition:all .2s ease}</style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header (injected) -->
+  <div id="site-header"></div>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 grid lg:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="uppercase tracking-widest text-xs opacity-70">Triathlon</p>
+        <h1 class="font-serif text-4xl sm:text-5xl text-neutral-900 dark:text-base-50">Swim. Bike. Run. Together.</h1>
+        <p class="mt-4 opacity-90">
+          Triathlon at RCT grows from our core: cycling, running, and open‑water swims. We’re a friendly,
+          multi‑sport crew—some chasing first sprints, others eyeing long distance. The aim is simple:
+          connect triathletes, train across disciplines, and show up for each other on race day.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="join.html" class="px-5 py-3 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 anim">Join</a>
+          <a href="#connect" class="px-5 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">How to connect</a>
+        </div>
+      </div>
+      <div class="rounded-2xl overflow-hidden shadow-soft border border-neutral-300/60 dark:border-neutral-700">
+        <img src="/assets/img/hero-tri@2000.jpg" alt="RCT triathletes" class="w-full h-full object-cover">
+      </div>
+    </div>
+  </section>
+
+  <!-- Train Across Three Disciplines -->
+  <section class="py-12 border-t border-neutral-300/60 dark:border-neutral-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="font-serif text-3xl text-neutral-900 dark:text-base-50">Train across three disciplines</h2>
+
+      <div class="mt-6 grid lg:grid-cols-3 gap-6">
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700">
+          <div class="text-xs uppercase tracking-wide opacity-70">Bike</div>
+          <h3 class="mt-1 font-semibold">Group rides (all levels)</h3>
+          <p class="mt-2 text-sm opacity-90">
+            Social endurance rides on weekends and structured midweek efforts with friends of RCT. Build aerobic capacity,
+            practice group skills, and get route ideas for solo training.
+          </p>
+          <a href="cycling.html" class="mt-3 inline-block text-sm underline">See Cycling</a>
+        </div>
+
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700">
+          <div class="text-xs uppercase tracking-wide opacity-70">Run</div>
+          <h3 class="mt-1 font-semibold">Club runs & sessions</h3>
+          <p class="mt-2 text-sm opacity-90">
+            Social city runs, distance days, and trail meetups. Perfect for building consistency between bike sessions and dialing
+            in fueling and pacing for brick days.
+          </p>
+          <a href="running.html" class="mt-3 inline-block text-sm underline">See Running</a>
+        </div>
+
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700">
+          <div class="text-xs uppercase tracking-wide opacity-70">Swim</div>
+          <h3 class="mt-1 font-semibold">Pool & open water</h3>
+          <p class="mt-2 text-sm opacity-90">
+            Members coordinate pool lanes and occasional open‑water meetups when weather allows. Technique tips are shared informally;
+            we’re building toward regular community swim dates.
+          </p>
+        </div>
+      </div>
+
+      <p class="mt-4 text-sm opacity-80">
+        Many triathletes in RCT combine <em>one</em> group session with <em>two</em> solo workouts weekly. Share your plan in the chat—there’s
+        usually someone keen to join for a brick.
+      </p>
+    </div>
+  </section>
+
+  <!-- What's ahead -->
+  <section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="font-serif text-3xl text-neutral-900 dark:text-base-50">What’s ahead</h2>
+      <div class="mt-5 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700">
+          <h3 class="font-semibold">Tri meetups</h3>
+          <p class="mt-2 text-sm opacity-90">Casual get‑togethers for Q&A, gear chat, and race planning.</p>
+        </div>
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700">
+          <h3 class="font-semibold">Brick workouts</h3>
+          <p class="mt-2 text-sm opacity-90">Bike‑to‑run sessions to practice transitions and pacing.</p>
+        </div>
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700">
+          <h3 class="font-semibold">Race day support</h3>
+          <p class="mt-2 text-sm opacity-90">Logistics, cheering squads, and shared travel for target races.</p>
+        </div>
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700">
+          <h3 class="font-semibold">Training weekends</h3>
+          <p class="mt-2 text-sm opacity-90">Destination camps that combine all three disciplines.</p>
+        </div>
+        <div class="p-6 rounded-2xl border border-neutral-300/60 dark:border-neutral-700">
+          <h3 class="font-semibold">Community swims</h3>
+          <p class="mt-2 text-sm opacity-90">Regular pool lanes and seasonal open‑water meetups.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Connect -->
+  <section id="connect" class="py-12 border-t border-neutral-300/60 dark:border-neutral-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="font-serif text-3xl text-neutral-900 dark:text-base-50">Connect with the tri community</h2>
+
+      <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- WhatsApp Triathlon -->
+        <a target="_blank" rel="noopener" href="https://chat.whatsapp.com/Cit2xtAuX0l8kNX1zaYLFo"
+           class="group rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 hover:shadow-soft anim flex items-center gap-3">
+          <img src="/assets/img/icons/whatsapp-custom.png" alt="WhatsApp icon" class="w-5 h-5 opacity-80 rounded">
+          <div>
+            <div class="font-semibold">WhatsApp – Triathlon</div>
+            <div class="text-xs opacity-70">Say hi, share plans, find brick buddies</div>
+          </div>
+        </a>
+
+        <!-- Strava club -->
+        <a target="_blank" rel="noopener" href="https://www.strava.com/clubs/1032760"
+           class="group rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 hover:shadow-soft anim flex items-center gap-3">
+          <img src="/assets/img/icons/strava-custom.svg" alt="Strava icon" class="w-5 h-5 opacity-80 rounded">
+          <div>
+            <div class="font-semibold">Strava Club</div>
+            <div class="text-xs opacity-70">See rides, runs, and OWS meetups</div>
+          </div>
+        </a>
+
+        <!-- Email -->
+        <a target="_blank" rel="noopener" href="mailto:info@rct-prague.de"
+           class="group rounded-xl border border-neutral-300/60 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-950 hover:shadow-soft anim flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <div>
+            <div class="font-semibold">Email us</div>
+            <div class="text-xs opacity-70">Ask about races or joining a brick</div>
+          </div>
+        </a>
+      </div>
+
+      <p class="mt-4 text-sm opacity-80">
+        Tip: Most coordination happens in the WhatsApp group; new sessions get pinned there first.
+      </p>
+    </div>
+  </section>
+
+  <!-- Simple FAQ -->
+  <section class="py-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="font-serif text-3xl text-neutral-900 dark:text-base-50">FAQ</h2>
+      <div class="mt-6 grid md:grid-cols-2 gap-6 text-sm opacity-90">
+        <div class="rounded-2xl border border-neutral-300/60 dark:border-neutral-700 p-5">
+          <div class="font-semibold">Do I need to be fast?</div>
+          <p class="mt-2">No. We welcome all levels. Our bike and run sessions usually offer a steady “conversational”
+            option and a faster option. Brick days are self‑paced.</p>
+        </div>
+        <div class="rounded-2xl border border-neutral-300/60 dark:border-neutral-700 p-5">
+          <div class="font-semibold">Are there coached swims?</div>
+          <p class="mt-2">Not yet. We’re starting with member‑organized lanes and OWS meetups. As the group grows,
+            we’ll look into structured technique sessions.</p>
+        </div>
+        <div class="rounded-2xl border border-neutral-300/60 dark:border-neutral-700 p-5">
+          <div class="font-semibold">Can I just join for one sport?</div>
+          <p class="mt-2">Absolutely. Many runners and cyclists try triathlon elements over time. Join the chat and
+            dip your toes—literally.</p>
+        </div>
+        <div class="rounded-2xl border border-neutral-300/60 dark:border-neutral-700 p-5">
+          <div class="font-semibold">How do races work?</div>
+          <p class="mt-2">We share a community calendar, form small groups for logistics, and cheer each other on.
+            Wear the kit, rep the team, and enjoy the day.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 bg-neutral-900 text-white dark:bg-neutral-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-8 items-center">
+      <div class="md:col-span-2">
+        <h3 class="font-serif text-3xl">Join. Train. Race. Belong.</h3>
+        <p class="mt-2 opacity-80">Plug into the chat, find training partners, and build toward your next start line.</p>
+      </div>
+      <div><a href="join.html" class="px-6 py-3 rounded-lg bg-gold text-neutral-900 font-semibold anim">Get involved</a></div>
+    </div>
+  </section>
+
+  <!-- Footer (injected) -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader + sticky header offset -->
+  <script defer>
+  async function loadComponent(id, file) {
+    const host = document.getElementById(id);
+    if (!host) return;
+    const res = await fetch(file, { cache: 'no-cache' });
+    host.innerHTML = await res.text();
+  }
+
+  function applyHeaderOffset() {
+    const header = document.getElementById('main-header');
+    document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+  }
+
+  (async () => {
+    await Promise.all([
+      loadComponent('site-header', '/components/header.html'),
+      loadComponent('site-footer', '/components/footer.html'),
+    ]);
+
+    const yr = document.getElementById('yr');
+    if (yr) yr.textContent = new Date().getFullYear();
+
+    const header = document.getElementById('main-header');
+    if (header) {
+      applyHeaderOffset();
+      const ro = new ResizeObserver(applyHeaderOffset);
+      ro.observe(header);
+      if (document.fonts && document.fonts.ready) { document.fonts.ready.then(applyHeaderOffset); }
+      window.addEventListener('resize', applyHeaderOffset);
+      window.addEventListener('orientationchange', applyHeaderOffset);
+    }
+  })();
+  </script>
+
+  <!-- Global site script (ES module; imports firebase.js internally) -->
+  <script type="module" src="assets/js/site.js"></script>
+</body>
+</html>

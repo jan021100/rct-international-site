@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Členství — RCT International z.s. (Spolek)</title>
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode:'class',
+      theme:{ extend:{
+        colors:{
+          base:{50:'#F6F5F2',900:'#0D0D0F'},
+          neutral:{800:'#1f2328',700:'#2B2B2E',600:'#4b5563',500:'#64748b',300:'#cbd5e1'},
+          gold:'#D6B25E', accent:'#D36B1F',
+          earth:{100:'#F3EFE6',200:'#E8E0CF',300:'#DCCEB5',400:'#CDBA96',500:'#BFA77C',600:'#987E58'}
+        },
+        fontFamily:{sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif']},
+        boxShadow:{soft:'0 10px 30px rgba(0,0,0,.08)'}
+      }}
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .card{border:1px solid rgb(203 213 225 / .6)}
+    .dark .card{border-color:#374151}
+    .badge{border:1px solid rgb(203 213 225 / .6); border-radius:9999px; padding:.125rem .5rem; font-size:.75rem}
+    .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.10) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.12) 0%, transparent 55%);
+    }
+    .dark .cta-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.18) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.18) 0%, transparent 55%);
+    }
+    .req:after{content:" *"; color:#b91c1c}
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header -->
+  <div id="site-header"></div>
+
+  <!-- Hero -->
+  <section class="py-10">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-6 sm:p-8">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <div class="text-sm uppercase tracking-wide opacity-70">Membership Application • Přihláška</div>
+            <h1 class="mt-1 font-serif text-3xl sm:text-4xl text-neutral-900 dark:text-base-50">
+              RCT International, z.s. — Spolek
+            </h1>
+            <p class="mt-2 opacity-80 text-sm">
+              EN: Complete the form to apply for membership. The board reviews every application.<br>
+              CZ: Vyplňte formulář pro členství. Přihlášku schvaluje výbor spolku.
+            </p>
+          </div>
+          <!-- (no language switcher; page is bilingual) -->
+        </div>
+      </div>
+
+      <!-- Statutes / Terms CTA -->
+      <div class="mt-4 rounded-xl card cta-grad bg-white dark:bg-neutral-950 shadow-soft px-5 py-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="leading-tight">
+            <div class="text-[11px] uppercase tracking-wide opacity-70">Read before you apply • Přečtěte si před podáním</div>
+            <div class="font-serif text-xl mt-0.5">Statutes & Terms of Membership</div>
+          </div>
+          <div class="flex gap-3">
+            <a href="stanovy.html" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-neutral-900 text-white hover:opacity-90 anim text-sm">Statutes • Stanovy</a>
+            <a href="termsSpolek.html" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-neutral-900 text-white hover:opacity-90 anim text-sm">Terms • Podmínky</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Auth gate -->
+  <section id="auth-gate" class="hidden">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mt-4 rounded-xl card bg-white dark:bg-neutral-950 shadow-soft px-5 py-4">
+        <p class="text-sm">
+          Please <a class="underline" href="/login.html?next=spolekjoin.html">sign in</a> to submit your application. •
+          Pro odeslání přihlášky se prosím <a class="underline" href="/login.html?next=spolekjoin.html">přihlaste</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form -->
+  <section class="pb-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <form id="app-form" class="rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-6 sm:p-8 space-y-8">
+        <!-- Applicant -->
+        <div>
+          <h2 class="font-serif text-2xl">Applicant • Žadatel</h2>
+          <div class="mt-4 grid sm:grid-cols-2 gap-4">
+            <div><label class="req block text-sm mb-1">Full name • Celé jméno</label><input id="ap-name" required class="w-full px-4 py-2 rounded-lg border dark:bg-neutral-900"></div>
+            <div><label class="req block text-sm mb-1">Email</label><input id="ap-email" type="email" required class="w-full px-4 py-2 rounded-lg border dark:bg-neutral-900"></div>
+            <div><label class="req block text-sm mb-1">Birthdate • Datum narození</label><input id="ap-birth" type="date" required class="w-full px-4 py-2 rounded-lg border dark:bg-neutral-900"></div>
+            <div><label class="block text-sm mb-1">Phone • Telefon</label><input id="ap-phone" class="w-full px-4 py-2 rounded-lg border dark:bg-neutral-900"></div>
+            <div class="sm:col-span-2"><label class="req block text-sm mb-1">Address • Adresa</label><input id="ap-addr" required class="w-full px-4 py-2 rounded-lg border dark:bg-neutral-900"></div>
+            <div><label class="req block text-sm mb-1">Nationality • Státní příslušnost</label><input id="ap-nat" required class="w-full px-4 py-2 rounded-lg border dark:bg-neutral-900"></div>
+            <div class="sm:col-span-2"><label class="block text-sm mb-1">Strava profile link • Odkaz na Stravu</label><input id="ap-strava" type="url" placeholder="https://www.strava.com/athletes/…" class="w-full px-4 py-2 rounded-lg border dark:bg-neutral-900"></div>
+          </div>
+        </div>
+
+        <!-- Minor / Guardian -->
+        <div>
+          <h2 class="font-serif text-2xl">Minor consent • Souhlas zákonného zástupce</h2>
+          <p class="text-sm opacity-80">If you are under 18, guardian consent is required. • Pokud je vám méně než 18 let, je nutný souhlas zákonného zástupce.</p>
+          <div id="guardian-box" class="mt-4 grid sm:grid-cols-2 gap-4 hidden">
+            <div><label class="req block text-sm mb-1">Guardian name • Jméno zástupce</label><input id="gu-name" class="w-full px-4 py-2 rounded-lg border dark:bg-neutral-900"></div>
+            <div><label class="req block text-sm mb-1">Guardian email</label><input id="gu-email" type="email" class="w-full px-4 py-2 rounded-lg border dark:bg-neutral-900"></div>
+            <div class="sm:col-span-2"><label class="block text-sm mb-1">Relationship • Vztah</label><input id="gu-rel" class="w-full px-4 py-2 rounded-lg border dark:bg-neutral-900"></div>
+            <div class="sm:col-span-2">
+              <label class="req flex items-start gap-2 text-sm">
+                <input id="gu-consent" type="checkbox" class="mt-1">
+                <span>I, the guardian, consent to the membership and processing of the minor’s data as described in the terms. •
+                  Jako zákonný zástupce souhlasím se členstvím a zpracováním údajů nezletilého dle podmínek.</span>
+              </label>
+            </div>
+            <div><label class="req block text-sm mb-1">Guardian signature (type name) • Podpis zástupce</label><input id="gu-sign" class="w-full px-4 py-2 rounded-lg border dark:bg-neutral-900"></div>
+          </div>
+        </div>
+
+        <!-- Declarations / Signature -->
+        <div>
+          <h2 class="font-serif text-2xl">Declarations • Prohlášení</h2>
+          <div class="space-y-3 text-sm">
+            <label class="req flex items-start gap-2"><input id="c-statutes" type="checkbox" class="mt-1">
+              <span>I accept the Statutes • Souhlasím se Stanovami.</span></label>
+            <label class="req flex items-start gap-2"><input id="c-terms" type="checkbox" class="mt-1">
+              <span>I have read and accept the Terms of Membership (incl. Privacy, liability, photo consent). • Seznámil/a jsem se s Podmínkami členství a souhlasím s nimi.</span></label>
+            <label class="req flex items-start gap-2"><input id="c-intent" type="checkbox" class="mt-1">
+              <span>I understand that typing my name constitutes my electronic signature. •
+                Beru na vědomí, že vypsáním jména uděluji elektronický podpis.</span></label>
+          </div>
+          <div class="mt-4 grid sm:grid-cols-2 gap-4">
+            <div><label class="req block text-sm mb-1">Your signature (type name) • Váš podpis</label><input id="ap-sign" class="w-full px-4 py-2 rounded-lg border dark:bg-neutral-900"></div>
+            <div><label class="block text-sm mb-1">Signed on • Datum</label><input id="ap-date" type="date" class="w-full px-4 py-2 rounded-lg border dark:bg-neutral-900"></div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex items-center justify-between gap-4">
+          <p id="form-msg" class="text-sm"></p>
+          <button id="btn-submit" type="submit" class="inline-flex items-center px-5 py-2.5 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 hover:opacity-90 anim">
+            Submit application • Odeslat přihlášku
+          </button>
+        </div>
+      </form>
+
+      <!-- Success card -->
+      <div id="success-card" class="hidden mt-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-6">
+        <h3 class="font-serif text-2xl">Thank you! • Děkujeme!</h3>
+        <p class="mt-2 opacity-80">
+          Your application was submitted and is now <strong>pending board approval</strong>. •
+          Vaše přihláška byla odeslána a nyní čeká na <strong>schválení výborem</strong>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader + sticky header offset -->
+  <script defer>
+    async function loadComponent(id, file) {
+      const host = document.getElementById(id);
+      if (!host) return;
+      const res = await fetch(file, { cache: 'no-cache' });
+      host.innerHTML = await res.text();
+    }
+    function applyHeaderOffset() {
+      const header = document.getElementById('main-header');
+      document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+    }
+    (async () => {
+      await Promise.all([
+        loadComponent('site-header','/components/header.html'),
+        loadComponent('site-footer','/components/footer.html')
+      ]);
+      const header = document.getElementById('main-header');
+      if (header) {
+        applyHeaderOffset();
+        const ro = new ResizeObserver(applyHeaderOffset);
+        ro.observe(header);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(applyHeaderOffset);
+        window.addEventListener('resize', applyHeaderOffset);
+        window.addEventListener('orientationchange', applyHeaderOffset);
+      }
+    })();
+  </script>
+
+  <!-- App logic -->
+  <script type="module">
+    import { auth, db, getUserProfile, onUserChanged } from '/assets/js/firebase.js';
+    import { serverTimestamp, collection, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const $ = (id) => document.getElementById(id);
+    const msg = $('form-msg');
+    const formEl = document.getElementById('app-form');
+    const successEl = document.getElementById('success-card');
+    const gateEl = document.getElementById('auth-gate');
+
+    // Auth gate + prefill
+    onUserChanged(async (user)=>{
+      if (!user) {
+        gateEl.classList.remove('hidden');
+        formEl.classList.add('hidden');
+        return;
+      }
+      gateEl.classList.add('hidden');
+      formEl.classList.remove('hidden');
+      try {
+        const p = await getUserProfile(user.uid);
+        if (p) {
+          $('ap-name').value  = p.name || '';
+          $('ap-email').value = p.email || user.email || '';
+          $('ap-phone').value = p.phone || '';
+          $('ap-addr').value  = p.address || '';
+          $('ap-nat').value   = p.nationality || '';
+        } else {
+          $('ap-email').value = user.email || '';
+        }
+      } catch {}
+    });
+
+    // Minor detection from DOB
+    function isMinorFromDOB(dateStr){
+      if(!dateStr) return false;
+      const d = new Date(dateStr);
+      if (Number.isNaN(d.getTime())) return false;
+      const today = new Date();
+      let age = today.getFullYear() - d.getFullYear();
+      const m = today.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+      return age < 18;
+    }
+    function applyGuardianRequired(minor){
+      const box = $('guardian-box');
+      box.classList.toggle('hidden', !minor);
+      ['gu-name','gu-email','gu-consent','gu-sign'].forEach(id=>{
+        const el=$(id); if(!el) return;
+        if (minor) el.setAttribute('required','required'); else el.removeAttribute('required');
+      });
+    }
+    $('ap-birth').addEventListener('change', ()=>{
+      applyGuardianRequired(isMinorFromDOB($('ap-birth').value));
+    });
+
+    // Collect IP (best-effort; optional)
+    let clientIp = null;
+    try {
+      const r = await fetch('https://api.ipify.org?format=json');
+      clientIp = (await r.json()).ip || null;
+    } catch {}
+
+    // Submit
+    formEl.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      msg.className = 'text-sm';
+      msg.textContent = 'Submitting…';
+
+      const user = auth.currentUser;
+      if (!user) { msg.textContent = 'Please sign in first.'; msg.classList.add('text-red-600'); return; }
+
+      const birthStr = $('ap-birth').value;
+      const minor = isMinorFromDOB(birthStr);
+
+      if (minor) {
+        if (
+          !$('gu-name').value.trim() ||
+          !$('gu-email').value.trim() ||
+          !$('gu-consent').checked ||
+          !$('gu-sign').value.trim()
+        ){
+          msg.textContent = 'Guardian consent and signature are required for minors.';
+          msg.classList.add('text-red-600');
+          return;
+        }
+      }
+
+      // Firestore Timestamp for DOB
+      const birthTs = birthStr ? Timestamp.fromDate(new Date(birthStr)) : null;
+
+      const docData = {
+        createdAt: Timestamp.now(),
+        status: 'pending',
+        applicant: {
+          userId: user.uid,
+          name: $('ap-name').value.trim(),
+          email: $('ap-email').value.trim(),
+          birthdate: birthTs,                   // Timestamp
+          phone: $('ap-phone').value.trim() || null,
+          address: $('ap-addr').value.trim(),   // required
+          nationality: $('ap-nat').value.trim(),// required
+          stravaUrl: $('ap-strava').value.trim() || null,
+          isMinor: minor
+        },
+        guardian: minor ? {
+          name: $('gu-name').value.trim(),
+          email: $('gu-email').value.trim(),
+          relationship: $('gu-rel').value.trim() || null,
+          consent: $('gu-consent').checked === true,
+          signature: $('gu-sign').value.trim(),
+          signedAt: new Date().toISOString()
+        } : null,
+        consents: {
+          statutesAccepted: $('c-statutes').checked === true,
+          termsAccepted: $('c-terms').checked === true,
+          signatureIntent: $('c-intent').checked === true
+        },
+        sign: {
+          applicantSignature: $('ap-sign').value.trim(),
+          signedAt: $('ap-date').value ? new Date($('ap-date').value).toISOString() : new Date().toISOString(),
+          ip: clientIp,
+          ua: navigator.userAgent
+        },
+        screening: { stravaChecked:false }
+      };
+
+      // Final validation on declarations/signature
+      if (!docData.consents.statutesAccepted || !docData.consents.termsAccepted || !docData.consents.signatureIntent || !docData.sign.applicantSignature) {
+        msg.textContent = 'Please accept the Statutes and Terms and add your signature.';
+        msg.classList.add('text-red-600');
+        return;
+      }
+
+      try {
+        const btn = $('btn-submit');
+        btn.disabled = true; btn.classList.add('opacity-60','cursor-not-allowed');
+        // Submit to `applications`
+        await addDoc(collection(db,'applications'), docData);
+        msg.textContent = '';
+        formEl.classList.add('hidden');
+        successEl.classList.remove('hidden');
+      } catch (err) {
+        console.error(err);
+        msg.textContent = 'Could not submit the application. Please try again or contact us.';
+        msg.classList.add('text-red-600');
+      }
+    });
+  </script>
+</body>
+</html>

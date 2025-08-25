@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en" class="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Terms & Code — RCT International</title>
+  <meta name="description" content="Terms of Use and Code of Conduct for RCT International community members and website users.">
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            base: { 50:'#F6F5F2', 900:'#0D0D0F' },
+            neutral: { 800:'#1f2328', 700:'#2B2B2E', 600:'#4b5563', 500:'#64748b', 300:'#cbd5e1' },
+            gold: '#D6B25E',
+            accent: '#D36B1F'
+          },
+          fontFamily: { sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif'] },
+          boxShadow: { soft:'0 10px 30px rgba(0,0,0,.08)' }
+        }
+      }
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .hero-tile{background-image:url('/assets/svg/topo-tile.svg'); background-size:700px}
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header -->
+  <div id="site-header"></div>
+
+  <!-- Hero / Intro -->
+  <section class="py-16 hero-tile border-b border-neutral-300/60 dark:border-neutral-700">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-serif text-4xl text-neutral-900 dark:text-base-50">Terms of Use & Community Code</h1>
+      <p class="mt-4 opacity-80">Last updated: August 2025</p>
+    </div>
+  </section>
+
+  <!-- Terms -->
+  <section class="py-16">
+    <div class="prose prose-neutral dark:prose-invert max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2>1. Purpose of This Website</h2>
+      <p>This website is the digital platform of RCT International. It is intended for active and committed members of the community. The site is used for team coordination, participation tracking, member tools, and internal communication.</p>
+
+      <h2>2. Creating an Account</h2>
+      <p>Only individuals who actively participate in the club or support its goals may register. The admin reserves full authority to approve, deny, or delete accounts at any time without justification, particularly in cases of:</p>
+      <ul>
+        <li>Inactivity</li>
+        <li>Violation of community values</li>
+        <li>Fake or misleading accounts</li>
+      </ul>
+
+      <h2>3. Participation Expectations</h2>
+      <p>Members who register are expected to participate in community activities regularly (e.g. group rides, runs, events). Participation at least once every 8 weeks is encouraged. Non-participating users may be removed to keep the community active and meaningful.</p>
+
+      <h2>4. Community Standards</h2>
+      <ul>
+        <li>Respect others and promote a supportive, inclusive environment</li>
+        <li>Harassment, discrimination, and spam will not be tolerated</li>
+        <li>Media may be created at events – you consent to being photographed or recorded unless you revoke this in writing</li>
+      </ul>
+
+      <h2>5. Membership Levels</h2>
+      <p>Having a website account does not make you a legal member of the Spolek (z.s.) or the German e.V.</p>
+      <p>If you apply to become a formal member, you will be asked to agree to the official bylaws and rules of:</p>
+      <ul>
+        <li><strong>RCT International, z.s.</strong> (Czech Republic)</li>
+        <li><strong>RCT International e.V.</strong> (Germany)</li>
+      </ul>
+
+      <h2>6. Data Use & Consent</h2>
+      <ul>
+        <li>I agree to abide by the purpose and values of RCT International.</li>
+        <li>I consent to the processing of my data (e.g. name, email, membership status) for internal purposes in accordance with GDPR.</li>
+        <li>I agree that this digital registration replaces a handwritten signature.</li>
+        <li>I consent to the publication of media (photo/video) of me during events, unless I withdraw this consent in writing.</li>
+      </ul>
+
+      <h2>7. Admin Rights</h2>
+      <p>The admin may remove, restrict, or modify accounts without notice if the user:</p>
+      <ul>
+        <li>Is inactive for long periods</li>
+        <li>Behaves in a way that undermines the community</li>
+        <li>Violates these terms</li>
+      </ul>
+
+      <h2>8. Final Notes</h2>
+      <p>By using this platform, you accept these terms in full. These terms may be updated at any time. For full legal membership, additional rules and responsibilities apply according to national association law (CZ/DE).</p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 bg-neutral-900 text-white dark:bg-neutral-800">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="font-serif text-3xl">Still with us?</h2>
+      <p class="mt-2 opacity-80">If you align with our values and want to contribute to the team, you're in the right place.</p>
+      <a href="/login.html" class="mt-6 inline-block px-6 py-3 rounded-lg bg-gold text-neutral-900 font-semibold anim">Become a member</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader -->
+  <script defer>
+    async function loadComponent(id, file) {
+      const host = document.getElementById(id);
+      if (!host) return;
+      const res = await fetch(file, { cache: 'no-cache' });
+      host.innerHTML = await res.text();
+    }
+
+    function applyHeaderOffset() {
+      const header = document.getElementById('main-header');
+      document.body.style.paddingTop = header ? header.offsetHeight + 'px' : '0px';
+    }
+
+    (async () => {
+      await Promise.all([
+        loadComponent('site-header', '/components/header.html'),
+        loadComponent('site-footer', '/components/footer.html'),
+      ]);
+
+      const header = document.getElementById('main-header');
+      if (header) {
+        applyHeaderOffset();
+        const ro = new ResizeObserver(applyHeaderOffset);
+        ro.observe(header);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(applyHeaderOffset);
+        window.addEventListener('resize', applyHeaderOffset);
+        window.addEventListener('orientationchange', applyHeaderOffset);
+      }
+    })();
+  </script>
+
+  <!-- Site script -->
+  <script type="module" src="/assets/js/site.js"></script>
+</body>
+</html>
