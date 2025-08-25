@@ -49,3 +49,17 @@ onUserChanged((user) => {
     applyTheme(isDark ? 'light' : 'dark', true);
   });
 })();
+
+// Mobile menu toggle
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('#mobile-menu-btn');
+  if (btn) {
+    document.getElementById('mobile-menu')?.classList.toggle('hidden');
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (e.target.id === 'close-banner') {
+    document.getElementById('beta-banner')?.remove();
+  }
+});
