@@ -106,7 +106,7 @@
         <div class="stat-card rounded-2xl card bg-white dark:bg-neutral-950 p-5">
           <div class="text-xs uppercase tracking-wide opacity-70">Running points</div>
           <div class="mt-2 text-4xl font-semibold" id="st-running">—</div>
-          <div class="text-xs opacity-70 mt-1">all‑time</div>
+          <div class="text-xs opacity-70 mt-1">all-time</div>
         </div>
         <!-- Rank -->
         <div class="stat-card rounded-2xl card bg-white dark:bg-neutral-950 p-5">
@@ -152,6 +152,25 @@
                class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 hover:opacity-90 anim text-sm">
               Join e.V.
             </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEW: Legacy/activation notice (visible if spolekMember == false) -->
+      <div id="legacy-merge-cta" class="hidden mt-4 rounded-xl card bg-white dark:bg-neutral-950 shadow-soft px-5 py-5">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="leading-tight">
+            <div class="text-[11px] uppercase tracking-wide opacity-70">Already applied in the past?</div>
+            <div class="font-serif text-xl mt-0.5">Request activation of your Spolek account</div>
+            <div class="text-sm opacity-80 mt-1">
+              If you previously filled out the old Spolek form, ask us to activate/merge your account.
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button id="btn-legacy-activate"
+              class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 hover:opacity-90 anim text-sm">
+              Request activation
+            </button>
           </div>
         </div>
       </div>
@@ -465,7 +484,7 @@
       setText('st-rank','—'); $('st-rank-note').innerHTML = lockedBadge('Rank visible to members');
 
       // secondary stats
-      $('st-last-name').innerHTML = lockedBadge('Hidden for non‑members');
+      $('st-last-name').innerHTML = lockedBadge('Hidden for non-members');
       setText('st-last-date','—');
       $('st-active-days').innerHTML = '—';
       $('st-top-month').innerHTML = '—';
@@ -533,6 +552,9 @@
         const profile = await getUserProfile(user.uid);
         if (!profile) { redirectToLogin(); return; }
 
+        // cache profile for the activation email handler
+        window._PROFILE_CACHE = { uid:user.uid, ...profile };
+
         $('hero-name').textContent = profile.name || (profile.email || 'Member');
         renderBadges(profile.roles || {});
         $('hero-loading').classList.add('hidden'); $('hero').classList.remove('hidden');
@@ -576,6 +598,11 @@ await renderMemberNumbers(profile);
           applyLockedState();
         }
         if (profile.roles?.admin) $('admin-section').classList.remove('hidden');
+
+        // Show legacy/activation CTA specifically if NOT spolek member
+        if (!profile?.roles?.spolekMember) {
+          $('legacy-merge-cta')?.classList.remove('hidden');
+        }
 
         // Profile details
         setText('acc-name', profile.name);
@@ -651,6 +678,35 @@ await renderMemberNumbers(profile);
           alert('Could not log out, please try again.');
         }
       }
+    });
+
+    // ===== Activation email handler =====
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('#btn-legacy-activate');
+      if (!btn) return;
+      const p = window._PROFILE_CACHE || {};
+      const roles = p.roles ? JSON.stringify(p.roles) : '{}';
+      const nums  = p.memberNumbers ? JSON.stringify(p.memberNumbers) : '{}';
+      const lines = [
+        'Hello RCT Admins,',
+        '',
+        'I previously filled out the old Spolek form and would like my account to be activated/merged.',
+        '',
+        '— Account details —',
+        `Name: ${p.name || '—'}`,
+        `Email: ${p.email || '—'}`,
+        `UID: ${p.uid || '—'}`,
+        `Roles: ${roles}`,
+        `Member Numbers: ${nums}`,
+        '',
+        'Thanks!'
+      ].join('\n');
+
+      if (!confirm('Send an email to request activation of your Spolek account?')) return;
+
+      const subject = encodeURIComponent('Request: Activate/Merge Spolek account');
+      const body    = encodeURIComponent(lines);
+      window.location.href = `mailto:janhanke@rct-prague.de?subject=${subject}&body=${body}`;
     });
   </script>
 </body>
