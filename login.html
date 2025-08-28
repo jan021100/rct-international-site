@@ -144,210 +144,180 @@
 
   <!-- App logic (safe without debug console) -->
   <script type="module">
-    import { auth, db, rctSignIn, rctSignOut, onUserChanged, getUserProfile } from '/assets/js/firebase.js';
-    import { onAuthStateChanged, sendPasswordResetEmail, getIdTokenResult, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { auth, db, rctSignIn, rctSignOut, onUserChanged, getUserProfile } from '/assets/js/firebase.js';
+  import {
+    onAuthStateChanged, sendPasswordResetEmail, getIdTokenResult,
+    createUserWithEmailAndPassword, updateProfile
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // ===== Safe debug helpers (no-op UI if console not present) =====
-    const dbgPanel  = document.getElementById('dbg-panel') || null;
-    const dbgLogEl  = document.getElementById('debug-log') || null;
-    const dbgStatus = document.getElementById('dbg-status') || null;
-    const dbgToggle = document.getElementById('dbg-toggle') || null;
-    if (dbgToggle && dbgPanel) dbgToggle.addEventListener('click', ()=> dbgPanel.classList.toggle('hidden'));
-    function pad(n){ return n.toString().padStart(2,'0'); }
-    function ts(){ const d=new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${d.getMilliseconds().toString().padStart(3,'0')}`; }
-    function safeJSON(x){ try{ return JSON.stringify(x, null, 2); } catch { return String(x); } }
-    function logUI(level,msg,obj){
-      const line = `[${ts()}] ${level.toUpperCase()}: ${msg}`;
-      console[level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log'](line, obj ?? '');
-      if (dbgLogEl) {
-        const div = document.createElement('div');
-        div.textContent = line + (obj ? `\n${safeJSON(obj)}` : '');
-        dbgLogEl.appendChild(div);
-        dbgLogEl.scrollTop = dbgLogEl.scrollHeight;
-      }
-    }
-    const log = { info:(m,o)=>logUI('info',m,o), warn:(m,o)=>logUI('warn',m,o), error:(m,o)=>logUI('error',m,o) };
-    function setStatus(s){ if (dbgStatus) dbgStatus.textContent = s; }
+  // ===== Tiny logger (safe, no UI deps) =====
+  const log = {
+    info: (...a)=>console.log('[login]', ...a),
+    warn: (...a)=>console.warn('[login]', ...a),
+    error:(...a)=>console.error('[login]', ...a)
+  };
 
-    // ===== Redirect helper =====
-    function gotoAccount() {
-      const next = new URLSearchParams(location.search).get('next') || 'account.html';
-      location.replace(next);
-    }
+  // ===== Redirect helper =====
+  function gotoAccount() {
+    const next = new URLSearchParams(location.search).get('next') || 'account.html';
+    location.replace(next);
+  }
 
-    // ===== Tabs =====
-    const tabs = { signin: document.getElementById('tab-signin'), create: document.getElementById('tab-create') };
-    const forms = { signin: document.getElementById('form-signin'), create: document.getElementById('form-create') };
-    function show(panel){
-      Object.values(tabs).forEach(b=>b.classList.remove('border-neutral-900','dark:border-base-50'));
-      tabs[panel].classList.add('border-neutral-900','dark:border-base-50');
-      Object.values(forms).forEach(f=>f.classList.add('hidden'));
-      forms[panel].classList.remove('hidden');
-      ['si-msg','ca-msg'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.textContent=''; el.classList.remove('text-red-600','text-green-700'); }});
-    }
-    tabs.signin.addEventListener('click',()=>show('signin'));
-    tabs.create.addEventListener('click',()=>show('create'));
-    show('signin');
-
-    // ===== Helpers =====
-    const $ = sel => document.querySelector(sel);
-    const ok  = (elm,msg)=>{ elm.textContent=msg; elm.classList.remove('text-red-600'); elm.classList.add('text-green-700'); };
-    const err = (elm,msg)=>{ elm.textContent=msg; elm.classList.remove('text-green-700'); elm.classList.add('text-red-600'); };
-
-    // ===== Auth observer (context + auto-redirect) =====
-    onAuthStateChanged(auth, async (user)=>{
-      setStatus(user ? `authed: ${user.uid.slice(0,6)}…` : 'signed-out');
-      if (user) {
-        // Already signed in? Jump to account.
-        gotoAccount();
-        log.info('Auth state changed → user present', { uid:user.uid, email:user.email });
-        try {
-          const token = await getIdTokenResult(user, true);
-          log.info('ID token claims', token.claims);
-        } catch (e) {
-          log.warn('Could not read token claims', { code:e?.code, message:e?.message });
-        }
-      } else {
-        log.info('Auth state changed → signed out');
-      }
+  // ===== Tabs =====
+  const tabs = { signin: document.getElementById('tab-signin'), create: document.getElementById('tab-create') };
+  const forms = { signin: document.getElementById('form-signin'), create: document.getElementById('form-create') };
+  function show(panel){
+    Object.values(tabs).forEach(b=>b.classList.remove('border-neutral-900','dark:border-base-50'));
+    tabs[panel].classList.add('border-neutral-900','dark:border-base-50');
+    Object.values(forms).forEach(f=>f.classList.add('hidden'));
+    forms[panel].classList.remove('hidden');
+    ['si-msg','ca-msg'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){ el.textContent=''; el.classList.remove('text-red-600','text-green-700'); }
     });
+  }
+  tabs.signin.addEventListener('click',()=>show('signin'));
+  tabs.create.addEventListener('click',()=>show('create'));
+  show('signin');
 
-    // Also redirect if our own onUserChanged fires (belt & suspenders)
-    onUserChanged(user => {
-      log.info('onUserChanged fired', { uid: user?.uid || null, email: user?.email || null });
-      if (user) gotoAccount(); else showSignedIn(null);
-    });
+  // ===== Helpers =====
+  const $ = sel => document.querySelector(sel);
+  const ok  = (elm,msg)=>{ elm.textContent=msg; elm.classList.remove('text-red-600'); elm.classList.add('text-green-700'); };
+  const err = (elm,msg)=>{ elm.textContent=msg; elm.classList.remove('text-green-700'); elm.classList.add('text-red-600'); };
 
-    // ===== Strong wait for auth after signup =====
-    function waitForAuth(uid, timeout = 8000) {
-      log.info('waitForAuth start', { uid, timeout });
-      return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => { log.error('waitForAuth timeout'); reject(new Error('Auth not ready')); }, timeout);
-        const unsub = onAuthStateChanged(auth, (u) => {
-          if (u && u.uid === uid) {
-            clearTimeout(timer); unsub();
-            log.info('waitForAuth resolved', { uid: u.uid });
-            resolve(u);
-          }
-        });
-      });
+  // ===== Signed-in status card =====
+  const signedCard = document.getElementById('signed-in-card');
+  const userLine   = document.getElementById('user-line');
+  const roleLine   = document.getElementById('role-line');
+  async function showSignedIn(user){
+    if(!user){ signedCard.classList.add('hidden'); return; }
+    userLine.textContent = `Signed in as ${user.email}`;
+    try {
+      const profile = await getUserProfile(user.uid);
+      const r = (profile && profile.roles) || {};
+      roleLine.textContent = (profile && profile.roles)
+        ? `Roles: ${r.spolekMember ? 'CZ spolek member' : '—'} | ${r.evMember ? 'DE e.V. member' : '—'}`
+        : '';
+      signedCard.classList.remove('hidden');
+    } catch (e) {
+      roleLine.textContent = '';
+      signedCard.classList.remove('hidden');
+      log.warn('getUserProfile failed (non-fatal)', e?.message);
     }
+  }
 
-    // ===== Firestore profile create =====
-    async function createUserDoc(uid, { name, email }) {
-      log.info('createUserDoc → setDoc begin', { uid, name, email });
+  // ===== IMPORTANT: prevent early redirects during signup =====
+  let creatingAccount = false;
+
+  // Global auth observer: update context only; DO NOT redirect here
+  onAuthStateChanged(auth, async (user)=>{
+    log.info('onAuthStateChanged', { uid:user?.uid || null });
+    if (user) {
+      // If this was a background sign-in while creating account, let the create flow handle redirect.
+      if (creatingAccount) { return; }
+      // Show “you are signed in” card; let explicit actions (submit) navigate.
+      showSignedIn(user);
+      try { await getIdTokenResult(user, true); } catch {}
+    } else {
+      showSignedIn(null);
+    }
+  });
+
+  // Also avoid redirecting from your custom observer
+  onUserChanged(user => {
+    log.info('onUserChanged', { uid:user?.uid || null });
+    if (creatingAccount) return;
+    // Do not auto-redirect from here; just update the card
+    if (user) showSignedIn(user); else showSignedIn(null);
+  });
+
+  // ===== Firestore profile create =====
+  async function createUserDoc(uid, { name, email }) {
+    log.info('createUserDoc → setDoc', { uid });
+    await setDoc(
+      doc(db, 'users', uid),
+      {
+        name: name || '',
+        email: email || '',
+        roles: { spolekMember:false, evMember:false, rctMember:true, admin:false },
+        createdAt: new Date().toISOString()
+      },
+      { merge: true }
+    );
+    // Optional: verify write
+    try {
+      const snap = await getDoc(doc(db,'users', uid));
+      log.info('createUserDoc verify exists:', snap.exists());
+    } catch {}
+  }
+
+  // ===== Sign in =====
+  forms.signin.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const email = $('#si-email').value.trim();
+    const pw    = $('#si-password').value;
+    const msg = document.getElementById('si-msg'); msg.textContent='Signing in...';
+    try {
+      await rctSignIn(email,pw);
+      ok(msg,'Signed in. Redirecting…');
+      gotoAccount();
+    } catch(e){
+      err(msg, e.message || 'Sign-in failed.');
+      log.error('Sign-in failed', e);
+    }
+  });
+
+  // ===== Forgot password =====
+  document.getElementById('btn-forgot').addEventListener('click', async ()=>{
+    const email = $('#si-email').value.trim();
+    const msg = document.getElementById('si-msg');
+    if(!email) return err(msg,'Enter your email first.');
+    try { await sendPasswordResetEmail(auth,email); ok(msg,'Password reset email sent.'); }
+    catch(e){ err(msg,'Could not send email.'); log.error('Password reset failed', e); }
+  });
+
+  // ===== Create account (Auth → Firestore → Redirect) =====
+  forms.create.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const name  = $('#ca-name').value.trim();
+    const email = $('#ca-email').value.trim();
+    const pw    = $('#ca-password').value;
+    const msg = document.getElementById('ca-msg'); msg.textContent='Creating account…';
+
+    creatingAccount = true;
+    try {
+      // 1) Create in Auth
+      const cred = await createUserWithEmailAndPassword(auth, email, pw);
+      const user = cred.user;
+      if (name) {
+        try { await updateProfile(user, { displayName: name }); } catch {}
+      }
+
+      // 2) Create/merge Firestore profile (allowed by your rules for own uid)
       try {
-        await setDoc(
-          doc(db, 'users', uid),
-          {
-            name: name || '',
-            email: email || '',
-            roles: { spolekMember:false, evMember:false, rctMember:true, admin:false },
-            createdAt: new Date().toISOString()
-          },
-          { merge: true }
-        );
-        log.info('createUserDoc → setDoc success', { uid });
-        const snap = await getDoc(doc(db,'users', uid));
-        log.info('createUserDoc → getDoc after write', { exists: snap.exists() });
-        return true;
-      } catch (e) {
-        log.error('createUserDoc → setDoc FAILED', { code:e?.code, message:e?.message, stack:e?.stack });
-        throw e;
+        await createUserDoc(user.uid, { name, email });
+      } catch (w) {
+        err(msg, (w && w.message) || 'Could not create profile. Please retry.');
+        creatingAccount = false;
+        return;
       }
+
+      // 3) Done → redirect
+      ok(msg,'Account created. Redirecting…');
+      gotoAccount();
+
+    } catch(e){
+      err(msg, e.message || 'Could not create account.');
+      log.error('Create-account failed', e);
+      creatingAccount = false;
     }
+  });
 
-    // ===== Sign in =====
-    forms.signin.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const email = $('#si-email').value.trim();
-      const pw    = $('#si-password').value;
-      const msg = document.getElementById('si-msg'); msg.textContent='Signing in...';
-      log.info('Sign-in submit', { email });
-      try {
-        await rctSignIn(email,pw);
-        ok(msg,'Signed in.');
-        log.info('Sign-in success');
-        // Redirect as soon as we know it succeeded.
-        gotoAccount();
-      } catch(e){
-        err(msg, e.message || 'Sign-in failed.');
-        log.error('Sign-in failed', { code:e?.code, message:e?.message, stack:e?.stack });
-      }
-    });
-
-    // ===== Forgot password =====
-    document.getElementById('btn-forgot').addEventListener('click', async ()=>{
-      const email = $('#si-email').value.trim();
-      const msg = document.getElementById('si-msg');
-      if(!email) return err(msg,'Enter your email first.');
-      log.info('Password reset requested', { email });
-      try { await sendPasswordResetEmail(auth,email); ok(msg,'Password reset email sent.'); }
-      catch(e){ err(msg,'Could not send email.'); log.error('Password reset failed', { code:e?.code, message:e?.message }); }
-    });
-
-    // ===== Create account (Auth → wait → Firestore) =====
-    forms.create.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const name  = $('#ca-name').value.trim();
-      const email = $('#ca-email').value.trim();
-      const pw    = $('#ca-password').value;
-      const msg = document.getElementById('ca-msg'); msg.textContent='Creating account...';
-
-      log.info('Create-account submit', { name, email });
-
-      try {
-        const cred = await createUserWithEmailAndPassword(auth, email, pw);
-        log.info('Auth createUserWithEmailAndPassword success', { uid:cred.user?.uid, email:cred.user?.email });
-
-        if (name) {
-          try { await updateProfile(cred.user, { displayName: name }); }
-          catch(eUp){ log.warn('updateProfile failed (non-fatal)', { code:eUp?.code, message:eUp?.message }); }
-        }
-
-        await waitForAuth(cred.user.uid);
-
-        try { await createUserDoc(cred.user.uid, { name, email }); }
-        catch (w) { err(msg, (w && w.message) || 'Missing or insufficient permissions.'); return; }
-
-        ok(msg,'Account created. Redirecting…');
-        // Go straight to account after successful create.
-        gotoAccount();
-
-      } catch(e){
-        err(msg, e.message || 'Could not create account.');
-        log.error('Create-account failed', { step:'auth-create', code:e?.code, message:e?.message, stack:e?.stack });
-      }
-    });
-
-    // ===== Signed-in card (still works if you keep this page visible) =====
-    const signedCard = document.getElementById('signed-in-card');
-    const userLine   = document.getElementById('user-line');
-    const roleLine   = document.getElementById('role-line');
-
-    async function showSignedIn(user){
-      if(!user){ signedCard.classList.add('hidden'); return; }
-      userLine.textContent = `Signed in as ${user.email}`;
-      try {
-        const profile = await getUserProfile(user.uid);
-        const r = (profile && profile.roles) || {};
-        roleLine.textContent = (profile && profile.roles)
-          ? `Roles: ${r.spolekMember ? 'CZ spolek member' : '—'} | ${r.evMember ? 'DE e.V. member' : '—'}`
-          : '';
-        signedCard.classList.remove('hidden');
-        log.info('showSignedIn render', { uid:user.uid, hasRoles: !!profile?.roles });
-      } catch (e) {
-        roleLine.textContent = '';
-        signedCard.classList.remove('hidden');
-        log.warn('showSignedIn getUserProfile failed (non-fatal)', { code:e?.code, message:e?.message });
-      }
-    }
-
-    document.getElementById('btn-logout')?.addEventListener('click', async ()=>{
-      log.info('Sign-out clicked');
-      await rctSignOut();
-    });
-  </script>
+  // ===== Sign out (if you show the signed-in card on this page) =====
+  document.getElementById('btn-logout')?.addEventListener('click', async ()=>{
+    await rctSignOut();
+  });
+</script>
 </body>
 </html>
