@@ -139,7 +139,7 @@
     import { auth, db, onUserChanged, getUserProfile } from '/assets/js/firebase.js';
     import {
       collection, collectionGroup, query, where, orderBy, limit, getDocs, doc, getDoc,
-      updateDoc, setDoc, writeBatch
+      updateDoc, setDoc, writeBatch, runTransaction
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     // --- Admin gate ---
@@ -174,28 +174,77 @@
       console.log(line);
     }
 
+    // Helpers
+    const normStr = (s) => (s||'').toString().trim();
+    const normLC  = (s) => normStr(s).toLowerCase();
+    function normalizeName(s){
+      return normStr(s)
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+        .toLowerCase();
+    }
+    const pad2 = (n)=> String(n).padStart(2,'0');
+
+    // === Member-number assignment helper (uses /counters/memberNumbers with czNext/deNext) ===
+    async function assignNextNumber(region){ // 'CZ' | 'DE'
+      const countersRef = doc(db, 'counters', 'memberNumbers');
+      const key = region === 'DE' ? 'deNext' : 'czNext';
+      const prefix = region === 'DE' ? 'DE' : 'CZ';
+
+      const next = await runTransaction(db, async (tx)=>{
+        const snap = await tx.get(countersRef);
+        const data = snap.exists() ? snap.data() : {};
+        const cur = Number(data[key] || 1); // initialize your counters doc to desired start (e.g. CZ=29)
+        const assign = cur;
+        const update = Object.assign({}, data, { [key]: cur + 1 });
+        snap.exists() ? tx.update(countersRef, update) : tx.set(countersRef, update);
+        return assign;
+      });
+
+      return `${prefix}${pad2(next)}`;
+    }
+
     // --- Load data ---
     async function loadUsers() {
       const qy = query(collection(db,'users'), orderBy('name'), limit(2000));
       const snap = await getDocs(qy);
       allUsers = snap.docs.map(d => ({ uid:d.id, ...(d.data()||{}) }));
+      log(`Loaded users: ${allUsers.length}`);
     }
+
+    // IMPORTANT: robust guests load + logging
     async function loadGuests() {
-      const qy = query(collection(db,'guests'), orderBy('displayName'), limit(3000));
-      const snap = await getDocs(qy);
-      allGuests = snap.docs.map(d => ({ id:d.id, type:'guest', ...(d.data()||{}) }));
+      try {
+        const snap = await getDocs(collection(db,'guests')); // no orderBy → no index requirements
+        allGuests = snap.docs.map(d => {
+          const x = d.data() || {};
+          return {
+            id: d.id,
+            type: 'guest',
+            displayName: x.displayName || '',
+            email: x.email || x.normalizedEmail || '',
+            _raw: x
+          };
+        });
+        allGuests.sort((a,b)=> (a.displayName || a.email).localeCompare(b.displayName || b.email));
+        log(`Loaded guests: ${allGuests.length}`);
+      } catch (e) {
+        log(`ERROR loading guests: ${e?.message || e}`);
+        allGuests = [];
+      }
     }
+
     async function loadLegacy() {
       const qy = query(collection(db,'legacyMembers'), orderBy('name'), limit(3000));
       const snap = await getDocs(qy);
       allLegacy = snap.docs.map(d => ({ id:d.id, type:'legacy', ...(d.data()||{}) }));
+      log(`Loaded legacy: ${allLegacy.length}`);
     }
 
     function renderUsers(filter=''){
-      const f = filter.trim().toLowerCase();
+      const f = normLC(filter);
       usersList.innerHTML = '';
       const filtered = allUsers.filter(u=>{
-        return !f || (u.name||'').toLowerCase().includes(f) || (u.email||'').toLowerCase().includes(f);
+        return !f || normLC(u.name).includes(f) || normLC(u.email).includes(f);
       });
       if (filtered.length === 0) {
         usersList.innerHTML = '<div class="p-3 text-sm opacity-70">No matches.</div>';
@@ -218,13 +267,33 @@
       });
     }
 
+    // FIX: include guests + legacy, diacritic-insensitive filter, sorted
     function renderSources(filter=''){
-      const f = filter.trim().toLowerCase();
+      const f = normLC(filter);
+      const fNorm = normalizeName(filter);
+
       sourcesList.innerHTML = '';
       const combined = [
-        ...allGuests.map(g => ({ id:g.id, type:'guest', label:g.displayName||'(guest)', email:g.email||'', _raw:g })),
-        ...allLegacy.map(l => ({ id:l.id, type:'legacy', label:l.name||'(legacy)', email:l.email||'', _raw:l })),
-      ].filter(x => !f || x.label.toLowerCase().includes(f) || x.email.toLowerCase().includes(f));
+        ...allGuests.map(g => ({
+          id: g.id,
+          type: 'guest',
+          label: g.displayName || g.email || '(guest)',
+          email: g.email || '',
+          _raw: g._raw
+        })),
+        ...allLegacy.map(l => ({
+          id: l.id,
+          type: 'legacy',
+          label: l.name || l.email || '(legacy)',
+          email: l.email || '',
+          _raw: l
+        })),
+      ].filter(x => {
+        if (!f) return true;
+        return normalizeName(x.label).includes(fNorm) || normLC(x.email).includes(f);
+      }).sort((a,b)=> (a.label || a.email).localeCompare(b.label || b.email));
+
+      log(`Render sources → guests:${allGuests.length} legacy:${allLegacy.length} shown:${combined.length}`);
 
       if (combined.length === 0) {
         sourcesList.innerHTML = '<div class="p-3 text-sm opacity-70">No matches.</div>';
@@ -247,15 +316,9 @@
       });
     }
 
-    // --- Merge helpers ---
+    // --- Merge helpers (unchanged) ---
     function boolOr(a,b){ return !!(a || b); }
     function normalizeStr(v){ return (v || '').toString().trim(); }
-    function normalizeName(n){
-      return (n || '')
-        .toString()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // strip diacritics
-        .toLowerCase().trim();
-    }
 
     async function copyProfileData(sourceData, targetUid) {
       const src = sourceData || {};
@@ -320,42 +383,26 @@
       return changed;
     }
 
-    // NEW: Legacy rewrite supports email, then name, then fallback diacritic-insensitive scan
     async function rewriteAttendanceFromLegacy(legacy, user) {
       const email = normalizeStr(legacy.email);
       const legacyName = normalizeStr(legacy.name);
       const legacyNameNorm = normalizeName(legacy.name);
       let matches = [];
 
-      // 1) by email (if present)
       if (email) {
         log(`Find attendance by legacy email=${email} …`);
         const q1 = query(collectionGroup(db,'attendance'), where('email','==',email));
         const s1 = await getDocs(q1);
-        if (!s1.empty) {
-          matches.push(...s1.docs);
-          log(`Matched ${s1.size} by email.`);
-        } else {
-          log(`No matches by email.`);
-        }
+        if (!s1.empty) { matches.push(...s1.docs); log(`Matched ${s1.size} by email.`); }
       }
 
-      // 2) exact by displayName
       log(`Find attendance by exact name="${legacyName}" …`);
       const q2 = query(collectionGroup(db,'attendance'), where('displayName','==',legacyName));
       const s2 = await getDocs(q2);
-      if (!s2.empty) {
-        matches.push(...s2.docs);
-        log(`Matched ${s2.size} by exact name.`);
-      } else {
-        log(`No exact name matches.`);
-      }
+      if (!s2.empty) { matches.push(...s2.docs); log(`Matched ${s2.size} by exact name.`); }
 
-      // 3) fallback scan: fetch recent attendance & filter by diacritic-insensitive name
-      // (guard: only if we still have 0)
       if (matches.length === 0) {
         log(`Fallback scan (up to 2000 recent attendance docs) for diacritic-insensitive match …`);
-        // We assume attendance docs have createdAt; if not, this still returns some window.
         const q3 = query(collectionGroup(db,'attendance'), orderBy('createdAt','desc'), limit(2000));
         const s3 = await getDocs(q3);
         const filtered = s3.docs.filter(d => normalizeName(d.data().displayName) === legacyNameNorm);
@@ -363,14 +410,11 @@
         matches.push(...filtered);
       }
 
-      // Deduplicate by path
-      const uniq = new Map();
-      matches.forEach(d => uniq.set(d.ref.path, d));
+      const uniq = new Map(); matches.forEach(d => uniq.set(d.ref.path, d));
       const docs = Array.from(uniq.values());
 
       if (docs.length === 0) {
         log('No attendance to rewrite for legacy.');
-        // still mark merged for bookkeeping
         try { await updateDoc(doc(db,'legacyMembers',legacy.id), { mergedToUserId: user.uid }); } catch {}
         return 0;
       }
@@ -402,7 +446,7 @@
       return changed;
     }
 
-    // --- Do merge ---
+    // --- Do merge (same flow; now assigns memberNumbers when roles become active) ---
     async function doMerge() {
       mergeMsg.textContent = ''; mergeMsg.className='text-sm';
       if (!selectedUser || !selectedSource) {
@@ -411,13 +455,11 @@
       btnMerge.disabled = true;
       log('--- Merge start ---');
       try {
-        // Load full target user
         const userRef = doc(db,'users',selectedUser.uid);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) throw new Error('Target user not found.');
         const user = { uid:selectedUser.uid, ...(userSnap.data()||{}) };
 
-        // Load full source
         let sourceData = null;
         if (selectedSource.type === 'guest') {
           const sSnap = await getDoc(doc(db,'guests',selectedSource.id));
@@ -433,12 +475,34 @@
         const payload = await copyProfileData(sourceData, user.uid);
         log(`Updated target with: ${JSON.stringify(payload)}`);
 
+        // === NEW: assign member numbers if roles are active and numbers missing ===
+        const afterSnap = await getDoc(userRef);
+        const after = afterSnap.exists() ? afterSnap.data() : {};
+        const roles = after.roles || {};
+        const nums  = after.memberNumbers || {};
+
+        // CZ spolek
+        if (roles.spolekMember === true && !nums.cz) {
+          const czNum = await assignNextNumber('CZ');
+          await setDoc(userRef, { memberNumbers: { ...nums, cz: czNum } }, { merge:true });
+          log(`Assigned CZ member number ${czNum}.`);
+        }
+        // DE e.V.
+        if (roles.evMember === true && !nums.de) {
+          const deNum = await assignNextNumber('DE');
+          await setDoc(userRef, { memberNumbers: { ...(nums.cz ? { cz: nums.cz } : {}), de: deNum } }, { merge:true });
+          log(`Assigned DE member number ${deNum}.`);
+        }
+
         // Attendance rewrite
         let changed = 0;
         if (selectedSource.type === 'guest') {
-          changed += await rewriteAttendanceFromGuest(selectedSource.id, { uid:user.uid, name:user.name, email:user.email });
+          changed += await rewriteAttendanceFromGuest(selectedSource.id, { uid:user.uid, name:after.name || user.name, email:after.email || user.email });
         } else {
-          changed += await rewriteAttendanceFromLegacy({ id: sourceData.id, email: sourceData.email || '', name: sourceData.name || '' }, { uid:user.uid, name:user.name, email:user.email });
+          changed += await rewriteAttendanceFromLegacy(
+            { id: sourceData.id, email: sourceData.email || '', name: sourceData.name || '' },
+            { uid:user.uid, name:after.name || user.name, email:after.email || user.email }
+          );
         }
 
         mergeMsg.textContent = `Merge complete. Rewrote ${changed} attendance docs.`; mergeMsg.classList.add('text-green-700');
