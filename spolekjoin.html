@@ -289,43 +289,48 @@
       }
 
       // Firestore Timestamp for DOB
-      const birthTs = birthStr ? Timestamp.fromDate(new Date(birthStr)) : null;
+const birthTs = $('ap-birth').value ? Timestamp.fromDate(new Date($('ap-birth').value)) : null;
 
-      const docData = {
-        createdAt: Timestamp.now(),
-        status: 'pending',
-        applicant: {
-          userId: user.uid,
-          name: $('ap-name').value.trim(),
-          email: $('ap-email').value.trim(),
-          birthdate: birthTs,                   // Timestamp
-          phone: $('ap-phone').value.trim() || null,
-          address: $('ap-addr').value.trim(),   // required
-          nationality: $('ap-nat').value.trim(),// required
-          stravaUrl: $('ap-strava').value.trim() || null,
-          isMinor: minor
-        },
-        guardian: minor ? {
-          name: $('gu-name').value.trim(),
-          email: $('gu-email').value.trim(),
-          relationship: $('gu-rel').value.trim() || null,
-          consent: $('gu-consent').checked === true,
-          signature: $('gu-sign').value.trim(),
-          signedAt: new Date().toISOString()
-        } : null,
-        consents: {
-          statutesAccepted: $('c-statutes').checked === true,
-          termsAccepted: $('c-terms').checked === true,
-          signatureIntent: $('c-intent').checked === true
-        },
-        sign: {
-          applicantSignature: $('ap-sign').value.trim(),
-          signedAt: $('ap-date').value ? new Date($('ap-date').value).toISOString() : new Date().toISOString(),
-          ip: clientIp,
-          ua: navigator.userAgent
-        },
-        screening: { stravaChecked:false }
-      };
+// Build applicant object without nulls
+const applicant = {
+  userId: auth.currentUser.uid,
+  name: $('ap-name').value.trim(),
+  email: $('ap-email').value.trim(),
+  birthdate: birthTs,
+  address: $('ap-addr').value.trim(),
+  nationality: $('ap-nat').value.trim(),
+  isMinor: isMinorFromDOB($('ap-birth').value),
+  ...( $('ap-phone').value.trim()  && { phone: $('ap-phone').value.trim() } ),
+  ...( $('ap-strava').value.trim() && { stravaUrl: $('ap-strava').value.trim() } ),
+};
+
+const docData = {
+  createdAt: Timestamp.now(),
+  status: 'pending',
+  applicant,
+  guardian: applicant.isMinor ? {
+    name: $('gu-name').value.trim(),
+    email: $('gu-email').value.trim(),
+    relationship: $('gu-rel').value.trim() || null,
+    consent: $('gu-consent').checked === true,
+    signature: $('gu-sign').value.trim(),
+    signedAt: new Date().toISOString()
+  } : null,
+  consents: {
+    statutesAccepted: $('c-statutes').checked === true,
+    termsAccepted: $('c-terms').checked === true,
+    signatureIntent: $('c-intent').checked === true
+  },
+  sign: {
+    applicantSignature: $('ap-sign').value.trim(),
+    signedAt: $('ap-date').value
+      ? new Date($('ap-date').value).toISOString()
+      : new Date().toISOString(),
+    ip: clientIp,
+    ua: navigator.userAgent
+  },
+  screening: { stravaChecked:false }
+};
 
       // Final validation on declarations/signature
       if (!docData.consents.statutesAccepted || !docData.consents.termsAccepted || !docData.consents.signatureIntent || !docData.sign.applicantSignature) {
