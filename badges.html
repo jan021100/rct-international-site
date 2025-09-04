@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RCT Admin — Badges</title>
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode:'class',
+      theme:{ extend:{
+        colors:{ base:{50:'#F6F5F2',900:'#0D0D0F'},
+                 neutral:{800:'#1f2328',700:'#2B2B2E',600:'#4b5563',500:'#64748b',300:'#cbd5e1'},
+                 gold:'#D6B25E', accent:'#D36B1F' },
+        fontFamily:{ sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif'] },
+        boxShadow:{ soft:'0 10px 30px rgba(0,0,0,.08)' }
+      }}
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .card{border:1px solid rgb(203 213 225 / .6)}
+    .dark .card{border-color:#374151}
+    .pill{border:1px solid rgb(203 213 225 / .6); border-radius:9999px; padding:.125rem .5rem}
+    .dark .pill{border-color:#374151}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;}
+    .badge-tile{display:flex;align-items:center;gap:.5rem;border:1px solid rgb(203 213 225 / .6);border-radius:.75rem;padding:.5rem .6rem}
+    .dark .badge-tile{border-color:#374151}
+    .grid-inventory{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.5rem}
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header -->
+  <div id="site-header"></div>
+
+  <!-- Title -->
+  <section class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h1 class="font-serif text-4xl text-neutral-900 dark:text-base-50">Badges Manager</h1>
+          <p class="opacity-80 mt-1">Define & recalculate member badges. Admins only.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href="/admin.html" class="px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">Admin Console</a>
+          <a href="/attendance.html" class="px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">Attendance</a>
+          <a href="/confirmMember.html" class="px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">Confirm members</a>
+          <a href="/merge.html" class="px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">Merge profiles</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Not admin -->
+      <div id="not-admin" class="hidden p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+        <p class="text-red-600 font-medium">You are not authorized to access this page.</p>
+        <p class="text-sm opacity-80 mt-1">Please sign in with an admin account.</p>
+      </div>
+
+      <!-- Admin UI -->
+      <div id="admin-ui" class="hidden grid lg:grid-cols-5 gap-8">
+
+        <!-- Left: directory + controls -->
+        <aside class="lg:col-span-2 space-y-6">
+          <!-- Controls -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="font-serif text-2xl dark:text-base-50">Tools</h2>
+              <div class="text-xs opacity-70" id="meta-events">—</div>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button id="btn-recalc-all" class="px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 anim">Recalculate all badges</button>
+              <button id="btn-recalc-selected" class="px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim disabled:opacity-50" disabled>Recalculate selected</button>
+            </div>
+            <div id="tool-msg" class="text-sm mt-2"></div>
+            <div class="mt-4">
+              <div class="text-xs uppercase tracking-wide opacity-70">Directory filters</div>
+              <div class="mt-2 flex items-center gap-2">
+                <input id="filter" type="text" placeholder="Search name/email"
+                       class="flex-1 px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm">
+                <select id="badge-filter" class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm">
+                  <option value="">Filter by badge…</option>
+                  <option value="winterWarrior">Winter Warrior (any season)</option>
+                  <option value="winterConqueror">Winter Conqueror (any season)</option>
+                  <option value="events_10">10 Events</option>
+                  <option value="events_20">20 Events</option>
+                  <option value="events_30">30 Events</option>
+                  <option value="events_40">40 Events</option>
+                  <option value="events_50">50 Events</option>
+                  <option value="years_1">1 Year</option>
+                  <option value="years_2">2 Years</option>
+                  <option value="years_3">3 Years</option>
+                  <option value="streak_sun_3">Sunday x3</option>
+                  <option value="streak_sun_5">Sunday x5</option>
+                  <option value="streak_sun_10">Sunday x10</option>
+                  <option value="streak_thu_3">Thursday x3</option>
+                  <option value="streak_thu_5">Thursday x5</option>
+                  <option value="streak_thu_10">Thursday x10</option>
+                  <option value="streak_ride_3">Ride x3</option>
+                  <option value="streak_ride_5">Ride x5</option>
+                  <option value="streak_ride_10">Ride x10</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Directory -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="font-serif text-2xl dark:text-base-50">Members</h3>
+              <div id="list-meta" class="text-xs opacity-70">—</div>
+            </div>
+            <div id="list" class="mt-3 h-[580px] overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800"></div>
+          </div>
+
+          <!-- Log -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="text-sm font-medium mb-1">Log</div>
+            <div id="log" class="mono text-xs bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-3 h-48 overflow-auto"></div>
+          </div>
+        </aside>
+
+        <!-- Right: details -->
+        <main class="lg:col-span-3 space-y-6">
+          <!-- Selected summary -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <div class="text-xs uppercase tracking-wide opacity-70">Selected</div>
+                <h3 id="sel-title" class="font-serif text-2xl dark:text-base-50">—</h3>
+                <div id="sel-sub" class="opacity-70 text-sm">Pick a member from the list.</div>
+              </div>
+              <div id="sel-badges" class="flex flex-wrap gap-1"></div>
+            </div>
+          </div>
+
+          <!-- Current badges -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between gap-3">
+              <h4 class="font-serif text-xl dark:text-base-50">Badges</h4>
+              <div class="text-xs opacity-70" id="sel-badges-meta">—</div>
+            </div>
+            <div id="sel-badges-grid" class="mt-3 grid-inventory"></div>
+          </div>
+
+          <!-- Catalog / definitions -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <h4 class="font-serif text-xl dark:text-base-50">Badge catalog</h4>
+            <div class="mt-3 grid md:grid-cols-2 gap-3 text-sm">
+              <div class="badge-tile"><span class="pill text-xs">Winter Warrior</span> ≥5 events in a winter season (Dec–Feb).</div>
+              <div class="badge-tile"><span class="pill text-xs">Winter Conqueror</span> ≥10 events in a winter season (Dec–Feb).</div>
+              <div class="badge-tile"><span class="pill text-xs">10/20/30/40/50 Events</span> Lifetime attended events (unique events).</div>
+              <div class="badge-tile"><span class="pill text-xs">Years with us</span> Full years since first attended event.</div>
+              <div class="badge-tile"><span class="pill text-xs">Sunday Run Streak</span> 3/5/10 consecutive Sundays (running).</div>
+              <div class="badge-tile"><span class="pill text-xs">Thursday Run Streak</span> 3/5/10 consecutive Thursdays (running).</div>
+              <div class="badge-tile"><span class="pill text-xs">Group Ride Streak</span> 3/5/10 consecutive cycling weeks.</div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader -->
+  <script defer>
+    async function loadComponent(id, file) {
+      const host = document.getElementById(id);
+      if (!host) return;
+      const res = await fetch(file, { cache: 'no-cache' });
+      host.innerHTML = await res.text();
+    }
+    (async () => {
+      await Promise.all([
+        loadComponent('site-header','/components/header.html'),
+        loadComponent('site-footer','/components/footer.html')
+      ]);
+    })();
+  </script>
+
+  <!-- Firebase + Logic -->
+  <script type="module">
+    import { auth, db, onUserChanged, getUserProfile } from '/assets/js/firebase.js';
+    import {
+      collection, collectionGroup, getDocs, doc, getDoc, setDoc,
+      query, orderBy, limit, where
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // --- dom refs ---
+    const notAdmin = document.getElementById('not-admin');
+    const adminUI  = document.getElementById('admin-ui');
+
+    const btnRecalcAll = document.getElementById('btn-recalc-all');
+    const btnRecalcSelected = document.getElementById('btn-recalc-selected');
+    const toolMsg = document.getElementById('tool-msg');
+
+    const filterEl = document.getElementById('filter');
+    const badgeFilter = document.getElementById('badge-filter');
+    const listEl   = document.getElementById('list');
+    const listMeta = document.getElementById('list-meta');
+
+    const selTitle = document.getElementById('sel-title');
+    const selSub   = document.getElementById('sel-sub');
+    const selBadges = document.getElementById('sel-badges');
+    const selBadgesGrid = document.getElementById('sel-badges-grid');
+    const selBadgesMeta = document.getElementById('sel-badges-meta');
+
+    const metaEvents = document.getElementById('meta-events');
+    const logEl = document.getElementById('log');
+    const log = (line)=>{ const t=new Date().toLocaleTimeString(); logEl.textContent += `[${t}] ${line}\n`; logEl.scrollTop=logEl.scrollHeight; };
+
+    // --- state ---
+    let USERS=[];
+    let EVENTS=new Map(); // id -> {sport,date,name}
+    let selected = null; // selected user summary
+
+    const norm = s => String(s||'').trim();
+    const nlc = s => norm(s).toLowerCase();
+
+    // helpers
+    const fmtDate = (v) => { try { return new Date(v).toLocaleDateString(); } catch { return '—'; } };
+    function stamp(){ return new Date().toISOString(); }
+
+    // -------- Badge engine (definitions) ----------
+    const MILESTONES = [10,20,30,40,50];
+
+    // season key is the January year (e.g. Dec 2024–Feb 2025 => 2025)
+    function winterSeasonKeyFromISO(isoDate){
+      const d = new Date(isoDate);
+      const m = d.getMonth(); // 0..11
+      const y = d.getFullYear();
+      return (m === 11) ? (y+1) : y;
+    }
+    // Dec 1 (prev year) → end of Feb (seasonYear)
+    function inSeasonRange(isoDate, seasonYear){
+      const d = new Date(isoDate);
+      const start = new Date(seasonYear-1, 11, 1);
+      const end   = new Date(seasonYear, 1, 29, 23, 59, 59, 999);
+      return d >= start && d <= end;
+    }
+    function weekday(dateISO){ try{ return new Date(dateISO).getDay(); } catch { return -1; } } // 0=Sun ... 6=Sat
+    function longestWeeklyStreak(datesISO){
+      if (!datesISO || datesISO.length===0) return 0;
+      const sorted = [...datesISO].map(d=>new Date(d)).sort((a,b)=>a-b);
+      let best=1, cur=1;
+      for (let i=1;i<sorted.length;i++){
+        const deltaDays = Math.round((sorted[i]-sorted[i-1])/(1000*60*60*24));
+        if (deltaDays>=6 && deltaDays<=8) { cur += 1; best = Math.max(best, cur); }
+        else { cur = 1; }
+      }
+      return best;
+    }
+
+    // Compute all badges for a user's attendance docs
+    function computeBadgesForUser(attDocs, eventsMap){
+      const allDates = [];
+      const sundayRunDates = [];
+      const thursdayRunDates = [];
+      const cyclingWeekDates = [];
+
+      const eventIdsSeen = new Set();
+      const seasonsSeen = new Set();
+      const seasonCounts = new Map();
+
+      attDocs.forEach(d=>{
+        const x = d.data() || {};
+        const parts = d.ref.path.split('/');
+        const eventId = parts.length>=2 ? parts[1] : null;
+        if (!eventId) return;
+        const ev = eventsMap.get(eventId) || {};
+        const date = ev.date || null;
+        const sport = (ev.sport || '').toLowerCase();
+        if (!date) return;
+
+        allDates.push(date);
+        eventIdsSeen.add(eventId);
+
+        const key = winterSeasonKeyFromISO(date);
+        if (inSeasonRange(date, key)) {
+          seasonsSeen.add(key);
+          seasonCounts.set(key, (seasonCounts.get(key)||0) + 1);
+        }
+
+        const wd = weekday(date);
+        if (sport.includes('run')){
+          if (wd===0) sundayRunDates.push(date);
+          if (wd===4) thursdayRunDates.push(date);
+        }
+        if (sport.includes('cycl')){
+          cyclingWeekDates.push(date);
+        }
+      });
+
+      const out = {};
+      [...seasonsSeen].sort().forEach(seasonYear=>{
+        const cnt = seasonCounts.get(seasonYear) || 0;
+        if (cnt >= 5) out[`winterWarrior_${seasonYear}`] = { label:`Winter Warrior ${seasonYear}`, earnedAt: stamp(), meta:{count:cnt, season:seasonYear} };
+        if (cnt >= 10) out[`winterConqueror_${seasonYear}`] = { label:`Winter Conqueror ${seasonYear}`, earnedAt: stamp(), meta:{count:cnt, season:seasonYear} };
+      });
+
+      const M = MILESTONES;
+      const totalEvents = eventIdsSeen.size;
+      M.forEach(n=>{ if (totalEvents >= n) out[`events_${n}`] = { label:`${n} Events Joined`, earnedAt: stamp(), meta:{totalEvents} }; });
+
+      if (allDates.length>0){
+        const first = new Date(allDates.slice().sort()[0]);
+        const now = new Date();
+        let years = now.getFullYear() - first.getFullYear();
+        const m = now.getMonth() - first.getMonth();
+        if (m < 0 || (m === 0 && now.getDate() < first.getDate())) years--;
+        for (let y=1; y<=years; y++) out[`years_${y}`] = { label:`${y} ${y===1?'Year':'Years'} with RCT`, earnedAt: stamp(), meta:{since:first.toISOString()} };
+      }
+
+      const sunStreak = longestWeeklyStreak(sundayRunDates);
+      const thuStreak = longestWeeklyStreak(thursdayRunDates);
+      const rideStreak = longestWeeklyStreak(cyclingWeekDates);
+      [3,5,10].forEach(th=>{
+        if (sunStreak >= th) out[`streak_sun_${th}`] = { label:`Sunday Run x${th}`, earnedAt: stamp(), meta:{best:sunStreak} };
+        if (thuStreak >= th) out[`streak_thu_${th}`] = { label:`Thursday Run x${th}`, earnedAt: stamp(), meta:{best:thuStreak} };
+        if (rideStreak >= th) out[`streak_ride_${th}`] = { label:`Group Ride x${th}`, earnedAt: stamp(), meta:{best:rideStreak} };
+      });
+
+      return out;
+    }
+    function mergeBadges(existing, computed){
+      const out = { ...(existing||{}) };
+      for (const [k,v] of Object.entries(computed)){
+        if (!out[k]) out[k] = v;
+        else out[k] = { ...(out[k]||{}), label:v.label, meta:v.meta, earnedAt: out[k].earnedAt || v.earnedAt };
+      }
+      return out;
+    }
+
+    // ------ Data loading -------
+    async function loadEvents(){
+      const snap = await getDocs(collection(db,'events'));
+      EVENTS = new Map();
+      snap.forEach(d=>{
+        const x = d.data() || {};
+        EVENTS.set(d.id, { sport:(x.sport||''), date:(x.date||null), name:(x.name||'') });
+      });
+      const years = new Set(); EVENTS.forEach(ev => { if (ev.date) years.add(winterSeasonKeyFromISO(ev.date)); });
+      const seasons = [...years].sort((a,b)=>a-b).join(', ');
+      document.getElementById('meta-events').textContent = `${EVENTS.size} events • seasons: ${seasons || '—'}`;
+      log(`Loaded events: ${EVENTS.size} • seasons: ${seasons}`);
+    }
+    async function loadUsers(){
+      const qy = query(collection(db,'users'), orderBy('name'), limit(5000));
+      const snap = await getDocs(qy);
+      USERS = snap.docs.map(d=>({ id:d.id, ...(d.data()||{}) }));
+      log(`Users: ${USERS.length}`);
+    }
+
+    function renderDirectory(){
+      const f = nlc(filterEl.value);
+      const bf = (badgeFilter.value || '').trim();
+      listEl.innerHTML = '';
+      const items = USERS.filter(u=>{
+        const matchText = !f || nlc(u.name||'').includes(f) || nlc(u.email||'').includes(f);
+        if (!matchText) return false;
+        if (!bf) return true;
+        const b = u.badges || {};
+        if (bf === 'winterWarrior' || bf === 'winterConqueror') return Object.keys(b).some(k => k.startsWith(bf + '_'));
+        return !!b[bf];
+      });
+      items.forEach(u=>{
+        const btn = document.createElement('button');
+        btn.type='button';
+        btn.className='w-full text-left px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 anim flex items-center gap-2';
+        btn.innerHTML = `
+          <span class="font-medium">${u.name || '(member)'}</span>
+          <span class="opacity-60 text-sm">${u.email || ''}</span>
+          <span class="pill text-xs ml-auto">${Object.keys(u.badges||{}).length} badges</span>
+        `;
+        btn.addEventListener('click', ()=> selectUser(u.id));
+        listEl.appendChild(btn);
+      });
+      listMeta.textContent = `${items.length} of ${USERS.length}`;
+    }
+
+    async function selectUser(uid){
+      const uRef = doc(db,'users',uid);
+      const snap = await getDoc(uRef);
+      const data = snap.exists() ? snap.data() : {};
+      const name = data.name || '(member)';
+      const email = data.email || '';
+      selected = { uid, name, email, badges: data.badges || {} };
+
+      selTitle.textContent = name;
+      selSub.textContent = `${email} — user`;
+      selBadges.innerHTML = '';
+      const p = (t)=>{ const s=document.createElement('span'); s.className='pill text-xs'; s.textContent=t; return s; };
+      if (data.roles?.admin) selBadges.appendChild(p('admin'));
+      if (data.roles?.spolekMember) selBadges.appendChild(p('spolek'));
+      if (data.roles?.evMember) selBadges.appendChild(p('e.V.'));
+      if (data.roles?.legacyMember) selBadges.appendChild(p('legacy'));
+
+      renderUserBadges(selected.badges);
+      btnRecalcSelected.disabled = false;
+    }
+
+    function renderUserBadges(badges){
+      selBadgesGrid.innerHTML = '';
+      const keys = Object.keys(badges||{}).sort();
+      if (keys.length===0){
+        selBadgesGrid.innerHTML = '<div class="opacity-70 text-sm">No badges yet.</div>';
+        selBadgesMeta.textContent = '—';
+        return;
+      }
+      keys.forEach(k=>{
+        const b = badges[k] || {};
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between gap-2 rounded-lg border border-neutral-200 dark:border-neutral-800 p-3';
+        row.innerHTML = `
+          <div>
+            <div class="font-medium">${b.label || k}</div>
+            <div class="text-xs opacity-70">Earned: ${b.earnedAt ? new Date(b.earnedAt).toLocaleString() : '—'}</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="px-2 py-1 text-xs rounded-lg border border-neutral-300 dark:border-neutral-700 anim" data-revoke="${k}">Revoke</button>
+          </div>
+        `;
+        selBadgesGrid.appendChild(row);
+      });
+      selBadgesMeta.textContent = `${keys.length} badge(s)`;
+    }
+
+    selBadgesGrid.addEventListener('click', async (e)=>{
+      const btn = e.target.closest('button[data-revoke]');
+      if (!btn || !selected) return;
+      const key = btn.getAttribute('data-revoke');
+      if (!confirm(`Revoke badge "${key}" for ${selected.name}?`)) return;
+      try{
+        const uRef = doc(db,'users',selected.uid);
+        const snap = await getDoc(uRef);
+        const data = snap.exists() ? snap.data() : {};
+        const badges = { ...(data.badges||{}) };
+        delete badges[key];
+        await setDoc(uRef, { badges }, { merge:true });
+        selected.badges = badges;
+        const idx = USERS.findIndex(u=>u.id===selected.uid);
+        if (idx>=0) USERS[idx].badges = badges;
+        renderUserBadges(badges);
+        renderDirectory();
+        log(`Revoked badge ${key} for ${selected.uid}`);
+      } catch(e){
+        alert('Revoke failed: '+(e.message||e));
+      }
+    });
+
+    async function getAttendanceForUser(uid){
+      const qy = query(collectionGroup(db,'attendance'), where('userId','==',uid));
+      const snap = await getDocs(qy);
+      return snap.docs;
+    }
+    function mergeBadgesIntoUser(uid, merged){
+      const idx = USERS.findIndex(u=>u.id===uid);
+      if (idx>=0) USERS[idx].badges = merged;
+    }
+
+    async function recalcUser(uid){
+      const [attDocs, userSnap] = await Promise.all([
+        getAttendanceForUser(uid),
+        getDoc(doc(db,'users',uid))
+      ]);
+      const userData = userSnap.exists()? userSnap.data() : {};
+      const computed = computeBadgesForUser(attDocs, EVENTS);
+      const merged = mergeBadges(userData.badges || {}, computed);
+      await setDoc(doc(db,'users',uid), { badges: merged }, { merge:true });
+      mergeBadgesIntoUser(uid, merged);
+      return { merged, count:Object.keys(merged).length };
+    }
+
+    async function recalcAll(){
+      toolMsg.textContent=''; toolMsg.className='text-sm';
+      btnRecalcAll.disabled = true; btnRecalcSelected.disabled = true;
+      let ok=0, fail=0;
+      for (let i=0;i<USERS.length;i++){
+        const u = USERS[i];
+        try{
+          const r = await recalcUser(u.id);
+          ok++;
+          if ((i%10)===0) log(`Recalc ${i+1}/${USERS.length} …`);
+        } catch(e){
+          fail++; log(`ERROR recalculating ${u.id}: ${e.message||e}`);
+        }
+      }
+      renderDirectory();
+      if (selected) { await selectUser(selected.uid); }
+      toolMsg.textContent = `Recalculation finished. OK ${ok} • Failed ${fail}`;
+      toolMsg.className = 'text-sm ' + (fail? 'text-red-600' : 'text-green-700');
+      btnRecalcAll.disabled = false; btnRecalcSelected.disabled = !selected;
+    }
+
+    btnRecalcAll.addEventListener('click', recalcAll);
+    btnRecalcSelected.addEventListener('click', async ()=>{
+      if (!selected) return;
+      btnRecalcSelected.disabled = true;
+      try{
+        const r = await recalcUser(selected.uid);
+        selected.badges = r.merged;
+        renderUserBadges(r.merged);
+        renderDirectory();
+        toolMsg.textContent = `Recalculated for ${selected.name} (${r.count} badges)`;
+        toolMsg.className='text-sm text-green-700';
+      } catch(e){
+        toolMsg.textContent = 'Recalc failed: '+(e.message||e);
+        toolMsg.className='text-sm text-red-600';
+      } finally{
+        btnRecalcSelected.disabled = false;
+      }
+    });
+
+    filterEl.addEventListener('input', renderDirectory);
+    badgeFilter.addEventListener('change', renderDirectory);
+
+    // Auth/admin gate
+    onUserChanged(async (u)=>{
+      if (!u){ adminUI.classList.add('hidden'); notAdmin.classList.remove('hidden'); return; }
+      const prof = await getUserProfile(u.uid);
+      const isAdmin = !!(prof && prof.roles && prof.roles.admin);
+      if (!isAdmin){ adminUI.classList.add('hidden'); notAdmin.classList.remove('hidden'); return; }
+
+      notAdmin.classList.add('hidden'); adminUI.classList.remove('hidden');
+      log(`Signed in as admin: ${u.email}`);
+
+      await loadEvents();
+      await loadUsers();
+      renderDirectory();
+    });
+  </script>
+</body>
+</html>

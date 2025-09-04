@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RCT Admin</title>
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode:'class',
+      theme:{ extend:{
+        colors:{ base:{50:'#F6F5F2',900:'#0D0D0F'},
+                 neutral:{800:'#1f2328',700:'#2B2B2E',600:'#4b5563',500:'#64748b',300:'#cbd5e1'},
+                 gold:'#D6B25E', accent:'#D36B1F' },
+        fontFamily:{ sans:['Inter','system-ui','sans-serif'], serif:['Playfair Display','serif'] },
+        boxShadow:{ soft:'0 10px 30px rgba(0,0,0,.08)' }
+      }}
+    }
+  </script>
+  <style>
+    .anim{transition:all .2s ease}
+    .card{border:1px solid rgb(203 213 225 / .6)}
+    .dark .card{border-color:#374151}
+    .pill{border:1px solid rgb(203 213 225 / .6); border-radius:9999px; padding:.125rem .5rem}
+    .dark .pill{border-color:#374151}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;}
+  </style>
+</head>
+
+<body class="bg-base-50 text-neutral-800 dark:bg-base-900 dark:text-neutral-200">
+  <!-- Header -->
+  <div id="site-header"></div>
+
+  <!-- Title -->
+  <section class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h1 class="font-serif text-4xl text-neutral-900 dark:text-base-50">Admin Console</h1>
+          <p class="opacity-80 mt-1">Organizer dashboard: data overview, quick actions, and member management.</p>
+        </div>
+        <!-- (optional) header links; leaving these too -->
+        <div class="flex flex-wrap gap-2">
+          <a href="attendance.html" class="px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">Attendance</a>
+          <a href="confirmMember.html" class="px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">Confirm members</a>
+          <a href="merge.html" class="px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">Merge profiles</a>
+          <a href="badges.html" class="px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">Manage badges</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Not admin -->
+      <div id="not-admin" class="hidden p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+        <p class="text-red-600 font-medium">You are not authorized to access this page.</p>
+        <p class="text-sm opacity-80 mt-1">Please sign in with an admin account.</p>
+      </div>
+
+      <!-- Admin UI -->
+      <div id="admin-ui" class="hidden grid lg:grid-cols-5 gap-8">
+        <!-- Left: directory -->
+        <aside class="lg:col-span-2 p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="font-serif text-2xl dark:text-base-50">Members & Contacts</h2>
+            <input id="filter" type="text" placeholder="Search name/email"
+                   class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm">
+          </div>
+          <div id="list" class="mt-4 h-[640px] overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800"></div>
+          <div id="list-meta" class="text-xs opacity-70 mt-2"></div>
+        </aside>
+
+        <!-- Right: details -->
+        <main class="lg:col-span-3 space-y-6">
+          <!-- NEW: Admin shortcuts (inside admin gate) -->
+          <div class="p-4 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="text-sm font-medium mb-2">Admin shortcuts</div>
+            <div class="flex flex-wrap gap-3">
+              <a href="attendance.html" class="px-4 py-2 rounded-lg bg-accent text-white hover:opacity-90 anim">Manage Attendance</a>
+              <a href="confirmMember.html" class="px-4 py-2 rounded-lg bg-accent text-white hover:opacity-90 anim">Confirm Applications</a>
+              <a href="merge.html" class="px-4 py-2 rounded-lg bg-accent text-white hover:opacity-90 anim">Merge Profiles</a>
+              <a href="badges.html" class="px-4 py-2 rounded-lg bg-accent text-white hover:opacity-90 anim">Manage badges</a>
+            </div>
+          </div>
+
+          <!-- Selected summary -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <div class="text-xs uppercase tracking-wide opacity-70">Selected</div>
+                <h3 id="sel-title" class="font-serif text-2xl dark:text-base-50">—</h3>
+                <div id="sel-sub" class="opacity-70 text-sm">Pick a person from the list.</div>
+              </div>
+              <div id="sel-badges" class="flex flex-wrap gap-1"></div>
+            </div>
+          </div>
+
+          <!-- Attendance rollup -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between gap-3">
+              <h4 class="font-serif text-xl dark:text-base-50">Attendance totals</h4>
+              <button id="btn-refresh-att" class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 text-sm anim hover:bg-neutral-100 dark:hover:bg-neutral-800">Refresh</button>
+            </div>
+            <div id="att-totals" class="mt-3 grid sm:grid-cols-4 gap-3"></div>
+            <div id="att-meta" class="text-xs opacity-70 mt-2"></div>
+          </div>
+
+          <!-- Quick edit (users only) -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <h4 class="font-serif text-xl dark:text-base-50">Quick edit (users only)</h4>
+            <div id="quick-edit-disabled" class="text-sm opacity-70 mt-1">Select a <strong>user</strong> to enable quick edit (roles & merch).</div>
+
+            <div id="quick-edit" class="hidden mt-3 grid sm:grid-cols-2 gap-6">
+              <!-- Roles -->
+              <div>
+                <div class="font-medium mb-1">Roles</div>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                  <label class="flex items-center gap-2"><input type="checkbox" id="r-admin"> <span>admin</span></label>
+                  <label class="flex items-center gap-2"><input type="checkbox" id="r-spolek"> <span>spolekMember (CZ)</span></label>
+                  <label class="flex items-center gap-2"><input type="checkbox" id="r-ev"> <span>evMember (DE)</span></label>
+                  <label class="flex items-center gap-2"><input type="checkbox" id="r-legacy"> <span>legacyMember</span></label>
+                  <label class="flex items-center gap-2"><input type="checkbox" id="r-rct"> <span>rctMember</span></label>
+                  <label class="flex items-center gap-2"><input type="checkbox" id="r-german"> <span>germanMember</span></label>
+                </div>
+              </div>
+
+              <!-- Merch -->
+              <div>
+                <div class="font-medium mb-1">Merch owned</div>
+                <div class="grid grid-cols-1 gap-2 text-sm">
+                  <label class="flex items-center gap-2"><input type="checkbox" id="m-white"> <span>White Jersey</span></label>
+                  <label class="flex items-center gap-2"><input type="checkbox" id="m-pink"> <span>Pink Jersey</span></label>
+                  <label class="flex items-center gap-2"><input type="checkbox" id="m-rotary"> <span>Rotary Legacy Jersey</span></label>
+                </div>
+              </div>
+
+              <div class="sm:col-span-2">
+                <button id="btn-save-quick" class="px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 anim">Save roles & merch</button>
+                <span id="quick-msg" class="text-sm ml-2"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Full JSON editor -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between gap-3">
+              <h4 class="font-serif text-xl dark:text-base-50">Document data (JSON)</h4>
+              <div class="text-xs opacity-70">Editing attendance here is disabled — use Attendance tools.</div>
+            </div>
+            <textarea id="json-edit" class="mt-3 w-full h-80 mono rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 p-3" spellcheck="false" disabled></textarea>
+            <div class="mt-3 flex items-center gap-2">
+              <button id="btn-save-json" class="px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-base-50 dark:text-neutral-900 anim disabled:opacity-50" disabled>Save document (replace)</button>
+              <button id="btn-reload-json" class="px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim">Reload</button>
+              <span id="json-msg" class="text-sm"></span>
+            </div>
+          </div>
+
+          <!-- Log -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="text-sm font-medium mb-1">Log</div>
+            <div id="log" class="mono text-xs bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-3 h-48 overflow-auto"></div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Components loader -->
+  <script defer>
+    async function loadComponent(id, file) {
+      const host = document.getElementById(id);
+      if (!host) return;
+      const res = await fetch(file, { cache: 'no-cache' });
+      host.innerHTML = await res.text();
+    }
+    (async () => {
+      await Promise.all([
+        loadComponent('site-header','/components/header.html'),
+        loadComponent('site-footer','/components/footer.html')
+      ]);
+    })();
+  </script>
+
+  <!-- Firebase + Logic -->
+  <script type="module">
+    import { auth, db, onUserChanged, getUserProfile } from '/assets/js/firebase.js';
+    import {
+      collection, collectionGroup, getDocs, doc, getDoc, setDoc, updateDoc,
+      query, orderBy, limit, where
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    /* (unchanged logic from your version below) */
+    const notAdmin = document.getElementById('not-admin');
+    const adminUI  = document.getElementById('admin-ui');
+
+    const filterEl = document.getElementById('filter');
+    const listEl   = document.getElementById('list');
+    const listMeta = document.getElementById('list-meta');
+
+    const selTitle = document.getElementById('sel-title');
+    const selSub   = document.getElementById('sel-sub');
+    const selBadges = document.getElementById('sel-badges');
+
+    const attTotals = document.getElementById('att-totals');
+    const attMeta   = document.getElementById('att-meta');
+    const btnRefreshAtt = document.getElementById('btn-refresh-att');
+
+    const quickEdit = document.getElementById('quick-edit');
+    const quickDisabled = document.getElementById('quick-edit-disabled');
+    const rAdmin=document.getElementById('r-admin');
+    const rSpolek=document.getElementById('r-spolek');
+    const rEv=document.getElementById('r-ev');
+    const rLegacy=document.getElementById('r-legacy');
+    const rRct=document.getElementById('r-rct');
+    const rGerman=document.getElementById('r-german');
+
+    const mWhite=document.getElementById('m-white');
+    const mPink=document.getElementById('m-pink');
+    const mRotary=document.getElementById('m-rotary');
+    const btnSaveQuick=document.getElementById('btn-save-quick');
+    const quickMsg=document.getElementById('quick-msg');
+
+    const jsonEdit = document.getElementById('json-edit');
+    const btnSaveJson = document.getElementById('btn-save-json');
+    const btnReloadJson = document.getElementById('btn-reload-json');
+    const jsonMsg = document.getElementById('json-msg');
+
+    const logEl = document.getElementById('log');
+    const log = (line)=>{ const t=new Date().toLocaleTimeString(); logEl.textContent += `[${t}] ${line}\n`; logEl.scrollTop=logEl.scrollHeight; };
+
+    let USERS=[], LEGACY=[], GUESTS=[];
+    let emailUsers = new Set(), emailLegacy = new Set();
+    let selected = null;
+
+    const norm = s => String(s||'').trim();
+    const nlc = s => norm(s).toLowerCase();
+    const normalizeName = s => norm(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+
+    async function loadUsers(){
+      const qy = query(collection(db,'users'), orderBy('name'), limit(5000));
+      const snap = await getDocs(qy);
+      USERS = snap.docs.map(d=>({ id:d.id, type:'user', ...(d.data()||{}) }));
+      emailUsers = new Set(USERS.map(u=>nlc(u.email)));
+      log(`Users: ${USERS.length}`);
+    }
+    async function loadLegacy(){
+      const qy = query(collection(db,'legacyMembers'), orderBy('name'), limit(5000));
+      const snap = await getDocs(qy);
+      LEGACY = snap.docs.map(d=>({ id:d.id, type:'legacy', ...(d.data()||{}) }))
+        .filter(x => !x.mergedToUserId);
+      emailLegacy = new Set(LEGACY.map(l=>nlc(l.email)));
+      log(`Legacy (unmerged): ${LEGACY.length}`);
+    }
+    async function loadGuests(){
+      const snap = await getDocs(collection(db,'guests'));
+      GUESTS = snap.docs.map(d=>{
+        const x=d.data()||{};
+        return { id:d.id, type:'guest',
+          displayName: x.displayName || '',
+          email: x.email || x.normalizedEmail || '',
+          mergedToUserId: x.mergedToUserId || null,
+          _raw:x
+        };
+      }).filter(g => !g.mergedToUserId && !emailUsers.has(nlc(g.email)) && !emailLegacy.has(nlc(g.email)));
+      log(`Guests (filtered): ${GUESTS.length}`);
+    }
+
+    function renderList(){
+      const f = nlc(filterEl.value);
+      listEl.innerHTML = '';
+
+      function section(title, items, getLabel){
+        const match = items.filter(x => !f || nlc(getLabel(x)).includes(f) || nlc(x.email).includes(f));
+        const head = document.createElement('div');
+        head.className='px-3 py-2 text-xs uppercase tracking-wide opacity-70';
+        head.textContent = `${title} — ${match.length}`;
+        listEl.appendChild(head);
+
+        if (match.length===0){
+          const empty = document.createElement('div');
+          empty.className='px-3 pb-2 text-sm opacity-60';
+          empty.textContent='No matches';
+          listEl.appendChild(empty);
+          return;
+        }
+
+        match.forEach(x=>{
+          const btn = document.createElement('button');
+          btn.type='button';
+          btn.className='w-full text-left px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 anim flex items-center gap-2';
+          const label = getLabel(x);
+          btn.innerHTML = `
+            <span class="font-medium">${label}</span>
+            <span class="opacity-60 text-sm">${x.email || ''}</span>
+            <span class="pill text-xs ml-auto">${x.type}</span>
+          `;
+          btn.addEventListener('click', ()=> selectPerson(x));
+          listEl.appendChild(btn);
+        });
+      }
+
+      section('Users', USERS, u => u.name || '(member)');
+      section('Legacy', LEGACY, l => l.name || '(legacy)');
+      section('Guests', GUESTS, g => g.displayName || g.email || '(guest)');
+
+      listMeta.textContent = `${USERS.length} users · ${LEGACY.length} legacy · ${GUESTS.length} guests`;
+    }
+
+    async function selectPerson(x){
+      selected = { type:x.type, id:x.id, name:x.name || x.displayName || '(n/a)', email: x.email || '' };
+      selTitle.textContent = `${selected.name}`;
+      selSub.textContent   = `${selected.email || ''} — ${selected.type}`;
+      selBadges.innerHTML  = '';
+      const b = (t)=>{ const s=document.createElement('span'); s.className='pill text-xs'; s.textContent=t; return s; };
+      selBadges.appendChild(b(selected.type));
+
+      if (selected.type==='user'){
+        quickEdit.classList.remove('hidden');
+        quickDisabled.classList.add('hidden');
+      } else {
+        quickEdit.classList.add('hidden');
+        quickDisabled.classList.remove('hidden');
+      }
+
+      await loadDocData();
+      await computeAttendanceTotals();
+    }
+
+    async function loadDocData(){
+      if (!selected) return;
+      let ref;
+      if (selected.type==='user') ref = doc(db,'users',selected.id);
+      else if (selected.type==='legacy') ref = doc(db,'legacyMembers',selected.id);
+      else ref = doc(db,'guests',selected.id);
+
+      const snap = await getDoc(ref);
+      const data = snap.exists() ? snap.data() : {};
+      jsonEdit.value = JSON.stringify(data, null, 2);
+      jsonEdit.disabled = false; btnSaveJson.disabled=false;
+
+      if (selected.type==='user'){
+        const roles = data.roles || {};
+        rAdmin.checked  = !!roles.admin;
+        rSpolek.checked = !!roles.spolekMember;
+        rEv.checked     = !!roles.evMember;
+        rLegacy.checked = !!roles.legacyMember;
+        rRct.checked    = !!roles.rctMember;
+        rGerman.checked = !!roles.germanMember;
+
+        const merch = data.merch || {};
+        mWhite.checked  = !!merch.whiteJersey;
+        mPink.checked   = !!merch.pinkJersey;
+        mRotary.checked = !!merch.RotaryLegacyJersey;
+      }
+    }
+
+    btnSaveJson.addEventListener('click', async ()=>{
+      jsonMsg.textContent=''; jsonMsg.className='text-sm';
+      if (!selected) return;
+      try{
+        const obj = JSON.parse(jsonEdit.value);
+        let ref;
+        if (selected.type==='user') ref = doc(db,'users',selected.id);
+        else if (selected.type==='legacy') ref = doc(db,'legacyMembers',selected.id);
+        else ref = doc(db,'guests',selected.id);
+
+        await setDoc(ref, obj, { merge:false });
+        jsonMsg.textContent='Saved.'; jsonMsg.classList.add('text-green-700');
+        await loadDocData();
+      } catch(e){
+        jsonMsg.textContent = 'Save failed: ' + (e.message || e);
+        jsonMsg.classList.add('text-red-600');
+      }
+    });
+    btnReloadJson.addEventListener('click', loadDocData);
+
+    btnSaveQuick.addEventListener('click', async ()=>{
+      quickMsg.textContent=''; quickMsg.className='text-sm';
+      if (!selected || selected.type!=='user') return;
+      try{
+        const payload = {
+          roles: {
+            admin: rAdmin.checked,
+            spolekMember: rSpolek.checked,
+            evMember: rEv.checked,
+            legacyMember: rLegacy.checked,
+            rctMember: rRct.checked,
+            germanMember: rGerman.checked
+          },
+          merch: {
+            whiteJersey: mWhite.checked,
+            pinkJersey: mPink.checked,
+            RotaryLegacyJersey: mRotary.checked
+          }
+        };
+        await setDoc(doc(db,'users',selected.id), payload, { merge:true });
+        quickMsg.textContent='Updated.'; quickMsg.classList.add('text-green-700');
+        await loadDocData();
+      } catch(e){
+        quickMsg.textContent='Update failed: ' + (e.message || e);
+        quickMsg.classList.add('text-red-600');
+      }
+    });
+
+    async function computeAttendanceTotals(){
+      if (!selected){ return; }
+      attTotals.innerHTML=''; attMeta.textContent='Calculating…';
+
+      const evSnap = await getDocs(collection(db,'events'));
+      const sportByEvent = new Map();
+      evSnap.forEach(d => { const v=d.data()||{}; sportByEvent.set(d.id, v.sport || ''); });
+
+      let docs=[];
+      if (selected.type==='user'){
+        const qy = query(collectionGroup(db,'attendance'), where('userId','==',selected.id));
+        const s = await getDocs(qy); docs = s.docs;
+      } else if (selected.type==='guest'){
+        const qy = query(collectionGroup(db,'attendance'), where('guestId','==',selected.id));
+        const s = await getDocs(qy); docs = s.docs;
+      } else {
+        const legacyRef = doc(db,'legacyMembers',selected.id);
+        const legacyData = (await getDoc(legacyRef)).data() || {};
+        const email = norm(legacyData.email);
+        const name  = norm(legacyData.name);
+        const nameNorm = normalizeName(name);
+
+        const matches = [];
+        if (email){
+          const q1 = query(collectionGroup(db,'attendance'), where('email','==',email));
+          const s1 = await getDocs(q1); if (!s1.empty) matches.push(...s1.docs);
+        }
+        const q2 = query(collectionGroup(db,'attendance'), where('displayName','==',name));
+        const s2 = await getDocs(q2); if (!s2.empty) matches.push(...s2.docs);
+
+        if (matches.length===0){
+          const q3 = query(collectionGroup(db,'attendance'), orderBy('createdAt','desc'), limit(2000));
+          const s3 = await getDocs(q3);
+          matches.push(...s3.docs.filter(d=> normalizeName((d.data()||{}).displayName) === nameNorm));
+        }
+        const uniq = new Map(); matches.forEach(d=> uniq.set(d.ref.path,d));
+        docs = [...uniq.values()];
+      }
+
+      let total=0, cycling=0, running=0, other=0;
+      docs.forEach(d=>{
+        const x=d.data()||{};
+        const pts=Number(x.awardedPoints||0);
+        const parts=d.ref.path.split('/');
+        const eventId = parts.length>=2 ? parts[1] : null;
+        const sport = eventId ? (sportByEvent.get(eventId)||'') : '';
+        if (sport==='cycling') cycling += pts;
+        else if (sport==='running') running += pts;
+        else other += pts;
+        total += pts;
+      });
+
+      const tile = (label,val)=>`
+        <div class="rounded-lg border border-neutral-200 dark:border-neutral-800 p-3">
+          <div class="text-xs uppercase tracking-wide opacity-70">${label}</div>
+          <div class="text-2xl font-semibold mt-1">${val}</div>
+        </div>`;
+      attTotals.innerHTML = tile('Total', total) + tile('Cycling', cycling) + tile('Running', running) + tile('Other', other);
+      attMeta.textContent = `${docs.length} attendance docs`;
+    }
+    btnRefreshAtt.addEventListener('click', computeAttendanceTotals);
+
+    onUserChanged(async (u)=>{
+      if (!u){ adminUI.classList.add('hidden'); notAdmin.classList.remove('hidden'); return; }
+      const prof = await getUserProfile(u.uid);
+      const isAdmin = !!(prof && prof.roles && prof.roles.admin);
+      if (!isAdmin){ adminUI.classList.add('hidden'); notAdmin.classList.remove('hidden'); return; }
+
+      notAdmin.classList.add('hidden'); adminUI.classList.remove('hidden');
+      log(`Signed in as admin: ${u.email}`);
+
+      await Promise.all([loadUsers(), loadLegacy(), loadGuests()]);
+      renderList();
+    });
+
+    filterEl.addEventListener('input', renderList);
+  </script>
+</body>
+</html>

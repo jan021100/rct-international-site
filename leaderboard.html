@@ -59,8 +59,17 @@
       <!-- Allowed content -->
       <div id="members-ui" class="hidden space-y-10">
 
-        <!-- Leaderboards -->
-        <div class="grid lg:grid-cols-2 gap-6">
+        <!-- Leaderboards (all-time) -->
+        <div class="grid lg:grid-cols-3 gap-6">
+          <!-- Overall (all-time) -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="font-serif text-2xl dark:text-base-50">Top 10 — Overall</h2>
+              <span id="lb-overall-meta" class="text-sm opacity-70"></span>
+            </div>
+            <ol id="lb-overall" class="mt-4 space-y-2"></ol>
+          </div>
+
           <!-- Cycling -->
           <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
             <div class="flex items-center justify-between gap-3">
@@ -77,6 +86,34 @@
               <span id="lb-running-meta" class="text-sm opacity-70"></span>
             </div>
             <ol id="lb-running" class="mt-4 space-y-2"></ol>
+          </div>
+        </div>
+
+        <!-- NEW: Year-to-date leaderboards -->
+        <div class="grid lg:grid-cols-3 gap-6">
+          <!-- Overall (YTD) -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="font-serif text-2xl dark:text-base-50">Top 10 — Overall (This year)</h2>
+              <span id="lb-overall-year-meta" class="text-sm opacity-70"></span>
+            </div>
+            <ol id="lb-overall-year" class="mt-4 space-y-2"></ol>
+          </div>
+          <!-- Cycling (YTD) -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="font-serif text-2xl dark:text-base-50">Top 10 — Cycling (This year)</h2>
+              <span id="lb-cycling-year-meta" class="text-sm opacity-70"></span>
+            </div>
+            <ol id="lb-cycling-year" class="mt-4 space-y-2"></ol>
+          </div>
+          <!-- Running (YTD) -->
+          <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="font-serif text-2xl dark:text-base-50">Top 10 — Running (This year)</h2>
+              <span id="lb-running-year-meta" class="text-sm opacity-70"></span>
+            </div>
+            <ol id="lb-running-year" class="mt-4 space-y-2"></ol>
           </div>
         </div>
 
@@ -162,10 +199,20 @@
     const gate = document.getElementById('not-allowed');
     const ui = document.getElementById('members-ui');
 
+    const lbOverall = document.getElementById('lb-overall');
+    const lbOverallMeta = document.getElementById('lb-overall-meta');
     const lbCycling = document.getElementById('lb-cycling');
     const lbRunning = document.getElementById('lb-running');
     const lbCyclingMeta = document.getElementById('lb-cycling-meta');
     const lbRunningMeta = document.getElementById('lb-running-meta');
+
+    // NEW (YTD)
+    const lbOverallYear = document.getElementById('lb-overall-year');
+    const lbCyclingYear = document.getElementById('lb-cycling-year');
+    const lbRunningYear = document.getElementById('lb-running-year');
+    const lbOverallYearMeta = document.getElementById('lb-overall-year-meta');
+    const lbCyclingYearMeta = document.getElementById('lb-cycling-year-meta');
+    const lbRunningYearMeta = document.getElementById('lb-running-year-meta');
 
     const adminBox = document.getElementById('admin-tools');
     const btnLoadFull = document.getElementById('btn-load-full');
@@ -188,11 +235,9 @@
       // fallback by normalized display name
       return `name:${norm(att.displayName).toLowerCase()}`;
     };
-    const labelFrom = (att) => norm(att.displayName) || norm(att.email) || '—';
 
     // cache for user names
     const userNameCache = new Map(); // uid -> {name,email}
-
     async function resolveUserLabel(uid){
       if (userNameCache.has(uid)) return userNameCache.get(uid);
       try {
@@ -230,25 +275,28 @@
 
     // Build leaderboards
     async function buildLeaderboards(){
-      log('Loading events (for sport lookup)…');
+      log('Loading events (for sport + date lookup)…');
       const evSnap = await getDocs(collection(db,'events'));
-      const sportByEvent = new Map(); // eventId -> sport
+      const eventInfo = new Map(); // eventId -> { sport, date }
       evSnap.forEach(d=> {
-        const v = d.data(); sportByEvent.set(d.id, (v && v.sport) || '');
+        const v = d.data();
+        eventInfo.set(d.id, { sport:(v && v.sport) || '', date:(v && v.date) || null });
       });
-      log(`Loaded ${sportByEvent.size} events.`);
+      log(`Loaded ${eventInfo.size} events.`);
 
       log('Loading attendance (all)…');
       const attSnap = await getDocs(collectionGroup(db,'attendance'));
       log(`Loaded ${attSnap.size} attendance docs.`);
 
-      // per-sport maps: key -> {points, displayName, email, type}
-      const agg = {
-        cycling: new Map(),
-        running: new Map(),
-      };
+      const currentYear = new Date().getFullYear();
 
-      // also aggregate for full list
+      // per-sport maps (all-time)
+      const agg = { cycling:new Map(), running:new Map() };
+
+      // year-to-date maps
+      const aggYear = { overall:new Map(), cycling:new Map(), running:new Map() };
+
+      // also aggregate for full list (all-time)
       const allTotals = new Map(); // key -> {cycling, running, other, total, label/email/type}
 
       attSnap.forEach(a=>{
@@ -256,7 +304,10 @@
         const path = a.ref.path; // events/{eventId}/attendance/{attId}
         const parts = path.split('/');
         const eventId = parts.length >= 2 ? parts[1] : null;
-        const sport = eventId ? (sportByEvent.get(eventId) || '') : '';
+        const info = eventId ? (eventInfo.get(eventId) || {}) : {};
+        const sport = info.sport || '';
+        const dateStr = info.date || null;
+        const isYTD = !!(dateStr && new Date(dateStr).getFullYear() === currentYear);
 
         const key = keyOf(x);
         const baseRec = {
@@ -266,19 +317,18 @@
         };
         const pts = Number(x.awardedPoints || 0);
 
-        // per-sport
+        // per-sport (all-time)
         const bucket = sport === 'cycling' ? 'cycling' : (sport === 'running' ? 'running' : null);
         if (bucket) {
           const m = agg[bucket];
           const cur = m.get(key) || { points:0, ...baseRec };
           cur.points += pts;
-          // keep the "best" label we see (prefer a proper displayName)
           if (!cur.displayName && baseRec.displayName) cur.displayName = baseRec.displayName;
           if (!cur.email && baseRec.email) cur.email = baseRec.email;
           m.set(key, cur);
         }
 
-        // overall
+        // overall (all-time)
         const overall = allTotals.get(key) || { cycling:0, running:0, other:0, total:0, ...baseRec };
         if (sport === 'cycling') overall.cycling += pts;
         else if (sport === 'running') overall.running += pts;
@@ -287,6 +337,26 @@
         if (!overall.displayName && baseRec.displayName) overall.displayName = baseRec.displayName;
         if (!overall.email && baseRec.email) overall.email = baseRec.email;
         allTotals.set(key, overall);
+
+        // --- YTD aggregation ---
+        if (isYTD) {
+          // overall YTD
+          const oy = aggYear.overall.get(key) || { points:0, ...baseRec };
+          oy.points += pts;
+          if (!oy.displayName && baseRec.displayName) oy.displayName = baseRec.displayName;
+          if (!oy.email && baseRec.email) oy.email = baseRec.email;
+          aggYear.overall.set(key, oy);
+
+          // cycling/running YTD
+          if (bucket) {
+            const mY = aggYear[bucket];
+            const curY = mY.get(key) || { points:0, ...baseRec };
+            curY.points += pts;
+            if (!curY.displayName && baseRec.displayName) curY.displayName = baseRec.displayName;
+            if (!curY.email && baseRec.email) curY.email = baseRec.email;
+            mY.set(key, curY);
+          }
+        }
       });
 
       // resolve names for 'user:' keys for nicer display (top lists only)
@@ -303,14 +373,38 @@
         return entries;
       }
 
+      // All-time Overall (after allTotals are complete)
+      const overallMap = new Map();
+      allTotals.forEach((rec, key) => {
+        overallMap.set(key, {
+          points: rec.total || 0,
+          displayName: rec.displayName || '',
+          email: rec.email || '',
+          type: rec.type
+        });
+      });
+      const topOverall = await hydrateLabelsForTop(overallMap);
+      renderTopList(lbOverall, topOverall);
+      lbOverallMeta.textContent = topOverall.length ? 'All-time' : '';
+
+      // All-time Cycling/Running
       const topCycling = await hydrateLabelsForTop(agg.cycling);
       const topRunning = await hydrateLabelsForTop(agg.running);
-
       renderTopList(lbCycling, topCycling);
       renderTopList(lbRunning, topRunning);
-
       lbCyclingMeta.textContent = `${topCycling.length ? 'All-time' : ''}`;
       lbRunningMeta.textContent = `${topRunning.length ? 'All-time' : ''}`;
+
+      // YTD tops
+      const topOverallYear = await hydrateLabelsForTop(aggYear.overall);
+      const topCyclingYear = await hydrateLabelsForTop(aggYear.cycling);
+      const topRunningYear = await hydrateLabelsForTop(aggYear.running);
+      renderTopList(lbOverallYear, topOverallYear);
+      renderTopList(lbCyclingYear, topCyclingYear);
+      renderTopList(lbRunningYear, topRunningYear);
+      lbOverallYearMeta.textContent = topOverallYear.length ? String(new Date().getFullYear()) : '';
+      lbCyclingYearMeta.textContent = topCyclingYear.length ? String(new Date().getFullYear()) : '';
+      lbRunningYearMeta.textContent = topRunningYear.length ? String(new Date().getFullYear()) : '';
 
       // store for admin table
       window._ALL_TOTALS = allTotals;
@@ -321,7 +415,6 @@
       const allTotals = window._ALL_TOTALS || new Map();
       const filter = (fullFilter.value || '').trim().toLowerCase();
 
-      // to array & sort
       let rows = [...allTotals.entries()].map(([key, rec])=>{
         return {
           key, type: rec.type,

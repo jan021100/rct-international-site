@@ -44,6 +44,66 @@
       background: radial-gradient(120% 120% at 0% 0%, rgba(211,107,31,.18) 0%, transparent 60%),
                   radial-gradient(120% 120% at 100% 100%, rgba(214,178,94,.18) 0%, transparent 55%);
     }
+
+    /* ===== Inventory & Badges (compact, “game inventory” look) ===== */
+    .ib-grid{
+      display:grid;
+      grid-template-columns:repeat(12, minmax(0,1fr)); /* 1 unit = badge size */
+      grid-auto-rows:72px; /* compact */
+      gap:.5rem;
+    }
+    @media (max-width:1024px){ .ib-grid{grid-template-columns:repeat(10,minmax(0,1fr)); grid-auto-rows:66px;} }
+    @media (max-width:640px){ .ib-grid{grid-template-columns:repeat(8,minmax(0,1fr)); grid-auto-rows:62px;} }
+
+    .ib-tile{
+      position:relative; border-radius:.6rem;
+      border:1px dashed rgba(100,116,139,.35);
+      background:
+        radial-gradient(120% 120% at 100% 0%, rgba(214,178,94,.10) 0%, transparent 55%),
+        radial-gradient(120% 120% at 0% 100%, rgba(211,107,31,.08) 0%, transparent 55%),
+        linear-gradient(180deg, rgba(0,0,0,.03), transparent);
+      overflow:hidden;
+      cursor:pointer;
+    }
+    .dark .ib-tile{border-color:rgba(55,65,81,.6)}
+    .ib-item{ grid-column: span 2; grid-row: span 2; }     /* 2x2 = one item */
+    .ib-badge{ grid-column: span 1; grid-row: span 1; }    /* 1x1 = one badge */
+
+    .ib-owned{ border-style:solid; border-color:rgba(214,178,94,.9); box-shadow:inset 0 0 0 1px rgba(214,178,94,.35), 0 6px 16px rgba(214,178,94,.22); }
+    .ib-locked{ filter:grayscale(1) opacity(.6); }
+    .ib-lock::after{
+      content:'';
+      position:absolute; inset:0;
+      background:linear-gradient(180deg,transparent,rgba(0,0,0,.18));
+      pointer-events:none;
+    }
+    .ib-lock .lock-icon{
+      position:absolute; top:.35rem; right:.35rem; width:18px; height:18px; opacity:.9; pointer-events:none;
+    }
+
+    .ib-name{
+      position:absolute; left:.4rem; right:.4rem; bottom:.35rem; text-align:center; font-size:.7rem; opacity:.95;
+      text-shadow:0 1px 0 rgba(255,255,255,.4);
+    }
+    .dark .ib-name{ text-shadow:none; }
+
+    .ib-img{ position:absolute; inset:0; margin:auto; width:66%; height:66%; object-fit:contain; image-rendering:auto; }
+    .ib-icon-sm{ width:60%; height:60%; }
+
+    /* tooltip */
+    .tip{ position:absolute; pointer-events:none; opacity:0; transform:translateY(4px); transition:opacity .15s, transform .15s;
+          left:50%; bottom:100%; translate:-50% -6px; background:rgba(17,24,39,.95); color:#fff; padding:.3rem .45rem; border-radius:.4rem; font-size:.7rem; white-space:nowrap; }
+    .ib-tile:hover .tip{ opacity:1; transform:translateY(0); }
+
+    /* click-popover */
+    .ib-pop{
+      position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+      background:#111827; color:#fff; padding:10px 12px; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.25);
+      z-index:70; max-width:90vw; width:max-content; font-size:.9rem;
+    }
+    .ib-pop .x{position:absolute; right:8px; top:6px; opacity:.7; cursor:pointer}
+    .ib-pop h4{font-weight:600; margin-right:18px}
+    .ib-dim{position:fixed; inset:0; background:rgba(0,0,0,.25); z-index:60}
   </style>
 </head>
 
@@ -56,59 +116,55 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
       <!-- Greeting / hero -->
-<div class="rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-6 sm:p-8">
-  <div id="hero-loading" class="space-y-3">
-    <div class="h-6 w-40 skeleton rounded"></div>
-    <div class="h-10 w-2/3 skeleton rounded"></div>
-    <div class="h-4 w-1/3 skeleton rounded"></div>
-  </div>
+      <div class="rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-6 sm:p-8">
+        <div id="hero-loading" class="space-y-3">
+          <div class="h-6 w-40 skeleton rounded"></div>
+          <div class="h-10 w-2/3 skeleton rounded"></div>
+          <div class="h-4 w-1/3 skeleton rounded"></div>
+        </div>
 
-  <div id="hero" class="hidden">
-    <div class="flex items-start justify-between gap-4">
-      <div>
-        <div class="text-sm uppercase tracking-wide opacity-70">Welcome back</div>
-        <h1 class="mt-1 font-serif text-3xl sm:text-4xl text-neutral-900 dark:text-base-50">
-          Hi, <span id="hero-name">Member</span> 👋
-        </h1>
-        <div class="mt-2 flex flex-wrap gap-2" id="role-badges"></div>
+        <div id="hero" class="hidden">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="text-sm uppercase tracking-wide opacity-70">Welcome back</div>
+              <h1 class="mt-1 font-serif text-3xl sm:text-4xl text-neutral-900 dark:text-base-50">
+                Hi, <span id="hero-name">Member</span> 👋
+              </h1>
+              <div class="mt-2 flex flex-wrap gap-2" id="role-badges"></div>
 
-        <!-- NEW: membership numbers -->
-        <div class="mt-1 flex flex-wrap gap-2 text-sm">
-          <span id="hero-member-cz" class="hidden badge bg-gold/10"># <span></span></span>
-          <span id="hero-member-de" class="hidden badge bg-gold/10"># <span></span></span>
+              <!-- Member numbers -->
+              <div class="mt-1 flex flex-wrap gap-2 text-sm">
+                <span id="hero-member-cz" class="hidden badge bg-gold/10"># <span></span></span>
+                <span id="hero-member-de" class="hidden badge bg-gold/10"># <span></span></span>
+              </div>
+            </div>
+
+            <!-- Logout -->
+            <button id="btn-logout"
+              class="self-start px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim hover:bg-neutral-100 dark:hover:bg-neutral-800 text-sm">
+              Log out
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Logout inside the hero card, right-aligned -->
-      <button id="btn-logout"
-        class="self-start px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim hover:bg-neutral-100 dark:hover:bg-neutral-800 text-sm">
-        Log out
-      </button>
-    </div>
-  </div>
-</div>
-
-      <!-- Stats -->
+      <!-- Stats (moved ABOVE items & badges) -->
       <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Total points -->
         <div class="stat-card rounded-2xl card bg-white dark:bg-neutral-950 p-5">
           <div class="text-xs uppercase tracking-wide opacity-70">Total points</div>
           <div class="mt-2 text-4xl font-semibold text-neutral-900 dark:text-base-50" id="st-total">—</div>
           <div class="text-xs opacity-70 mt-1" id="st-events">— attended events</div>
         </div>
-        <!-- Cycling -->
         <div class="stat-card rounded-2xl card bg-white dark:bg-neutral-950 p-5">
           <div class="text-xs uppercase tracking-wide opacity-70">Cycling points</div>
           <div class="mt-2 text-4xl font-semibold" id="st-cycling">—</div>
           <div class="text-xs opacity-70 mt-1" id="st-cycling-events">— rides</div>
         </div>
-        <!-- Running -->
         <div class="stat-card rounded-2xl card bg-white dark:bg-neutral-950 p-5">
           <div class="text-xs uppercase tracking-wide opacity-70">Running points</div>
           <div class="mt-2 text-4xl font-semibold" id="st-running">—</div>
           <div class="text-xs opacity-70 mt-1">all-time</div>
         </div>
-        <!-- Rank -->
         <div class="stat-card rounded-2xl card bg-white dark:bg-neutral-950 p-5">
           <div class="text-xs uppercase tracking-wide opacity-70">Team rank</div>
           <div class="mt-2 text-4xl font-semibold" id="st-rank">—</div>
@@ -116,7 +172,30 @@
         </div>
       </div>
 
-      <!-- Slim Leaderboards CTA (members/admins only) -->
+      <!-- Items & Badges (compact) -->
+      <div class="mt-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft p-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-xs uppercase tracking-wide opacity-70">Collection</div>
+            <h2 class="font-serif text-2xl dark:text-base-50">Items & Badges</h2>
+          </div>
+          <label class="flex items-center gap-2 text-sm opacity-80">
+            <input id="toggle-all-badges" type="checkbox">
+            <span>Show available badges</span>
+          </label>
+        </div>
+        
+        <!-- Tip: click tiles -->
+<div class="mt-2 text-xs opacity-70 flex items-center gap-2">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 2a10 10 0 1010 10A10.012 10.012 0 0012 2zm0 14a1 1 0 01-1-1v-4a1 1 0 112 0v4a1 1 0 01-1 1zm0-8a1.25 1.25 0 111.25-1.25A1.251 1.251 0 0112 8z"/>
+  </svg>
+  <span>Tip: Click any item or badge for details.</span>
+</div>
+        <div id="ib-grid" class="ib-grid mt-4"></div>
+      </div>
+
+      <!-- Membership CTA (non-members) -->
       <div id="leaderboards-cta" class="hidden mt-4 rounded-xl card cta-grad bg-white dark:bg-neutral-950 shadow-soft px-5 py-4">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div class="leading-tight">
@@ -133,7 +212,7 @@
         </div>
       </div>
 
-      <!-- Membership CTA (non-members only; same style) -->
+      <!-- Membership CTA (non-members; unchanged) -->
       <div id="membership-cta" class="hidden mt-4 rounded-xl card cta-grad bg-white dark:bg-neutral-950 shadow-soft px-5 py-5">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div class="leading-tight">
@@ -156,7 +235,7 @@
         </div>
       </div>
 
-      <!-- NEW: Legacy/activation notice (visible if spolekMember == false) -->
+      <!-- Legacy/activation notice (unchanged) -->
       <div id="legacy-merge-cta" class="hidden mt-4 rounded-xl card bg-white dark:bg-neutral-950 shadow-soft px-5 py-5">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div class="leading-tight">
@@ -175,7 +254,7 @@
         </div>
       </div>
 
-      <!-- Secondary stats -->
+      <!-- Secondary stats (unchanged) -->
       <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="rounded-2xl card bg-white dark:bg-neutral-950 p-5">
           <div class="text-xs uppercase tracking-wide opacity-70">Last attended event</div>
@@ -194,7 +273,7 @@
         </div>
       </div>
       
-      <!-- Slim Events CTA -->
+      <!-- Slim Events CTA (unchanged) -->
       <div id="events-cta" class="mt-4 rounded-xl card cta-grad bg-white dark:bg-neutral-950 shadow-soft px-5 py-4">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div class="leading-tight">
@@ -205,13 +284,11 @@
             </div>
           </div>
           <div class="flex gap-3">
-            <!-- Strava button -->
             <a href="https://www.strava.com/clubs/1032760" target="_blank"
               class="inline-flex items-center justify-center px-6 py-2 rounded-lg text-white font-medium anim text-sm
                      bg-gradient-to-r from-[#D36B1F] to-[#B84F0C] hover:opacity-90">
               Strava
             </a>
-            <!-- Atlans button -->
             <a href="https://atlans.com/community/47" target="_blank"
               class="inline-flex items-center justify-center px-6 py-2 rounded-lg text-white font-medium anim text-sm
                      bg-gradient-to-r from-[#6E8B3D] to-[#4C6627] hover:opacity-90">
@@ -221,7 +298,7 @@
         </div>
       </div>
 
-      <!-- Recent activity + Milestone -->
+      <!-- Recent activity + Milestone (unchanged) -->
       <div class="mt-6 grid lg:grid-cols-3 gap-4">
         <div class="rounded-2xl card bg-white dark:bg-neutral-950 p-6 lg:col-span-2">
           <div class="flex items-center justify-between">
@@ -242,7 +319,7 @@
         </div>
       </div>
 
-      <!-- Details (collapsed) -->
+      <!-- Details (unchanged) -->
       <div id="details" class="hidden mt-6 rounded-2xl card bg-white dark:bg-neutral-950 p-6">
         <h2 class="font-semibold text-lg">Your profile data</h2>
         <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -267,16 +344,14 @@
         </div>
       </div>
 
-      <!-- Admin tools (separate block, aligned) -->
+      <!-- Admin tools (unchanged but single button) -->
       <div id="admin-section" class="hidden mt-10">
         <div class="rounded-2xl card bg-white dark:bg-neutral-950 p-6">
           <div class="flex items-center justify-between">
             <h2 class="font-serif text-2xl">Admin tools</h2>
           </div>
-          <div class="mt-3 flex flex-wrap gap-3">
-            <a href="attendance.html" class="px-4 py-2 rounded-lg bg-accent text-white hover:opacity-90 anim">Manage Attendance</a>
-            <a href="merge.html" class="px-4 py-2 rounded-lg bg-accent text-white hover:opacity-90 anim">Merge Profiles</a>
-            <a href="confirmMember.html" class="px-4 py-2 rounded-lg bg-accent text-white hover:opacity-90 anim">Confirm Apllications</a>
+          <div class="mt-3">
+            <a href="admin.html" class="px-4 py-2 rounded-lg bg-accent text-white hover:opacity-90 anim">Open Admin Console</a>
           </div>
         </div>
       </div>
@@ -352,7 +427,135 @@
       if (roles?.admin)        wrap.appendChild(mk('Admin','bg-accent text-white'));
     }
 
-    // ------- stats + helpers (unchanged) -------
+    /* ===== Items & Badges renderer ===== */
+
+    // Catalog (for “available” view). Add/extend freely in future.
+    const BADGE_CATALOG_STATIC = [
+      'events_10','events_20','events_30','events_40','events_50',
+      'years_1','years_2','years_3',
+      'streak_sun_3','streak_sun_5','streak_sun_10',
+      'streak_thu_3','streak_thu_5','streak_thu_10',
+      'streak_ride_3','streak_ride_5','streak_ride_10',
+      'winterWarrior_2022','winterWarrior_2023','winterWarrior_2024',
+      'winterConqueror_2022','winterConqueror_2023','winterConqueror_2024'
+    ];
+
+    function badgeLabelAndHint(key){
+      if (key.startsWith('events_')){
+        const n = key.split('_')[1]; return {label:`${n} Events`, hint:`Attend ${n} unique events in total.`};
+      }
+      if (key.startsWith('years_')){
+        const n = key.split('_')[1]; return {label:`${n} ${n==='1'?'Year':'Years'}`, hint:`Full years since your first attended event.`};
+      }
+      if (key.startsWith('streak_sun_')){
+        const n = key.split('_')[2]; return {label:`Sunday x${n}`, hint:`Attend ${n} consecutive Sunday runs (±1 day forgiven).`};
+      }
+      if (key.startsWith('streak_thu_')){
+        const n = key.split('_')[2]; return {label:`Thursday x${n}`, hint:`Attend ${n} consecutive Thursday runs (±1 day forgiven).`};
+      }
+      if (key.startsWith('streak_ride_')){
+        const n = key.split('_')[2]; return {label:`Group Ride x${n}`, hint:`Attend ${n} consecutive cycling weeks (±1 day forgiven).`};
+      }
+      if (key.startsWith('winterWarrior_')){
+        const y = key.split('_')[1]; return {label:`Winter Warrior ${y}`, hint:`≥5 events in the ${y-1}/${y} winter (Dec–Feb).`};
+      }
+      if (key.startsWith('winterConqueror_')){
+        const y = key.split('_')[1]; return {label:`Winter Conqueror ${y}`, hint:`≥10 events in the ${y-1}/${y} winter (Dec–Feb).`};
+      }
+      return {label:key, hint:'Earn this badge by participating in RCT activities.'};
+    }
+
+    function badgeIconPath(key){ return `/assets/img/badges/${key}.png`; }
+
+    // simple popover
+    function showIBNotice(title, text){
+      const dim = document.createElement('div');
+      dim.className = 'ib-dim';
+      const box = document.createElement('div');
+      box.className = 'ib-pop';
+      box.innerHTML = `
+        <button class="x" aria-label="Close">✕</button>
+        <h4>${title}</h4>
+        <div class="opacity-90 text-sm">${text}</div>
+      `;
+      const close = ()=>{ dim.remove(); box.remove(); };
+      dim.addEventListener('click', close);
+      box.querySelector('.x').addEventListener('click', close);
+      document.body.appendChild(dim);
+      document.body.appendChild(box);
+    }
+
+    function addItemTile(grid, {key, name, src, owned, hint}){
+      // RotaryLegacyJersey only if true
+      if (key==='RotaryLegacyJersey' && !owned) return;
+
+      const t = document.createElement('div');
+      t.className = `ib-tile ib-item ${owned ? 'ib-owned' : 'ib-locked ib-lock'}`;
+      t.title = name;
+      t.dataset.label = name;
+      t.dataset.hint = hint || (owned ? 'Owned item' : 'Not owned yet');
+      t.innerHTML = `
+        <img class="ib-img" src="${src}" alt="${name}" loading="lazy"
+             onload="this.nextElementSibling && this.nextElementSibling.classList.add('hidden')"
+             onerror="this.style.display='none'">
+        <div class="ib-name">${name}</div>
+        <svg class="lock-icon ${owned?'hidden':''}" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a4 4 0 00-4 4v3H7a3 3 0 00-3 3v7a3 3 0 003 3h10a3 3 0 003-3v-7a3 3 0 00-3-3h-1V6a4 4 0 00-4-4z"/></svg>
+        <div class="tip">${t.dataset.hint}</div>
+      `;
+      grid.appendChild(t);
+    }
+
+    function addBadgeTile(grid, {key, earned, label, hint}){
+      const t = document.createElement('div');
+      t.className = `ib-tile ib-badge ${earned ? 'ib-owned' : 'ib-locked ib-lock'}`;
+      t.title = label;
+      t.dataset.label = label;
+      t.dataset.hint = hint || '';
+      t.innerHTML = `
+        <img class="ib-img ib-icon-sm" src="${badgeIconPath(key)}" alt="${label}" loading="lazy"
+             onload="this.nextElementSibling && this.nextElementSibling.classList.add('hidden')"
+             onerror="this.style.display='none'">
+        <div class="ib-name">${label}</div>
+        <svg class="lock-icon ${earned?'hidden':''}" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a4 4 0 00-4 4v3H7a3 3 0 00-3 3v7a3 3 0 003 3h10a3 3 0 003-3v-7a3 3 0 00-3-3h-1V6a4 4 0 00-4-4z"/></svg>
+        <div class="tip">${t.dataset.hint}</div>
+      `;
+      grid.appendChild(t);
+    }
+
+    function renderItemsAndBadges(profile, showAll=false){
+      const grid = $('ib-grid'); grid.innerHTML = '';
+      const merch = profile.merch || {};
+      const badges = profile.badges || {};
+
+      // 1) Items (left)
+      const items = [
+        { key:'whiteJersey', name:'White Jersey', src:'/assets/img/items/whiteJersey.png', hint:'RCT white team jersey' },
+        { key:'pinkJersey',  name:'Pink Jersey',  src:'/assets/img/items/pinkJersey.png',  hint:'RCT pink team jersey' },
+        /* NOTE: screenshot shows "rotaryLagecyJersey.png" (typo). Keep path as-is if that is the actual file name. */
+        { key:'RotaryLegacyJersey', name:'Rotary Legacy Jersey', src:'/assets/img/items/rotaryLagecyJersey.png', hint:'Special edition Rotary Legacy jersey' }
+      ];
+      items.forEach(it => addItemTile(grid, { ...it, owned: !!merch[it.key] }));
+
+      // 2) Badges (right) — earned first
+      Object.keys(badges).sort().forEach(k=>{
+        const meta = badges[k] || {};
+        const lb = meta.label || badgeLabelAndHint(k).label;
+        const hint = meta.hint || badgeLabelAndHint(k).hint;
+        addBadgeTile(grid, { key:k, earned:true, label:lb, hint });
+      });
+
+      // 3) Optionally show “available” (not yet earned)
+      if (showAll){
+        const have = new Set(Object.keys(badges));
+        BADGE_CATALOG_STATIC.forEach(k=>{
+          if (have.has(k)) return;
+          const {label, hint} = badgeLabelAndHint(k);
+          addBadgeTile(grid, { key:k, earned:false, label, hint });
+        });
+      }
+    }
+
+    // ------- stats + helpers (unchanged below here) -------
     async function loadStatsForUser(uid) {
       const events = new Map();
       try {
@@ -404,7 +607,7 @@
           const day = date.slice(0,10);
           stats.activeDates.add(day);
           const key = day.slice(0,7);
-          monthPoints.set(key, (monthPoints.get(key)||0) + pts);
+          monthPoints.set(key, (monthPoints.get(key) || 0) + pts);
           if (!stats.lastDate || new Date(date) > new Date(stats.lastDate)) { stats.lastDate = date; stats.last = name; }
         }
 
@@ -463,7 +666,6 @@
       return { next, diff };
     }
 
-    // Simple lock badge generator
     function lockedBadge(text='Members only'){
       return `
         <span class="inline-flex items-center gap-2 text-sm opacity-80">
@@ -475,35 +677,27 @@
       `;
     }
 
-    // Apply locked state to all tiles/panels
     function applyLockedState(){
-      // top stats
       setText('st-total','—'); setText('st-events',''); $('st-events').innerHTML = lockedBadge();
       setText('st-cycling','—'); $('st-cycling-events').innerHTML = lockedBadge();
       setText('st-running','—');
       setText('st-rank','—'); $('st-rank-note').innerHTML = lockedBadge('Rank visible to members');
 
-      // secondary stats
       $('st-last-name').innerHTML = lockedBadge('Hidden for non-members');
       setText('st-last-date','—');
       $('st-active-days').innerHTML = '—';
       $('st-top-month').innerHTML = '—';
       $('st-top-month-pts').innerHTML = '';
 
-      // activity & milestone
       const ra = $('recent-activity');
       if (ra) ra.innerHTML = lockedBadge('Recent activity is a member perk');
       const msNext = $('milestone-next'); if (msNext) msNext.innerHTML = '—';
       const msNote = $('milestone-note'); if (msNote) msNote.innerHTML = lockedBadge('Unlock milestones with membership');
 
-      // controls
       const btn = $('btn-toggle-activity'); if (btn) btn.classList.add('hidden');
-
-      // show membership CTA
       const mem = $('membership-cta'); if (mem) mem.classList.remove('hidden');
     }
 
-    // Expand/collapse helpers
     function renderActivity(list, full=false){
       const box = $('recent-activity');
       if (!list || list.length===0) { box.textContent = 'No recent activity yet.'; return; }
@@ -529,7 +723,6 @@
       box.dataset.expanded = full ? '1' : '0';
     }
 
-    // Global UI clicks
     document.addEventListener('click', (e)=>{
       const btn = e.target.closest('#btn-toggle-details');
       if (btn) {
@@ -542,6 +735,14 @@
         const full = $('recent-activity').dataset.expanded !== '1';
         renderActivity(window._RECENT_ALL || [], full);
       }
+
+      // Click handler for item/badge tiles → show notice
+      const tile = e.target.closest('.ib-tile');
+      if (tile) {
+        const label = tile.dataset.label || 'Info';
+        const hint  = tile.dataset.hint  || 'Details';
+        showIBNotice(label, hint);
+      }
     });
 
     // ------- auth gate
@@ -552,59 +753,50 @@
         const profile = await getUserProfile(user.uid);
         if (!profile) { redirectToLogin(); return; }
 
-        // cache profile for the activation email handler
         window._PROFILE_CACHE = { uid:user.uid, ...profile };
 
         $('hero-name').textContent = profile.name || (profile.email || 'Member');
         renderBadges(profile.roles || {});
         $('hero-loading').classList.add('hidden'); $('hero').classList.remove('hidden');
-        
-        /* === Member numbers in hero (user doc first, then legacy fallback) === */
-async function renderMemberNumbers(profile){
-  const czEl = document.getElementById('hero-member-cz');
-  const deEl = document.getElementById('hero-member-de');
-  const show = (el, val) => { if (el && val) { el.querySelector('span').textContent = val; el.classList.remove('hidden'); } };
 
-  // 1) Try numbers from users/{uid} -> memberNumbers map
-  if (profile?.memberNumbers) {
-    show(czEl, profile.memberNumbers.cz);
-    show(deEl, profile.memberNumbers.de);
-  }
+        // Items & Badges (initial render)
+        renderItemsAndBadges(profile, false);
+        $('toggle-all-badges').addEventListener('change', (e)=> {
+          renderItemsAndBadges(profile, e.target.checked);
+        });
 
-  // 2) Fallback: try legacyMembers by email
-  if ((!profile?.memberNumbers?.cz) && (!profile?.memberNumbers?.de)) {
-    try {
-      const email = (profile?.email || '').trim().toLowerCase();
-      if (!email) return;
-      const qLegacy = query(collection(db,'legacyMembers'), where('email','==', email));
-      const snap = await getDocs(qLegacy);
-      if (!snap.empty) {
-        const legacy = snap.docs[0].data() || {};
-        show(czEl, legacy.memberNumberCZ || legacy.czNumber || legacy.memberNumbers?.cz);
-        show(deEl, legacy.memberNumberDE || legacy.deNumber || legacy.memberNumbers?.de);
-      }
-    } catch (e) {
-      console.warn('Legacy member number lookup failed:', e?.message || e);
-    }
-  }
-}
-await renderMemberNumbers(profile);
+        // Member numbers (user then legacy fallback)
+        async function renderMemberNumbers(profile){
+          const czEl = document.getElementById('hero-member-cz');
+          const deEl = document.getElementById('hero-member-de');
+          const show = (el, val) => { if (el && val) { el.querySelector('span').textContent = val; el.classList.remove('hidden'); } };
+          if (profile?.memberNumbers) {
+            show(czEl, profile.memberNumbers.cz);
+            show(deEl, profile.memberNumbers.de);
+          }
+          if ((!profile?.memberNumbers?.cz) && (!profile?.memberNumbers?.de)) {
+            try {
+              const email = (profile?.email || '').trim().toLowerCase();
+              if (!email) return;
+              const qLegacy = query(collection(db,'legacyMembers'), where('email','==', email));
+              const snap = await getDocs(qLegacy);
+              if (!snap.empty) {
+                const legacy = snap.docs[0].data() || {};
+                show(czEl, legacy.memberNumberCZ || legacy.czNumber || legacy.memberNumbers?.cz);
+                show(deEl, legacy.memberNumberDE || legacy.deNumber || legacy.memberNumbers?.de);
+              }
+            } catch (e) { console.warn('Legacy member number lookup failed:', e?.message || e); }
+          }
+        }
+        await renderMemberNumbers(profile);
 
         const isMember = !!(profile?.roles?.spolekMember || profile?.roles?.evMember);
-        if (isMember || profile.roles?.admin) {
-          $('leaderboards-cta').classList.remove('hidden');
-        } else {
-          // Non-member: lock everything and skip heavy reads
-          applyLockedState();
-        }
+        if (isMember || profile.roles?.admin) { $('leaderboards-cta').classList.remove('hidden'); }
+        else { applyLockedState(); }
         if (profile.roles?.admin) $('admin-section').classList.remove('hidden');
 
-        // Show legacy/activation CTA specifically if NOT spolek member
-        if (!profile?.roles?.spolekMember) {
-          $('legacy-merge-cta')?.classList.remove('hidden');
-        }
+        if (!profile?.roles?.spolekMember) { $('legacy-merge-cta')?.classList.remove('hidden'); }
 
-        // Profile details
         setText('acc-name', profile.name);
         setText('acc-email', profile.email);
         setText('acc-phone', profile.phone);
@@ -614,11 +806,9 @@ await renderMemberNumbers(profile);
         setText('acc-sports', profile.sports);
         setText('acc-created', profile.createdAt ? new Date(profile.createdAt).toLocaleString() : '—');
 
-        // If member, fetch stats/rank as before
         if (isMember) {
           try {
             const s = await loadStatsForUser(user.uid);
-
             setText('st-total', s.total);
             setText('st-events', `${s.eventsAttended} attended events`);
             setText('st-cycling', s.cycling);
@@ -627,22 +817,17 @@ await renderMemberNumbers(profile);
             setText('st-last-name', s.last || '—');
             setText('st-last-date', s.lastDate ? fmtDate(s.lastDate) : '—');
             setText('st-active-days', s.activeDates.size || 0);
-
             if (s.topMonthKey) {
               setText('st-top-month', fmtMonth(s.topMonthKey));
               setText('st-top-month-pts', `${s.topMonthPts} pts`);
             } else {
-              setText('st-top-month', '—');
-              setText('st-top-month-pts', '—');
+              setText('st-top-month', '—'); setText('st-top-month-pts', '—');
             }
-
             window._RECENT_ALL = s.recentAll || [];
             renderActivity(s.recentAll || [], false);
-
             const ms = computeMilestone(s.total || 0);
             setText('milestone-next', `${ms.next} pts`);
             setText('milestone-note', ms.diff ? `${ms.diff} to go` : 'You just hit a milestone! 🎉');
-
           } catch (e) {
             console.error('Stats error:', e?.message||e);
             setText('st-total','—'); setText('st-events','stats unavailable');
@@ -654,13 +839,10 @@ await renderMemberNumbers(profile);
             $('recent-activity').textContent = '—';
             setText('milestone-next','—'); setText('milestone-note','—');
           }
-
-          // Rank
           const rk = await computeRankSmart(user.uid, profile);
           setText('st-rank', rk.rank);
           setText('st-rank-note', rk.population !== '—' ? `out of ${rk.population}` : 'rank among members');
         }
-
       } catch (e) {
         console.error(e);
         redirectToLogin();
@@ -680,7 +862,7 @@ await renderMemberNumbers(profile);
       }
     });
 
-    // ===== Activation email handler =====
+    // Activation email handler (unchanged)
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('#btn-legacy-activate');
       if (!btn) return;

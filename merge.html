@@ -139,7 +139,7 @@
     import { auth, db, onUserChanged, getUserProfile } from '/assets/js/firebase.js';
     import {
       collection, collectionGroup, query, where, orderBy, limit, getDocs, doc, getDoc,
-      updateDoc, setDoc, writeBatch, runTransaction
+      updateDoc, setDoc, writeBatch
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     // --- Admin gate ---
@@ -181,26 +181,6 @@
       return normStr(s)
         .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
         .toLowerCase();
-    }
-    const pad2 = (n)=> String(n).padStart(2,'0');
-
-    // === Member-number assignment helper (uses /counters/memberNumbers with czNext/deNext) ===
-    async function assignNextNumber(region){ // 'CZ' | 'DE'
-      const countersRef = doc(db, 'counters', 'memberNumbers');
-      const key = region === 'DE' ? 'deNext' : 'czNext';
-      const prefix = region === 'DE' ? 'DE' : 'CZ';
-
-      const next = await runTransaction(db, async (tx)=>{
-        const snap = await tx.get(countersRef);
-        const data = snap.exists() ? snap.data() : {};
-        const cur = Number(data[key] || 1); // initialize your counters doc to desired start (e.g. CZ=29)
-        const assign = cur;
-        const update = Object.assign({}, data, { [key]: cur + 1 });
-        snap.exists() ? tx.update(countersRef, update) : tx.set(countersRef, update);
-        return assign;
-      });
-
-      return `${prefix}${pad2(next)}`;
     }
 
     // --- Load data ---
@@ -446,7 +426,7 @@
       return changed;
     }
 
-    // --- Do merge (same flow; now assigns memberNumbers when roles become active) ---
+    // --- Do merge (no new member numbers are created) ---
     async function doMerge() {
       mergeMsg.textContent = ''; mergeMsg.className='text-sm';
       if (!selectedUser || !selectedSource) {
@@ -475,33 +455,24 @@
         const payload = await copyProfileData(sourceData, user.uid);
         log(`Updated target with: ${JSON.stringify(payload)}`);
 
-        // === NEW: assign member numbers if roles are active and numbers missing ===
-        const afterSnap = await getDoc(userRef);
-        const after = afterSnap.exists() ? afterSnap.data() : {};
-        const roles = after.roles || {};
-        const nums  = after.memberNumbers || {};
-
-        // CZ spolek
-        if (roles.spolekMember === true && !nums.cz) {
-          const czNum = await assignNextNumber('CZ');
-          await setDoc(userRef, { memberNumbers: { ...nums, cz: czNum } }, { merge:true });
-          log(`Assigned CZ member number ${czNum}.`);
-        }
-        // DE e.V.
-        if (roles.evMember === true && !nums.de) {
-          const deNum = await assignNextNumber('DE');
-          await setDoc(userRef, { memberNumbers: { ...(nums.cz ? { cz: nums.cz } : {}), de: deNum } }, { merge:true });
-          log(`Assigned DE member number ${deNum}.`);
+        // If merging a LEGACY record, carry over its memberNumbers (no new numbers minted).
+        if (selectedSource.type === 'legacy' && sourceData.memberNumbers) {
+          const cur = (user.memberNumbers || {});
+          const merged = { ...sourceData.memberNumbers, ...cur }; // target wins
+          if (JSON.stringify(cur) !== JSON.stringify(merged)) {
+            await setDoc(userRef, { memberNumbers: merged }, { merge:true });
+            log('Carried over legacy memberNumbers to user.');
+          }
         }
 
         // Attendance rewrite
         let changed = 0;
         if (selectedSource.type === 'guest') {
-          changed += await rewriteAttendanceFromGuest(selectedSource.id, { uid:user.uid, name:after.name || user.name, email:after.email || user.email });
+          changed += await rewriteAttendanceFromGuest(selectedSource.id, { uid:user.uid, name:user.name, email:user.email });
         } else {
           changed += await rewriteAttendanceFromLegacy(
             { id: sourceData.id, email: sourceData.email || '', name: sourceData.name || '' },
-            { uid:user.uid, name:after.name || user.name, email:after.email || user.email }
+            { uid:user.uid, name:user.name, email:user.email }
           );
         }
 
