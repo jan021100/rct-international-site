@@ -69,7 +69,6 @@
 
         <!-- Left: directory + controls -->
         <aside class="lg:col-span-2 space-y-6">
-          <!-- Controls -->
           <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
             <div class="flex items-center justify-between gap-3">
               <h2 class="font-serif text-2xl dark:text-base-50">Tools</h2>
@@ -80,6 +79,7 @@
               <button id="btn-recalc-selected" class="px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 anim disabled:opacity-50" disabled>Recalculate selected</button>
             </div>
             <div id="tool-msg" class="text-sm mt-2"></div>
+
             <div class="mt-4">
               <div class="text-xs uppercase tracking-wide opacity-70">Directory filters</div>
               <div class="mt-2 flex items-center gap-2">
@@ -111,7 +111,6 @@
             </div>
           </div>
 
-          <!-- Directory -->
           <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
             <div class="flex items-center justify-between gap-3">
               <h3 class="font-serif text-2xl dark:text-base-50">Members</h3>
@@ -120,7 +119,6 @@
             <div id="list" class="mt-3 h-[580px] overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800"></div>
           </div>
 
-          <!-- Log -->
           <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
             <div class="text-sm font-medium mb-1">Log</div>
             <div id="log" class="mono text-xs bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-3 h-48 overflow-auto"></div>
@@ -129,7 +127,6 @@
 
         <!-- Right: details -->
         <main class="lg:col-span-3 space-y-6">
-          <!-- Selected summary -->
           <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
             <div class="flex items-center justify-between gap-3">
               <div>
@@ -141,7 +138,6 @@
             </div>
           </div>
 
-          <!-- Current badges -->
           <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
             <div class="flex items-center justify-between gap-3">
               <h4 class="font-serif text-xl dark:text-base-50">Badges</h4>
@@ -150,13 +146,12 @@
             <div id="sel-badges-grid" class="mt-3 grid-inventory"></div>
           </div>
 
-          <!-- Catalog / definitions -->
           <div class="p-6 rounded-2xl card bg-white dark:bg-neutral-950 shadow-soft">
             <h4 class="font-serif text-xl dark:text-base-50">Badge catalog</h4>
             <div class="mt-3 grid md:grid-cols-2 gap-3 text-sm">
               <div class="badge-tile"><span class="pill text-xs">Winter Warrior</span> ≥5 events in a winter season (Dec–Feb).</div>
               <div class="badge-tile"><span class="pill text-xs">Winter Conqueror</span> ≥10 events in a winter season (Dec–Feb).</div>
-              <div class="badge-tile"><span class="pill text-xs">10/20/30/40/50 Events</span> Lifetime attended events (unique events).</div>
+              <div class="badge-tile"><span class="pill text-xs">10/…/100 Events</span> Lifetime attended events (unique events).</div>
               <div class="badge-tile"><span class="pill text-xs">Years with us</span> Full years since first attended event.</div>
               <div class="badge-tile"><span class="pill text-xs">Sunday Run Streak</span> 3/5/10 consecutive Sundays (running).</div>
               <div class="badge-tile"><span class="pill text-xs">Thursday Run Streak</span> 3/5/10 consecutive Thursdays (running).</div>
@@ -168,10 +163,8 @@
     </div>
   </section>
 
-  <!-- Footer -->
   <div id="site-footer"></div>
 
-  <!-- Components loader -->
   <script defer>
     async function loadComponent(id, file) {
       const host = document.getElementById(id);
@@ -187,11 +180,10 @@
     })();
   </script>
 
-  <!-- Firebase + Logic -->
   <script type="module">
     import { auth, db, onUserChanged, getUserProfile } from '/assets/js/firebase.js';
     import {
-      collection, collectionGroup, getDocs, doc, getDoc, setDoc,
+      collection, collectionGroup, getDocs, doc, getDoc, setDoc, updateDoc, deleteField,
       query, orderBy, limit, where
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -220,47 +212,59 @@
 
     // --- state ---
     let USERS=[];
-    let EVENTS=new Map(); // id -> {sport,date,name}
-    let selected = null; // selected user summary
+    let EVENTS=new Map();
+    let selected = null;
 
     const norm = s => String(s||'').trim();
     const nlc = s => norm(s).toLowerCase();
-
-    // helpers
-    const fmtDate = (v) => { try { return new Date(v).toLocaleDateString(); } catch { return '—'; } };
     function stamp(){ return new Date().toISOString(); }
 
-    // -------- Badge engine (definitions) ----------
-    const MILESTONES = [10,20,30,40,50];
+    // ===== Catalog (allow-list) =====
+    const ALLOWED_BADGE_KEYS = new Set([
+      'events_10','events_20','events_30','events_40','events_50','events_60','events_70','events_80','events_90','events_100',
+      'years_1','years_2','years_3','years_4','years_5',
+      'streak_sun_3','streak_sun_5','streak_sun_10',
+      'streak_thu_3','streak_thu_5','streak_thu_10',
+      'streak_ride_3','streak_ride_5','streak_ride_10',
+      'winterWarrior_2022','winterWarrior_2023','winterWarrior_2024','winterWarrior_2025',
+      'winterConqueror_2022','winterConqueror_2023','winterConqueror_2024','winterConqueror_2025'
+    ]);
 
-    // season key is the January year (e.g. Dec 2024–Feb 2025 => 2025)
+    const MILESTONES = [10,20,30,40,50,60,70,80,90,100];
+
+    // === Winter helper: December-year naming ===
     function winterSeasonKeyFromISO(isoDate){
       const d = new Date(isoDate);
+      if (Number.isNaN(d)) return null;
       const m = d.getMonth(); // 0..11
       const y = d.getFullYear();
-      return (m === 11) ? (y+1) : y;
+      if (m === 11) return y;           // December -> same year
+      if (m === 0 || m === 1) return y - 1; // Jan/Feb -> previous December year
+      return null;
     }
-    // Dec 1 (prev year) → end of Feb (seasonYear)
-    function inSeasonRange(isoDate, seasonYear){
+    function inSeasonRange(isoDate, seasonStartYear){
+      if (seasonStartYear == null) return false;
       const d = new Date(isoDate);
-      const start = new Date(seasonYear-1, 11, 1);
-      const end   = new Date(seasonYear, 1, 29, 23, 59, 59, 999);
+      if (Number.isNaN(d)) return false;
+      const start = new Date(seasonStartYear, 11, 1, 0, 0, 0, 0);
+      const end = new Date(seasonStartYear + 1, 2, 1, 0, 0, 0, 0);
+      end.setMilliseconds(end.getMilliseconds() - 1);
       return d >= start && d <= end;
     }
-    function weekday(dateISO){ try{ return new Date(dateISO).getDay(); } catch { return -1; } } // 0=Sun ... 6=Sat
+
+    function weekday(dateISO){ try{ return new Date(dateISO).getDay(); } catch { return -1; } }
     function longestWeeklyStreak(datesISO){
       if (!datesISO || datesISO.length===0) return 0;
       const sorted = [...datesISO].map(d=>new Date(d)).sort((a,b)=>a-b);
       let best=1, cur=1;
       for (let i=1;i<sorted.length;i++){
-        const deltaDays = Math.round((sorted[i]-sorted[i-1])/(1000*60*60*24));
-        if (deltaDays>=6 && deltaDays<=8) { cur += 1; best = Math.max(best, cur); }
-        else { cur = 1; }
+        const delta = Math.round((sorted[i]-sorted[i-1])/(1000*60*60*24));
+        if (delta>=6 && delta<=8) { cur += 1; best = Math.max(best, cur); } else { cur = 1; }
       }
       return best;
     }
 
-    // Compute all badges for a user's attendance docs
+    // === Compute current-qualification badges ===
     function computeBadgesForUser(attDocs, eventsMap){
       const allDates = [];
       const sundayRunDates = [];
@@ -272,7 +276,6 @@
       const seasonCounts = new Map();
 
       attDocs.forEach(d=>{
-        const x = d.data() || {};
         const parts = d.ref.path.split('/');
         const eventId = parts.length>=2 ? parts[1] : null;
         if (!eventId) return;
@@ -284,10 +287,10 @@
         allDates.push(date);
         eventIdsSeen.add(eventId);
 
-        const key = winterSeasonKeyFromISO(date);
-        if (inSeasonRange(date, key)) {
-          seasonsSeen.add(key);
-          seasonCounts.set(key, (seasonCounts.get(key)||0) + 1);
+        const seasonStartYear = winterSeasonKeyFromISO(date);
+        if (seasonStartYear != null && inSeasonRange(date, seasonStartYear)) {
+          seasonsSeen.add(seasonStartYear);
+          seasonCounts.set(seasonStartYear, (seasonCounts.get(seasonStartYear)||0) + 1);
         }
 
         const wd = weekday(date);
@@ -300,47 +303,69 @@
         }
       });
 
-      const out = {};
-      [...seasonsSeen].sort().forEach(seasonYear=>{
-        const cnt = seasonCounts.get(seasonYear) || 0;
-        if (cnt >= 5) out[`winterWarrior_${seasonYear}`] = { label:`Winter Warrior ${seasonYear}`, earnedAt: stamp(), meta:{count:cnt, season:seasonYear} };
-        if (cnt >= 10) out[`winterConqueror_${seasonYear}`] = { label:`Winter Conqueror ${seasonYear}`, earnedAt: stamp(), meta:{count:cnt, season:seasonYear} };
+      const computed = {};
+
+      // Winter (December-year)
+      [...seasonsSeen].sort().forEach(seasonStartYear=>{
+        const cnt = seasonCounts.get(seasonStartYear) || 0;
+        if (cnt >= 5)  computed[`winterWarrior_${seasonStartYear}`]   = { label:`Winter Warrior ${seasonStartYear}`,   earnedAt: stamp(), meta:{count:cnt, seasonStartYear} };
+        if (cnt >= 10) computed[`winterConqueror_${seasonStartYear}`] = { label:`Winter Conqueror ${seasonStartYear}`, earnedAt: stamp(), meta:{count:cnt, seasonStartYear} };
       });
 
-      const M = MILESTONES;
+      // Lifetime unique event milestones
       const totalEvents = eventIdsSeen.size;
-      M.forEach(n=>{ if (totalEvents >= n) out[`events_${n}`] = { label:`${n} Events Joined`, earnedAt: stamp(), meta:{totalEvents} }; });
+      MILESTONES.forEach(n=>{
+        if (totalEvents >= n) computed[`events_${n}`] = { label:`${n} Events Joined`, earnedAt: stamp(), meta:{totalEvents} };
+      });
 
+      // Years with us (cap display by allow-list)
       if (allDates.length>0){
         const first = new Date(allDates.slice().sort()[0]);
         const now = new Date();
         let years = now.getFullYear() - first.getFullYear();
         const m = now.getMonth() - first.getMonth();
         if (m < 0 || (m === 0 && now.getDate() < first.getDate())) years--;
-        for (let y=1; y<=years; y++) out[`years_${y}`] = { label:`${y} ${y===1?'Year':'Years'} with RCT`, earnedAt: stamp(), meta:{since:first.toISOString()} };
+        for (let y=1; y<=years; y++){
+          computed[`years_${y}`] = { label:`${y} ${y===1?'Year':'Years'} with RCT`, earnedAt: stamp(), meta:{since:first.toISOString()} };
+        }
       }
 
+      // Streaks
       const sunStreak = longestWeeklyStreak(sundayRunDates);
       const thuStreak = longestWeeklyStreak(thursdayRunDates);
       const rideStreak = longestWeeklyStreak(cyclingWeekDates);
       [3,5,10].forEach(th=>{
-        if (sunStreak >= th) out[`streak_sun_${th}`] = { label:`Sunday Run x${th}`, earnedAt: stamp(), meta:{best:sunStreak} };
-        if (thuStreak >= th) out[`streak_thu_${th}`] = { label:`Thursday Run x${th}`, earnedAt: stamp(), meta:{best:thuStreak} };
-        if (rideStreak >= th) out[`streak_ride_${th}`] = { label:`Group Ride x${th}`, earnedAt: stamp(), meta:{best:rideStreak} };
+        if (sunStreak >= th) computed[`streak_sun_${th}`] = { label:`Sunday Run x${th}`, earnedAt: stamp(), meta:{best:sunStreak} };
+        if (thuStreak >= th) computed[`streak_thu_${th}`] = { label:`Thursday Run x${th}`, earnedAt: stamp(), meta:{best:thuStreak} };
+        if (rideStreak >= th) computed[`streak_ride_${th}`] = { label:`Group Ride x${th}`, earnedAt: stamp(), meta:{best:rideStreak} };
       });
 
-      return out;
+      return pruneToCatalog(computed);
     }
-    function mergeBadges(existing, computed){
-      const out = { ...(existing||{}) };
-      for (const [k,v] of Object.entries(computed)){
-        if (!out[k]) out[k] = v;
-        else out[k] = { ...(out[k]||{}), label:v.label, meta:v.meta, earnedAt: out[k].earnedAt || v.earnedAt };
+
+    // Keep only allowed keys
+    function pruneToCatalog(badgesObj){
+      const out = {};
+      for (const [k, v] of Object.entries(badgesObj || {})){
+        if (ALLOWED_BADGE_KEYS.has(k)) out[k] = v;
       }
       return out;
     }
 
-    // ------ Data loading -------
+    // Replace badges with currently-qualified set; preserve earliest earnedAt
+    function mergeReplacePreserveEarnedAt(existing, computed){
+      const out = {};
+      for (const [k, v] of Object.entries(computed)){
+        const prev = existing?.[k];
+        out[k] = {
+          ...v,
+          earnedAt: prev?.earnedAt && new Date(prev.earnedAt) < new Date(v.earnedAt) ? prev.earnedAt : v.earnedAt
+        };
+      }
+      return pruneToCatalog(out);
+    }
+
+    // ---- Data loading ----
     async function loadEvents(){
       const snap = await getDocs(collection(db,'events'));
       EVENTS = new Map();
@@ -348,7 +373,13 @@
         const x = d.data() || {};
         EVENTS.set(d.id, { sport:(x.sport||''), date:(x.date||null), name:(x.name||'') });
       });
-      const years = new Set(); EVENTS.forEach(ev => { if (ev.date) years.add(winterSeasonKeyFromISO(ev.date)); });
+      const years = new Set();
+      EVENTS.forEach(ev => {
+        if (ev.date){
+          const k = winterSeasonKeyFromISO(ev.date);
+          if (k != null) years.add(k);
+        }
+      });
       const seasons = [...years].sort((a,b)=>a-b).join(', ');
       document.getElementById('meta-events').textContent = `${EVENTS.size} events • seasons: ${seasons || '—'}`;
       log(`Loaded events: ${EVENTS.size} • seasons: ${seasons}`);
@@ -393,7 +424,7 @@
       const data = snap.exists() ? snap.data() : {};
       const name = data.name || '(member)';
       const email = data.email || '';
-      selected = { uid, name, email, badges: data.badges || {} };
+      selected = { uid, name, email, badges: pruneToCatalog(data.badges || {}) };
 
       selTitle.textContent = name;
       selSub.textContent = `${email} — user`;
@@ -441,15 +472,14 @@
       if (!confirm(`Revoke badge "${key}" for ${selected.name}?`)) return;
       try{
         const uRef = doc(db,'users',selected.uid);
-        const snap = await getDoc(uRef);
-        const data = snap.exists() ? snap.data() : {};
-        const badges = { ...(data.badges||{}) };
-        delete badges[key];
-        await setDoc(uRef, { badges }, { merge:true });
-        selected.badges = badges;
+        // Explicitly delete that key from the badges map
+        await updateDoc(uRef, { [`badges.${key}`]: deleteField() });
+        // Refresh local state
+        const fresh = await getDoc(uRef);
+        selected.badges = pruneToCatalog((fresh.data()||{}).badges || {});
         const idx = USERS.findIndex(u=>u.id===selected.uid);
-        if (idx>=0) USERS[idx].badges = badges;
-        renderUserBadges(badges);
+        if (idx>=0) USERS[idx].badges = selected.badges;
+        renderUserBadges(selected.badges);
         renderDirectory();
         log(`Revoked badge ${key} for ${selected.uid}`);
       } catch(e){
@@ -468,16 +498,26 @@
     }
 
     async function recalcUser(uid){
-      const [attDocs, userSnap] = await Promise.all([
-        getAttendanceForUser(uid),
-        getDoc(doc(db,'users',uid))
-      ]);
-      const userData = userSnap.exists()? userSnap.data() : {};
+      const uRef = doc(db,'users',uid);
+      const [attDocs, userSnap] = await Promise.all([ getAttendanceForUser(uid), getDoc(uRef) ]);
+
+      const existing = pruneToCatalog((userSnap.exists()? userSnap.data() : {}).badges || {});
       const computed = computeBadgesForUser(attDocs, EVENTS);
-      const merged = mergeBadges(userData.badges || {}, computed);
-      await setDoc(doc(db,'users',uid), { badges: merged }, { merge:true });
-      mergeBadgesIntoUser(uid, merged);
-      return { merged, count:Object.keys(merged).length };
+      const replaced = mergeReplacePreserveEarnedAt(existing, computed);
+
+      // 1) Delete obsolete keys explicitly
+      const obsolete = Object.keys(existing).filter(k => !(k in replaced));
+      if (obsolete.length){
+        const delPayload = {};
+        obsolete.forEach(k => { delPayload[`badges.${k}`] = deleteField(); });
+        await updateDoc(uRef, delPayload);
+      }
+
+      // 2) Upsert the current set (preserving earliest earnedAt already handled)
+      await setDoc(uRef, { badges: replaced }, { merge:true });
+
+      mergeBadgesIntoUser(uid, replaced);
+      return { merged: replaced, count:Object.keys(replaced).length };
     }
 
     async function recalcAll(){
@@ -487,7 +527,7 @@
       for (let i=0;i<USERS.length;i++){
         const u = USERS[i];
         try{
-          const r = await recalcUser(u.id);
+          await recalcUser(u.id);
           ok++;
           if ((i%10)===0) log(`Recalc ${i+1}/${USERS.length} …`);
         } catch(e){
@@ -523,7 +563,6 @@
     filterEl.addEventListener('input', renderDirectory);
     badgeFilter.addEventListener('change', renderDirectory);
 
-    // Auth/admin gate
     onUserChanged(async (u)=>{
       if (!u){ adminUI.classList.add('hidden'); notAdmin.classList.remove('hidden'); return; }
       const prof = await getUserProfile(u.uid);
