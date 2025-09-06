@@ -453,75 +453,90 @@
       $('inp-number').value = num;
     }
 
-    // UPDATED: write BOTH legacy flat flags and nested roles + rctMember
-    async function approveCurrent(){
-      if (!CURRENT) return;
-      const { collId, id, data, region } = CURRENT;
-      const a = data.applicant || {};
-      const uid = a.userId;
-      if (!uid) { $('action-msg').textContent = 'Missing userId on application.'; $('action-msg').className='text-sm text-red-600'; return; }
+    // UPDATED approveCurrent(): merge into existing roles object (no top-level role flags)
+async function approveCurrent(){
+  if (!CURRENT) return;
+  const { collId, id, data, region } = CURRENT;
+  const a = data.applicant || {};
+  const uid = a.userId;
+  if (!uid) {
+    $('action-msg').textContent = 'Missing userId on application.';
+    $('action-msg').className = 'text-sm text-red-600';
+    return;
+  }
 
-      // get or suggest number
-      let number = $('inp-number').value.trim();
-      if (!number) { number = await assignNextNumber(region); }
+  // get or suggest number
+  let number = $('inp-number').value.trim();
+  if (!number) number = await assignNextNumber(region);
 
-      const userRef = doc(db,'users', uid);
-      const appRef  = doc(db, collId, id);
+  const userRef = doc(db,'users', uid);
+  const appRef  = doc(db, collId, id);
 
-      try {
-        const isCZ = region === 'CZ';
+  try {
+    const isCZ = region === 'CZ';
 
-        // 1) Upsert user with data + roles + memberNumbers
-        const updates = {
-          name: a.name || null,
-          email: a.email || null,
-          address: a.address || null,
-          nationality: a.nationality || null,
-          phone: a.phone || null,
-          stravaUrl: a.stravaUrl || null,
-          birthdate: a.birthdate || null,
+    // read existing user to merge roles properly
+    const currentSnap = await getDoc(userRef);
+    const existing = currentSnap.exists() ? (currentSnap.data() || {}) : {};
+    const existingRoles = (existing.roles && typeof existing.roles === 'object')
+      ? existing.roles
+      : { admin:false, legacyMember:false, germanMember:false, evMember:false, spolekMember:false, rctMember:false };
 
-          // Ensure BOTH schemas are set (flat + nested)
-          ...(isCZ
-            ? { spolekMember: true, 'roles.spolekMember': true }
-            : { evMember: true,     'roles.evMember': true }),
+    // merged roles
+    const newRoles = {
+      ...existingRoles,
+      spolekMember: isCZ ? true : existingRoles.spolekMember,
+      evMember:     isCZ ? existingRoles.evMember : true,
+      germanMember: isCZ ? existingRoles.germanMember : true, // keep if you want this flag for DE approvals
+      rctMember: true
+    };
 
-          // Global flag for convenience
-          rctMember: true,
+    // partial update (avoid top-level duplicate flags)
+    const updatePayload = {
+      name: a.name || existing.name || null,
+      email: a.email || existing.email || null,
+      address: a.address || existing.address || null,
+      nationality: a.nationality || existing.nationality || null,
+      phone: a.phone || existing.phone || null,
+      stravaUrl: a.stravaUrl || existing.stravaUrl || null,
+      birthdate: a.birthdate || existing.birthdate || null,
 
-          // member number
-          ...(isCZ ? { 'memberNumbers.cz': number } : { 'memberNumbers.de': number }),
+      roles: newRoles,
 
-          // audit
-          'memberStatus.lastUpdatedAt': serverTimestamp()
-        };
+      ...(isCZ
+        ? { 'memberNumbers.cz': number }
+        : { 'memberNumbers.de': number }),
 
-        await setDoc(userRef, updates, { merge:true });
+      'memberStatus.lastUpdatedAt': serverTimestamp()
+    };
 
-        // 2) Mark application as approved + audit
-        const audit = {
-          status: 'approved',
-          assignedNumber: number,
-          reviewedAt: serverTimestamp(),
-          reviewedBy: {
-            uid: CURRENT_ADMIN?.uid || null,
-            email: CURRENT_ADMIN?.email || null,
-            name: CURRENT_ADMIN?.name || null
-          }
-        };
-        await updateDoc(appRef, audit);
+    // remove undefined so we don't overwrite unintentionally
+    Object.keys(updatePayload).forEach(k => updatePayload[k] === undefined && delete updatePayload[k]);
 
-        $('action-msg').textContent = `Approved. Assigned number ${number}.`;
-        $('action-msg').className = 'text-sm text-green-700';
+    await updateDoc(userRef, updatePayload);
 
-        // Refresh lists
-        await refreshAll(true);
-      } catch (e) {
-        console.error(e);
-        $('action-msg').textContent = e?.message || 'Approval failed.';
-        $('action-msg').className = 'text-sm text-red-600';
+    // mark application approved + audit
+    await updateDoc(appRef, {
+      status: 'approved',
+      assignedNumber: number,
+      reviewedAt: serverTimestamp(),
+      reviewedBy: {
+        uid: CURRENT_ADMIN?.uid || null,
+        email: CURRENT_ADMIN?.email || null,
+        name: CURRENT_ADMIN?.name || null
       }
-    }
+    });
+
+    $('action-msg').textContent = `Approved. Assigned number ${number}.`;
+    $('action-msg').className = 'text-sm text-green-700';
+
+    await refreshAll(true);
+  } catch (e) {
+    console.error(e);
+    $('action-msg').textContent = e?.message || 'Approval failed.';
+    $('action-msg').className = 'text-sm text-red-600';
+  }
+}
 
     async function declineCurrent(){
       if (!CURRENT) return;
