@@ -485,10 +485,11 @@ async function approveCurrent(){
     // merged roles
     const newRoles = {
       ...existingRoles,
-      spolekMember: isCZ ? true : existingRoles.spolekMember,
-      evMember:     isCZ ? existingRoles.evMember : true,
-      germanMember: isCZ ? existingRoles.germanMember : true, // keep if you want this flag for DE approvals
-      rctMember: true
+        spolekMember: isCZ ? true : (existingRoles.spolekMember ?? false),
+        evMember:     isCZ ? (existingRoles.evMember ?? false) : true,
+        germanMember: isCZ ? (existingRoles.germanMember ?? false) : true,
+        rctMember: true
+
     };
 
     // partial update (avoid top-level duplicate flags)
